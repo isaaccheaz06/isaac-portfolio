@@ -1,0 +1,50 @@
+.project-page {
+    margin: 0 auto;
+    max-width: 900px;
+    min-height: 80vh;
+    padding: 100px 8%;
+}
+
+.back-link {
+    color: #555;
+    display: inline-block;
+    margin-bottom: 50px;
+    text-decoration: none;
+}
+
+.back-link:hover {
+    color: #000;
+}
+
+.project-page>h1 {
+    font-size: clamp(45px, 7vw, 75px);
+    line-height: 1.1;
+    margin-bottom: 25px;
+}
+
+.project-summary {
+    color: #555;
+    font-size: 21px;
+    line-height: 1.7;
+    margin-bottom: 70px;
+}
+
+.project-section {
+    margin-bottom: 60px;
+}
+
+.project-section h2 {
+    font-size: 30px;
+    margin-bottom: 15px;
+}
+
+.project-section p,
+.project-section li {
+    color: #555;
+    font-size: 18px;
+    line-height: 1.8;
+}
+
+.project-section ul {
+    padding-left: 25px;
+}
