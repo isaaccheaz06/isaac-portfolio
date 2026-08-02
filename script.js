@@ -6,7 +6,7 @@ window.addEventListener('scroll', () => {
 
     if (currentScrollY > lastScrollY && currentScrollY > 80) {
         navbar.classList.add('navbar-hidden');
-    } else {
+    } else if (currentScrollY <= 0) {
         navbar.classList.remove('navbar-hidden');
     }
 
