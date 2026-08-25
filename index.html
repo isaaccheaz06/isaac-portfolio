@@ -6,6 +6,13 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
     <title>Isaac Cheaz | Portfolio</title>
+    <meta name="description"
+        content="Isaac Cheaz — connecting business, technology and design. Interactive media, web development and data analytics.">
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500&family=Poppins:wght@500;600&display=swap"
+        rel="stylesheet">
 
     <link rel="stylesheet" href="style.css">
 </head>
@@ -13,117 +20,146 @@
 <body>
 
     <header class="navbar">
-        <a href="#" class="logo">Portfolio</a>
+        <a href="#top" class="logo">Isaac Cheaz</a>
 
-        <nav>
+        <nav class="nav-links">
+            <a href="#work">Work</a>
             <a href="#about">About</a>
-            <a href="#projects">Projects</a>
             <a href="#contact">Contact</a>
         </nav>
+
+        <a href="https://docs.google.com/document/d/11qATXeMCFB1Io2WauJywyM81skCrmu7SGtFiiL8NM3w/export?format=pdf"
+            class="nav-resume" target="_blank" rel="noopener noreferrer">Resume</a>
     </header>
 
-    <main>
+    <main id="top">
+
         <section class="hero">
-            <p class="intro">Hello, my name is</p>
+            <div class="hero-glow" aria-hidden="true"></div>
 
-            <h1>Isaac Cheaz</h1>
+            <p class="eyebrow">NYU Shanghai — Interactive Media Business</p>
 
-            <h2>I connect business, technology, and design.</h2>
+            <h1 class="hero-title">
+                I connect business,<br>
+                technology and design
+            </h1>
 
             <p class="hero-description">
-                I am a student at NYU Shanghai pursuing a B.S. in Interactive Media Business. I enjoy exploring new and
-                traditional technology and design to solve problems.
+                I use interactive media, web development and data analytics to turn
+                messy problems into clear, considered outcomes.
             </p>
 
-            <a href="#projects" class="button">View My Projects</a>
-        </section>
-
-        <section id="about" class="section">
-            <h2>About Me</h2>
-
-            <p>
-                I enjoy using technology and design to solve business problems.
-                My experience includes interactive media, web development,
-                Unity, content design, and student leadership.
-            </p>
-
-            <a href="https://docs.google.com/document/d/11qATXeMCFB1Io2WauJywyM81skCrmu7SGtFiiL8NM3w/export?format=pdf"
-                class="button resume-button" target="_blank" rel="noopener noreferrer">
-                View Resume
-            </a>
-        </section>
-
-        <br>
-
-        <section id="projects" class="section">
-            <h2>Projects</h2>
-
-            <div class="project-grid">
-                <a href="projects/analytics-project.html" class="project-link">
-                    <article class="project-card">
-                        <p class="project-label">Featured Project</p>
-                        <h3>Business Analytics Project</h3>
-                        <p>
-                            A future data analysis project using Excel, SQL, and
-                            Tableau to identify patterns and communicate business
-                            insights.
-                        </p>
-                        <p class="project-tools">Excel · SQL · Tableau</p>
-                    </article>
-                </a>
-
-                <a href="projects/others.html" class="project-link">
-                    <article class="project-card">
-                        <p class="project-label">Other Projects</p>
-                        <h3>Interactive Installation</h3>
-                        <p>
-                            A physical computing project combining coding,
-                            fabrication, and interactive design.
-                        </p>
-                        <p class="project-tools">Arduino · LEDs · Fabrication</p>
-                    </article>
-                </a>
-                <a href="projects/creative-projects.html" class="project-link">
-                    <article class="project-card">
-                        <p class="project-label">Creative Works</p>
-                        <h3>New Media Works</h3>
-                        <p>
-                            Projects that explore new forms of creative expression through coding and emerging
-                            technologies.
-                        </p>
-                        <p class="project-tools">Unity · C# · AI · P5.js · Arduino · Processing</p>
-                    </article>
-                </a>
+            <div class="hero-actions">
+                <a href="#work" class="button">View Work</a>
+                <a href="#contact" class="button button-ghost">Get in touch</a>
             </div>
         </section>
 
-        <section id="contact" class="section contact-section">
-            <h2>Contact</h2>
+        <section id="work" class="section section-work">
+            <div class="section-head">
+                <h2 class="section-title">Selected Work</h2>
+                <p class="section-note">Three ongoing projects across analytics, physical computing and new media.</p>
+            </div>
 
-            <p>
-                I am currently exploring internship opportunities in business,
-                analytics, product, and technology.
+            <div class="collage" id="collage">
+
+                <a href="projects/analytics-project.html" class="tile tile-project tile-1" data-depth="1.4">
+                    <span class="tile-art tile-art-1" aria-hidden="true"></span>
+                    <span class="tile-body">
+                        <span class="tile-label">Featured</span>
+                        <span class="tile-title">Business Analytics Project</span>
+                        <span class="tile-tools">Excel · SQL · Tableau</span>
+                    </span>
+                </a>
+
+                <a href="projects/creative-projects.html" class="tile tile-project tile-2" data-depth="0.8">
+                    <span class="tile-art tile-art-2" aria-hidden="true"></span>
+                    <span class="tile-body">
+                        <span class="tile-label">Creative Works</span>
+                        <span class="tile-title">New Media Works</span>
+                        <span class="tile-tools">Unity · C# · P5.js</span>
+                    </span>
+                </a>
+
+                <a href="projects/others.html" class="tile tile-project tile-3" data-depth="1.1">
+                    <span class="tile-art tile-art-3" aria-hidden="true"></span>
+                    <span class="tile-body">
+                        <span class="tile-label">Other Projects</span>
+                        <span class="tile-title">Interactive Installation</span>
+                        <span class="tile-tools">Arduino · LEDs · Fabrication</span>
+                    </span>
+                </a>
+
+                <span class="tile tile-note tile-4" data-depth="2.2" aria-hidden="true">Data &amp; Dashboards</span>
+                <span class="tile tile-note tile-5" data-depth="1.8" aria-hidden="true">Physical Computing</span>
+                <span class="tile tile-note tile-6" data-depth="2.6" aria-hidden="true">Content Design</span>
+                <span class="tile tile-note tile-7" data-depth="2.0" aria-hidden="true">Student Leadership</span>
+
+            </div>
+        </section>
+
+        <section id="about" class="section section-about">
+            <div class="section-head">
+                <h2 class="section-title">About</h2>
+            </div>
+
+            <div class="about-grid">
+                <p class="about-lead">
+                    I am a student at NYU Shanghai pursuing a B.S. in Interactive Media Business.
+                    I enjoy exploring both new and traditional technology to solve business problems.
+                </p>
+
+                <dl class="about-facts">
+                    <div class="fact">
+                        <dt>Focus</dt>
+                        <dd>Interactive media, web development, data analytics</dd>
+                    </div>
+                    <div class="fact">
+                        <dt>Tools</dt>
+                        <dd>Excel, SQL, Tableau, Unity, Arduino, HTML/CSS/JS</dd>
+                    </div>
+                    <div class="fact">
+                        <dt>Also</dt>
+                        <dd>Content design and student leadership</dd>
+                    </div>
+                </dl>
+            </div>
+        </section>
+
+        <section id="contact" class="section section-contact">
+            <div class="section-head">
+                <h2 class="section-title">Contact</h2>
+            </div>
+
+            <p class="contact-lead">
+                Currently exploring internship opportunities in business, analytics,
+                product and technology.
             </p>
 
-            <div class="contact-buttons">
+            <div class="contact-links">
                 <a href="https://mail.google.com/mail/?view=cm&fs=1&to=icheaz06@gmail.com&su=Portfolio%20Inquiry"
-                    class="button" id="email-button" target="_blank" rel="noopener noreferrer">
-                    Email Me
+                    class="contact-link" target="_blank" rel="noopener noreferrer">
+                    <span>Email</span>
+                    <span class="contact-arrow" aria-hidden="true">↗</span>
                 </a>
-                <a href="https://www.linkedin.com/in/isaac-cheaz-235302365/" class="button" target="_blank"
+                <a href="https://www.linkedin.com/in/isaac-cheaz-235302365/" class="contact-link" target="_blank"
                     rel="noopener noreferrer">
-                    LinkedIn
+                    <span>LinkedIn</span>
+                    <span class="contact-arrow" aria-hidden="true">↗</span>
                 </a>
-
-                <a href="https://github.com/isaaccheaz06" class="button" target="_blank" rel="noopener noreferrer">
-                    GitHub
+                <a href="https://github.com/isaaccheaz06" class="contact-link" target="_blank"
+                    rel="noopener noreferrer">
+                    <span>GitHub</span>
+                    <span class="contact-arrow" aria-hidden="true">↗</span>
                 </a>
             </div>
         </section>
+
     </main>
 
-    <footer>
+    <footer class="footer">
         <p>Designed and built by Isaac Cheaz</p>
+        <p>Shanghai</p>
     </footer>
 
     <script src="script.js"></script>
