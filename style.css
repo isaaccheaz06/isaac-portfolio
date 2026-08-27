@@ -123,15 +123,49 @@ body {
     font-size: 13px;
     letter-spacing: 0.14em;
     margin-bottom: 28px;
-    text-transform: uppercase;
+    /* text-transform: uppercase; */
 }
 
 .hero-title {
     font-family: var(--font-display);
-    font-size: clamp(42px, 7.4vw, 104px);
+    font-size: clamp(52px, 7.4vw, 74px);
     font-weight: 600;
     letter-spacing: -0.035em;
     line-height: 1.02;
+}
+
+/*
+ * Mask-reveal on load: each line's outer span clips, the inner span slides
+ * up from below it. Add a matching nth-child rule if a line is added.
+ */
+.hero-title .line-mask {
+    display: block;
+    overflow: hidden;
+}
+
+.hero-title .line-inner {
+    animation: reveal-line 0.7s var(--ease) both;
+    display: block;
+}
+
+.hero-title .line-mask:nth-child(2) .line-inner {
+    animation-delay: 70ms;
+}
+
+.hero-title .line-mask:nth-child(3) .line-inner {
+    animation-delay: 140ms;
+}
+
+@keyframes reveal-line {
+    from {
+        opacity: 0;
+        transform: translateY(100%);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
 }
 
 .hero-description {
@@ -139,6 +173,23 @@ body {
     font-size: clamp(16px, 1.4vw, 19px);
     margin-top: 32px;
     max-width: 46ch;
+}
+
+/*
+ * Spawned by script.js on pointer move inside .hero. A hairline ring, not a
+ * filled dot — matches the site's existing border vocabulary instead of
+ * introducing a new shape language. JS gates spawning on reduced-motion and
+ * coarse pointers, so this rule only ever needs to describe one animation.
+ */
+.cursor-ripple {
+    border: 1px solid var(--border-strong);
+    border-radius: 50%;
+    height: 26px;
+    left: 0;
+    pointer-events: none;
+    position: absolute;
+    top: 0;
+    width: 26px;
 }
 
 .hero-actions {

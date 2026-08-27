@@ -49,3 +49,50 @@ if (collage && !reduceMotion.matches && !coarsePointer.matches) {
         }
     });
 }
+
+const hero = document.querySelector('.hero');
+
+if (hero && !reduceMotion.matches && !coarsePointer.matches) {
+    // spacing, not a timer — ties ripple density to how fast the cursor
+    // is actually moving instead of firing on a fixed interval
+    const RIPPLE_SPACING = 46;
+    let lastX = null;
+    let lastY = null;
+
+    const spawnRipple = (x, y) => {
+        const ripple = document.createElement('span');
+        ripple.className = 'cursor-ripple';
+        ripple.style.left = `${x}px`;
+        ripple.style.top = `${y}px`;
+        hero.appendChild(ripple);
+
+        const animation = ripple.animate(
+            [
+                { transform: 'translate(-50%, -50%) scale(0.4)', opacity: 0.5 },
+                { transform: 'translate(-50%, -50%) scale(1.8)', opacity: 0 },
+            ],
+            { duration: 650, easing: 'cubic-bezier(0.22, 1, 0.36, 1)' }
+        );
+
+        animation.onfinish = () => ripple.remove();
+    };
+
+    hero.addEventListener('mousemove', (event) => {
+        const bounds = hero.getBoundingClientRect();
+        const x = event.clientX - bounds.left;
+        const y = event.clientY - bounds.top;
+
+        if (lastX !== null && Math.hypot(x - lastX, y - lastY) < RIPPLE_SPACING) {
+            return;
+        }
+
+        lastX = x;
+        lastY = y;
+        spawnRipple(x, y);
+    });
+
+    hero.addEventListener('mouseleave', () => {
+        lastX = null;
+        lastY = null;
+    });
+}
