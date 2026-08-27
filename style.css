@@ -562,11 +562,6 @@ main [id] {
         grid-column: auto;
     }
 
-    /*
-     * Flattens the desktop stagger and rotation. !important is needed only
-     * for transform, because the parallax script writes it inline; margin-top
-     * is plain CSS and this rule simply wins on source order.
-     */
     .tile {
         margin-top: 0;
         transform: none !important;
