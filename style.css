@@ -4,6 +4,12 @@
     --text: #f2f2f2;
     --muted: #a1a1a1;
     --faint: #7a7a7a;
+    /*
+     * --faint is tuned against --bg and clears WCAG AA there (4.61:1), but
+     * drops to 4.29:1 on the lighter --surface used by cards. This is the
+     * same grey lifted just enough to pass on --surface (5.34:1).
+     */
+    --faint-on-surface: #8a8a8a;
     --border: rgba(255, 255, 255, 0.11);
     --border-strong: rgba(255, 255, 255, 0.22);
 
@@ -249,7 +255,7 @@ body {
 }
 
 .tile-label {
-    color: var(--faint);
+    color: var(--faint-on-surface);
     display: block;
     font-size: 11px;
     letter-spacing: 0.13em;

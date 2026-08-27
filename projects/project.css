@@ -156,7 +156,7 @@
 }
 
 .project-type {
-    color: var(--faint);
+    color: var(--faint-on-surface);
     font-size: 11px;
     letter-spacing: 0.13em;
     text-transform: uppercase;
@@ -180,7 +180,7 @@
 }
 
 .project-card-tools {
-    color: var(--faint);
+    color: var(--faint-on-surface);
     font-size: 13px;
     margin-top: auto;
     padding-top: 20px;
@@ -305,6 +305,31 @@
     text-wrap: pretty;
 }
 
+/*
+ * Inline links in prose. Without this a bare <a> falls through to the UA
+ * default (#0000EE), which is ~2:1 against --bg — notably on the redirect
+ * pages, where the fallback link is the only way out if the meta refresh
+ * is blocked.
+ */
+.project-summary a,
+.project-section p a {
+    color: var(--text);
+    text-decoration-color: var(--border-strong);
+    text-underline-offset: 3px;
+    transition: text-decoration-color 0.25s ease;
+}
+
+.project-summary a:hover,
+.project-section p a:hover {
+    text-decoration-color: var(--text);
+}
+
+.project-summary a:focus-visible,
+.project-section p a:focus-visible {
+    outline: 2px solid var(--text);
+    outline-offset: 3px;
+}
+
 .project-section {
     border-top: 1px solid var(--border);
     margin-bottom: 56px;
@@ -340,8 +365,12 @@
 /*
  * Marks a case-study section that is still awaiting real content.
  * Delete the .section-placeholder element once the section is written.
+ *
+ * Scoped to .project-section so it out-specifies `.project-section p`
+ * above — as a bare `.section-placeholder` it lost colour and font-size
+ * to that rule and rendered identically to real body copy.
  */
-.section-placeholder {
+.project-section .section-placeholder {
     border: 1px dashed var(--border);
     border-radius: 4px;
     color: var(--faint);
