@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<!--
+  ============================================================
+  CASE STUDY TEMPLATE — not linked from anywhere, safe to copy.
+
+  To add a new project:
+    1. Copy this file to projects/<project-slug>.html
+    2. Replace every {{PLACEHOLDER}} below
+    3. Point .back-link at the category page this belongs to:
+         product-fabrication.html | ux-product.html | creative-technology.html
+    4. Add a matching <a class="project-card"> to that category page's
+       .project-grid (copy an existing card and edit it)
+    5. Drop images in assets/<project-slug>/ and swap each
+       .project-figure div for a real <img>
+
+  Delete any .project-section you do not need — and delete each
+  <p class="section-placeholder"> once real copy replaces it.
+  ============================================================
+-->
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>{{PROJECT TITLE}} | Isaac Cheaz</title>
+    <meta name="description" content="{{ONE SENTENCE DESCRIPTION FOR SEARCH RESULTS}}">
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500&family=Poppins:wght@500;600&display=swap"
+        rel="stylesheet">
+
+    <link rel="stylesheet" href="../style.css">
+    <link rel="stylesheet" href="project.css">
+</head>
+
+<body>
+
+    <header class="navbar">
+        <a href="../index.html" class="logo">Isaac Cheaz</a>
+
+        <nav class="nav-links">
+            <a href="../index.html#work">Work</a>
+            <a href="../index.html#about">About</a>
+            <a href="../index.html#contact">Contact</a>
+        </nav>
+
+        <a href="https://docs.google.com/document/d/11qATXeMCFB1Io2WauJywyM81skCrmu7SGtFiiL8NM3w/export?format=pdf"
+            class="nav-resume" target="_blank" rel="noopener noreferrer">Resume</a>
+    </header>
+
+    <main class="project-page">
+
+        <a href="{{CATEGORY PAGE}}.html" class="back-link">← {{CATEGORY NAME}}</a>
+
+        <!-- Featured Case Study | Case Study | Experiment | Featured Project -->
+        <p class="project-label">{{PROJECT TYPE}}</p>
+
+        <h1>{{PROJECT TITLE}}</h1>
+
+        <p class="project-summary">{{TWO OR THREE SENTENCE SUMMARY}}</p>
+
+        <div class="project-figure"><span>Hero image</span></div>
+
+        <section class="project-section">
+            <h2>Overview</h2>
+            <p class="section-placeholder">Add a short framing of the project here.</p>
+        </section>
+
+        <section class="project-section">
+            <h2>Problem / Concept</h2>
+            <p class="section-placeholder">The question or brief behind the work.</p>
+        </section>
+
+        <section class="project-section">
+            <h2>Research &amp; Inspiration</h2>
+            <p class="section-placeholder">References, precedents, studies.</p>
+        </section>
+
+        <section class="project-section">
+            <h2>Process</h2>
+            <p class="section-placeholder">How it was made, step by step.</p>
+        </section>
+
+        <section class="project-section">
+            <h2>Iterations</h2>
+            <p class="section-placeholder">What changed between versions, and why.</p>
+        </section>
+
+        <section class="project-section">
+            <h2>Tools</h2>
+            <p>{{TOOL · TOOL · TOOL}}</p>
+        </section>
+
+        <!-- Rename to "Development" for software work. -->
+        <section class="project-section">
+            <h2>Fabrication</h2>
+            <p class="section-placeholder">Materials, machines, settings, assembly.</p>
+        </section>
+
+        <section class="project-section">
+            <h2>Final Outcome</h2>
+            <p class="section-placeholder">The finished result and what it demonstrates.</p>
+            <div class="project-figure"><span>Result image</span></div>
+        </section>
+
+        <section class="project-section">
+            <h2>Reflection</h2>
+            <p class="section-placeholder">What you would do differently next time.</p>
+        </section>
+
+    </main>
+
+    <footer class="footer">
+        <p>Designed and built by Isaac Cheaz</p>
+        <p>Shanghai</p>
+    </footer>
+
+    <script src="../script.js"></script>
+</body>
+
+</html>

@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Creative Technology | Isaac Cheaz</title>
+    <meta name="description"
+        content="Interactive systems by Isaac Cheaz — Unity, local LLMs, Arduino, physical computing and creative coding.">
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500&family=Poppins:wght@500;600&display=swap"
+        rel="stylesheet">
+
+    <link rel="stylesheet" href="../style.css">
+    <link rel="stylesheet" href="project.css">
+</head>
+
+<body>
+
+    <header class="navbar">
+        <a href="../index.html" class="logo">Isaac Cheaz</a>
+
+        <nav class="nav-links">
+            <a href="../index.html#work">Work</a>
+            <a href="../index.html#about">About</a>
+            <a href="../index.html#contact">Contact</a>
+        </nav>
+
+        <a href="https://docs.google.com/document/d/11qATXeMCFB1Io2WauJywyM81skCrmu7SGtFiiL8NM3w/export?format=pdf"
+            class="nav-resume" target="_blank" rel="noopener noreferrer">Resume</a>
+    </header>
+
+    <main class="category-page">
+
+        <a href="../index.html#work" class="back-link">← Works</a>
+
+        <header class="category-head">
+            <p class="eyebrow">Interactive Systems</p>
+
+            <h1 class="category-title">Creative Technology</h1>
+
+            <p class="category-intro">
+                Systems built to be responded to. Simulation, physical computing and locally
+                hosted AI, used to make environments that react to the people moving through
+                them.
+            </p>
+
+            <p class="category-tools">Unity · Arduino · Creative Coding</p>
+        </header>
+
+        <section class="category-section">
+            <div class="section-head">
+                <h2 class="section-title">Featured Projects</h2>
+            </div>
+
+            <div class="project-grid">
+
+                <a class="project-card" href="museum-npc.html">
+                    <span class="project-thumb project-thumb-green">
+                        <span class="project-thumb-note">16 : 9 image</span>
+                    </span>
+                    <span class="project-card-body">
+                        <span class="project-type">Featured Case Study</span>
+                        <span class="project-name">LLM-Powered Museum NPC</span>
+                        <span class="project-desc">
+                            An interactive 3D museum experience where autonomous NPCs navigate the
+                            environment and hold locally hosted AI-powered conversations with
+                            visitors.
+                        </span>
+                        <span class="project-card-tools">
+                            Unity · Ollama · Local LLMs
+                        </span>
+                    </span>
+                </a>
+
+            </div>
+        </section>
+
+        <section class="category-section">
+            <div class="section-head">
+                <h2 class="section-title">Experiments</h2>
+                <p class="section-note">Simulations and physical computing builds.</p>
+            </div>
+
+            <!--
+              Each entry becomes a link once its case-study page exists:
+              swap <li class="experiment-item"> for an <a> using .project-card,
+              or point .experiment-name at a detail page.
+            -->
+            <ul class="experiment-list">
+                <li class="experiment-item">
+                    <span class="experiment-name">Fireworks Simulation</span>
+                    <span class="experiment-note">Documentation in progress</span>
+                </li>
+                <li class="experiment-item">
+                    <span class="experiment-name">Physical Computing Projects</span>
+                    <span class="experiment-note">Documentation in progress</span>
+                </li>
+            </ul>
+        </section>
+
+    </main>
+
+    <footer class="footer">
+        <p>Designed and built by Isaac Cheaz</p>
+        <p>Shanghai</p>
+    </footer>
+
+    <script src="../script.js"></script>
+</body>
+
+</html>

@@ -347,6 +347,18 @@ body {
     z-index: 10;
 }
 
+/*
+ * Declared after the hover rules so a keyboard-focused tile stays legible
+ * even while the pointer is dimming the rest of the collage.
+ */
+.collage .tile-project:focus-visible {
+    border-color: var(--border-strong);
+    opacity: 1;
+    outline: 2px solid var(--text);
+    outline-offset: 3px;
+    z-index: 10;
+}
+
 /* ---------- about ---------- */
 
 .about-grid {
