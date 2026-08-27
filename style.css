@@ -18,6 +18,9 @@
 
     --gutter: 7vw;
     --ease: cubic-bezier(0.22, 1, 0.36, 1);
+    /* fallback for the instant before script.js measures the real, sticky
+       navbar height — overwritten immediately once it runs */
+    --navbar-height: 93px;
     /* easeOutBack — a slight overshoot, used where something should feel
        physically nudged (the magnetic letters) rather than just eased in */
     --ease-spring: cubic-bezier(0.34, 1.56, 0.64, 1);
@@ -172,27 +175,6 @@ body {
 }
 
 /*
- * Spawned by script.js on pointer move, anywhere on the site. Fixed-position
- * so page coordinates never need translating — script.js uses clientX/Y
- * directly. Each ripple is a pair of these (a main ring + a fainter, smaller,
- * delayed echo), sized and timed with slight per-spawn randomness so a
- * moving trail doesn't look mechanically identical — real ripples don't
- * repeat exactly either. Hairline rings, not filled shapes, to match the
- * site's existing border vocabulary. JS gates spawning on reduced-motion and
- * coarse pointers, so this rule only ever needs to describe one animation.
- */
-.cursor-ripple {
-    border: 1px solid var(--border-strong);
-    border-radius: 50%;
-    left: 0;
-    pointer-events: none;
-    position: fixed;
-    top: 0;
-    will-change: transform, opacity;
-    z-index: 200;
-}
-
-/*
  * Runtime-split into <span class="word"> containing one <span class="letter">
  * per character, by script.js (only for elements carrying this class —
  * currently just .hero-title). Kept out of the HTML source so project copy
@@ -269,6 +251,12 @@ body {
 
 .section {
     padding: 110px var(--gutter);
+    /*
+     * The navbar is sticky, so without this, jumping to #work/#about/#contact
+     * lands the section directly under it — the heading ends up partially
+     * hidden behind the bar instead of clear of it.
+     */
+    scroll-margin-top: var(--navbar-height);
 }
 
 .section-head {

@@ -4,6 +4,25 @@ let lastScrollY = window.scrollY;
 // guarded: this file is shared with pages that may not render a navbar,
 // and an unguarded classList call here throws on every scroll frame
 if (navbar) {
+    /*
+     * The navbar is sticky, so clicking a nav link (#work, #about, #contact)
+     * lands the target's top edge at viewport y=0 — directly underneath it,
+     * hiding part of the heading. --navbar-height feeds scroll-margin-top on
+     * those sections so the browser stops short by the navbar's own height
+     * instead. Measured rather than hardcoded because the height changes
+     * across breakpoints and grows if the logo ever wraps to two lines.
+     */
+    const setNavbarHeight = () => {
+        document.documentElement.style.setProperty('--navbar-height', `${navbar.offsetHeight}px`);
+    };
+
+    setNavbarHeight();
+    window.addEventListener('resize', setNavbarHeight);
+
+    if (document.fonts && document.fonts.ready) {
+        document.fonts.ready.then(setNavbarHeight);
+    }
+
     window.addEventListener('scroll', () => {
         const currentScrollY = window.scrollY;
 
@@ -53,85 +72,6 @@ if (collage && !reduceMotion.matches && !coarsePointer.matches) {
         }
     });
 }
-
-/* ---------- cursor ripple (site-wide) ---------- */
-
-if (!reduceMotion.matches && !coarsePointer.matches) {
-    // spacing, not a timer — ties ripple density to how fast the cursor is
-    // actually moving instead of firing on a fixed interval
-    const RIPPLE_SPACING = 10;
-    // hard ceiling on rings in flight — RIPPLE_SPACING is dense enough that
-    // a fast swipe across a large screen could otherwise spawn dozens of
-    // elements at once
-    const MAX_CONCURRENT = 40;
-
-    let lastX = null;
-    let lastY = null;
-    let liveCount = 0;
-
-    // one ring, from base scale to a randomised peak, with its own delay,
-    // size and colour so the pair reads as a wavefront and its echo rather
-    // than two identical circles
-    const spawnRing = (x, y, { delay, size, peakScale, peakOpacity, colorVar }) => {
-        const ring = document.createElement('span');
-        ring.className = 'cursor-ripple';
-        ring.style.left = `${x}px`;
-        ring.style.top = `${y}px`;
-        ring.style.width = `${size}px`;
-        ring.style.height = `${size}px`;
-        ring.style.borderColor = `var(${colorVar})`;
-        document.body.appendChild(ring);
-        liveCount++;
-
-        // real ripples aren't perfectly round — a small, fixed-per-ring
-        // stretch keeps two rings from a single spawn from ever looking
-        // identical
-        const stretch = 1 + ((x + y) % 7) / 60;
-
-        const animation = ring.animate(
-            [
-                { transform: `translate(-50%, -50%) scale(0.4, ${0.4 * stretch})`, opacity: peakOpacity },
-                { transform: `translate(-50%, -50%) scale(${peakScale}, ${peakScale * stretch})`, opacity: 0 },
-            ],
-            { duration: 700 + Math.random() * 250, delay, easing: 'cubic-bezier(0.22, 1, 0.36, 1.25)' }
-        );
-
-        animation.onfinish = () => {
-            ring.remove();
-            liveCount--;
-        };
-    };
-
-    const spawnRipple = (x, y) => {
-        if (liveCount >= MAX_CONCURRENT) return;
-
-        const size = 18 + Math.random() * 10;
-        const peakScale = 2.1 + Math.random() * 0.6;
-
-        // leading wavefront
-        spawnRing(x, y, { delay: 0, size, peakScale, peakOpacity: 0.5, colorVar: '--border-strong' });
-        // fainter, smaller echo just behind it
-        spawnRing(x, y, { delay: 90, size: size * 0.7, peakScale: peakScale * 0.75, peakOpacity: 0.3, colorVar: '--border' });
-    };
-
-    document.addEventListener('mousemove', (event) => {
-        const { clientX: x, clientY: y } = event;
-
-        if (lastX !== null && Math.hypot(x - lastX, y - lastY) < RIPPLE_SPACING) {
-            return;
-        }
-
-        lastX = x;
-        lastY = y;
-        spawnRipple(x, y);
-    });
-
-    document.addEventListener('mouseleave', () => {
-        lastX = null;
-        lastY = null;
-    });
-}
-
 
 /* ---------- magnetic letters ---------- */
 
