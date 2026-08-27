@@ -97,7 +97,7 @@ body {
     color: var(--muted);
     font-size: 15px;
     text-decoration: none;
-    transition: color 0.25s ease;
+    transition: color 0.5s ease;
 }
 
 .nav-links a:hover,
@@ -251,11 +251,21 @@ body {
 
 .section {
     padding: 110px var(--gutter);
-    /*
-     * The navbar is sticky, so without this, jumping to #work/#about/#contact
-     * lands the section directly under it — the heading ends up partially
-     * hidden behind the bar instead of clear of it.
-     */
+}
+
+/*
+ * Sticky-navbar clearance for anchor jumps.
+ *
+ * Without this, #work/#about/#contact scroll their target's top edge to
+ * viewport 0 — directly under the bar — so the heading lands behind it.
+ *
+ * Scoped to any id inside main rather than to .section, because the anchor
+ * target is not always the section element: #contact currently sits on a
+ * heading. Tying the clearance to the id itself means it keeps working
+ * wherever that id is moved, instead of silently reverting to 0.
+ */
+main[id],
+main [id] {
     scroll-margin-top: var(--navbar-height);
 }
 
@@ -285,14 +295,34 @@ body {
 
 /* ---------- work collage ---------- */
 
+/*
+ * Content-driven grid, not a fixed-height absolute canvas.
+ *
+ * This was `height: 640px` with every tile absolutely positioned at a top%.
+ * That canvas was sized for tiles that carried a 132px artwork block and for
+ * four decorative labels sitting between 60% and 82%. Once the artwork was
+ * removed and the labels were commented out, the three remaining tiles all
+ * ended up in the upper half and 321px of the 640px stood empty — the
+ * container had no way to know its contents had shrunk.
+ *
+ * A grid derives its height from what is actually in it, so that whole class
+ * of drift cannot happen again: remove a tile, add one, change its content,
+ * and the section still ends where the content ends.
+ */
 .collage {
-    height: 640px;
-    margin-top: 40px;
-    position: relative;
+    display: grid;
+    gap: clamp(20px, 3vw, 44px);
+    /*
+     * 12 columns so both rows divide evenly: three project cards at span 4,
+     * four capability labels at span 3. A 3-column grid left the fourth
+     * label stranded alone on a third row.
+     */
+    grid-template-columns: repeat(12, minmax(0, 1fr));
+    margin-top: 48px;
 }
 
 .tile {
-    position: absolute;
+    position: relative;
     transition: transform 0.5s var(--ease), opacity 0.4s ease, border-color 0.3s ease;
     will-change: transform;
 }
@@ -304,6 +334,7 @@ body {
     color: var(--text);
     display: flex;
     flex-direction: column;
+    grid-column: span 4;
     overflow: hidden;
     text-decoration: none;
 }
@@ -349,68 +380,44 @@ body {
     margin-top: 12px;
 }
 
+/*
+ * Currently commented out in index.html. Left styled so they can be brought
+ * back — note they would now flow as ordinary grid items rather than float
+ * at absolute positions, so they'd want their own stagger if re-enabled.
+ */
 .tile-note {
+    align-self: center;
     border: 1px solid var(--border);
     border-radius: 4px;
     color: var(--faint);
     font-size: 13px;
+    grid-column: span 3;
     letter-spacing: 0.06em;
     padding: 14px 18px;
-    white-space: nowrap;
+    text-align: center;
 }
 
-/* scattered placement */
-
+/*
+ * Scattered character without the fixed canvas: each tile keeps its slight
+ * rotation, and a vertical offset staggers the row so it does not read as a
+ * plain three-up grid. Offsets are margins rather than absolute tops, so
+ * they push the grid's own height rather than floating free of it.
+ */
 .tile-1 {
-    left: 4%;
-    top: 6%;
-    transform: rotate(-3deg);
-    width: 300px;
+    transform: rotate(-2.5deg);
     z-index: 3;
 }
 
 .tile-2 {
-    left: 36%;
-    top: 30%;
+    margin-top: clamp(28px, 5vw, 76px);
     transform: rotate(2deg);
-    width: 320px;
     z-index: 4;
 }
 
 .tile-3 {
-    right: 5%;
-    top: 4%;
-    transform: rotate(3.5deg);
-    width: 290px;
+    margin-top: clamp(10px, 2vw, 30px);
+    transform: rotate(3deg);
     z-index: 2;
-}
-
-.tile-4 {
-    left: 30%;
-    top: 2%;
-    transform: rotate(-5deg);
-    z-index: 1;
-}
-
-.tile-5 {
-    left: 8%;
-    top: 62%;
-    transform: rotate(4deg);
-    z-index: 1;
-}
-
-.tile-6 {
-    right: 12%;
-    top: 60%;
-    transform: rotate(-4deg);
-    z-index: 5;
-}
-
-.tile-7 {
-    right: 26%;
-    top: 82%;
-    transform: rotate(2.5deg);
-    z-index: 1;
 }
 
 .collage:hover .tile-project {
@@ -545,16 +552,24 @@ body {
 
     /* collage collapses to a stacked, un-rotated list */
     .collage {
-        display: grid;
         gap: 16px;
         grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
-        height: auto;
     }
 
+    /* release the 12-column spans — this grid has its own column count */
+    .tile-project,
+    .tile-note {
+        grid-column: auto;
+    }
+
+    /*
+     * Flattens the desktop stagger and rotation. !important is needed only
+     * for transform, because the parallax script writes it inline; margin-top
+     * is plain CSS and this rule simply wins on source order.
+     */
     .tile {
-        position: static;
+        margin-top: 0;
         transform: none !important;
-        width: auto;
     }
 
     /* decorative texture tiles only make sense in the scattered layout */

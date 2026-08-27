@@ -23,8 +23,96 @@ if (navbar) {
         document.fonts.ready.then(setNavbarHeight);
     }
 
+    /*
+     * Anchor navigation vs. auto-hide.
+     *
+     * Jumping to #work/#about/#contact always scrolls DOWN, which tripped the
+     * auto-hide below. The browser had already reserved --navbar-height of
+     * clearance via scroll-margin-top, so the section landed correctly but the
+     * bar it was making room for had slid away — leaving a void at the top,
+     * and snapping back over the heading the moment the user scrolled up 1px.
+     *
+     * Holding the bar visible for the duration of the jump makes the reserved
+     * space correct: the heading comes to rest directly beneath a bar that is
+     * actually there.
+     */
+    let anchorNavigating = false;
+    let anchorNavStartedAt = 0;
+    let settleTimer = null;
+
+    /*
+     * With scroll-behavior:auto — which is what prefers-reduced-motion users
+     * get — the jump is instantaneous and scrollend can fire in the same
+     * frame, releasing the guard before the trailing scroll events have
+     * settled and letting the auto-hide fire anyway. Holding the guard for a
+     * short floor covers that, and the explicit un-hide here guarantees we
+     * always come to rest with the bar visible however the race resolves.
+     */
+    const MIN_GUARD_MS = 350;
+
+    const endAnchorNav = () => {
+        anchorNavigating = false;
+        lastScrollY = window.scrollY;
+        navbar.classList.remove('navbar-hidden');
+    };
+
+    const beginAnchorNav = () => {
+        anchorNavigating = true;
+        anchorNavStartedAt = performance.now();
+        navbar.classList.remove('navbar-hidden');
+        clearTimeout(settleTimer);
+        // fallback for browsers without scrollend, and a backstop if the
+        // scroll is interrupted before it ever settles
+        settleTimer = setTimeout(endAnchorNav, 1400);
+    };
+
+    // only same-page hashes that actually resolve to an element on this page
+    const isInPageAnchor = (hash) => hash.length > 1 && document.getElementById(hash.slice(1));
+
+    document.addEventListener('click', (event) => {
+        const link = event.target.closest('a[href*="#"]');
+        if (!link) return;
+
+        const url = new URL(link.href, location.href);
+        if (url.pathname !== location.pathname || url.origin !== location.origin) return;
+        if (!isInPageAnchor(url.hash)) return;
+
+        beginAnchorNav();
+    });
+
+    // back/forward between hashes, and links that change the hash directly
+    window.addEventListener('hashchange', () => {
+        if (isInPageAnchor(location.hash)) beginAnchorNav();
+    });
+
+    // landing directly on /#work with the bar already scrolled out of view
+    if (isInPageAnchor(location.hash)) beginAnchorNav();
+
+    if ('onscrollend' in window) {
+        window.addEventListener('scrollend', () => {
+            if (!anchorNavigating) return;
+
+            const elapsed = performance.now() - anchorNavStartedAt;
+            clearTimeout(settleTimer);
+
+            if (elapsed < MIN_GUARD_MS) {
+                settleTimer = setTimeout(endAnchorNav, MIN_GUARD_MS - elapsed);
+                return;
+            }
+
+            endAnchorNav();
+        });
+    }
+
     window.addEventListener('scroll', () => {
         const currentScrollY = window.scrollY;
+
+        if (anchorNavigating) {
+            // keep the bar pinned and stay in sync, so the first real scroll
+            // after the jump compares against where we actually ended up
+            lastScrollY = currentScrollY;
+            return;
+        }
 
         if (currentScrollY > lastScrollY && currentScrollY > 80) {
             navbar.classList.add('navbar-hidden');
