@@ -18,6 +18,9 @@
 
     --gutter: 7vw;
     --ease: cubic-bezier(0.22, 1, 0.36, 1);
+    /* easeOutBack — a slight overshoot, used where something should feel
+       physically nudged (the magnetic letters) rather than just eased in */
+    --ease-spring: cubic-bezier(0.34, 1.56, 0.64, 1);
 }
 
 * {
@@ -176,20 +179,61 @@ body {
 }
 
 /*
- * Spawned by script.js on pointer move inside .hero. A hairline ring, not a
- * filled dot — matches the site's existing border vocabulary instead of
- * introducing a new shape language. JS gates spawning on reduced-motion and
+ * Spawned by script.js on pointer move, anywhere on the site. Fixed-position
+ * so page coordinates never need translating — script.js uses clientX/Y
+ * directly. Each ripple is a pair of these (a main ring + a fainter, smaller,
+ * delayed echo), sized and timed with slight per-spawn randomness so a
+ * moving trail doesn't look mechanically identical — real ripples don't
+ * repeat exactly either. Hairline rings, not filled shapes, to match the
+ * site's existing border vocabulary. JS gates spawning on reduced-motion and
  * coarse pointers, so this rule only ever needs to describe one animation.
  */
 .cursor-ripple {
     border: 1px solid var(--border-strong);
     border-radius: 50%;
-    height: 26px;
     left: 0;
     pointer-events: none;
-    position: absolute;
+    position: fixed;
     top: 0;
-    width: 26px;
+    will-change: transform, opacity;
+    z-index: 200;
+}
+
+/*
+ * Runtime-split into <span class="word"> containing one <span class="letter">
+ * per character, by script.js (only for elements carrying this class —
+ * currently just .hero-title). Kept out of the HTML source so project copy
+ * stays plain, editable text.
+ *
+ * Two nested inline-blocks, not one level: `transform` silently does not
+ * apply to plain `display: inline` elements, so the letters need
+ * inline-block to move at all. But inline-block also makes an element
+ * atomic, and atomic inlines get a line-break opportunity between them even
+ * with no whitespace — letters-only inline-block broke words mid-letter
+ * ("des|ign") at narrower widths. Wrapping each word in its own inline-block
+ * first fixes that: the word moves as one atomic unit against the rest of
+ * the line, and the letters inside it never see a line-break opportunity
+ * between them because the word box doesn't wrap internally under normal
+ * circumstances.
+ */
+.magnetic-text .word {
+    display: inline-block;
+    /*
+     * Without this, shrink-to-fit sizing caps the word's own width at
+     * whatever space is left on the line, and since its letters are also
+     * atomic inline-blocks they then wrap internally to fit that shrunk
+     * box — splitting a single long word onto two lines. nowrap forces
+     * the box to size to its full natural width instead, so an overlong
+     * word overflows the container edge, matching how plain unsplit text
+     * already handles the same case by default.
+     */
+    white-space: nowrap;
+}
+
+.magnetic-text .letter {
+    display: inline-block;
+    transition: transform 0.4s var(--ease-spring);
+    will-change: transform;
 }
 
 .hero-actions {
