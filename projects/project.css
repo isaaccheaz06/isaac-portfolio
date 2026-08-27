@@ -125,27 +125,25 @@
 }
 
 .project-thumb-note {
-    background-color: rgba(10, 10, 10, 0.55);
     border: 1px dashed var(--border-strong);
-    border-radius: 3px;
-    color: var(--text);
+    color: var(--faint-on-surface);
     font-size: 11px;
     letter-spacing: 0.14em;
     padding: 6px 12px;
     text-transform: uppercase;
 }
 
-/* reuses the exact gradients already defined for the home-page tiles */
-.project-thumb-amber {
-    background: linear-gradient(140deg, #4a2c1a, #b8763c 50%, #241408);
-}
-
-.project-thumb-blue {
-    background: linear-gradient(140deg, #1e3a5f, #4a6fa5 55%, #16202e);
-}
-
+/*
+ * Was three linear-gradients faking photography. Now a flat surface with a
+ * hairline — it reads honestly as "image goes here" rather than pretending
+ * to be artwork. The three class names are kept so the category pages need
+ * no edits; they are deliberately identical until real images land.
+ */
+.project-thumb-amber,
+.project-thumb-blue,
 .project-thumb-green {
-    background: linear-gradient(140deg, #1f2d24, #5c8a6e 55%, #101a14);
+    background-color: var(--surface);
+    box-shadow: inset 0 0 0 1px var(--border);
 }
 
 .project-card-body {

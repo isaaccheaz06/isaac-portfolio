@@ -50,8 +50,12 @@ body {
 
 .navbar {
     align-items: center;
-    background-color: rgba(10, 10, 10, 0.72);
-    backdrop-filter: blur(14px);
+    /*
+     * Solid, not a translucent blur layer. Over a flat near-black page the
+     * blur resolved to almost nothing visually while still forcing a
+     * compositing layer on every scroll frame — cost with no payoff.
+     */
+    background-color: var(--bg);
     border-bottom: 1px solid transparent;
     display: flex;
     justify-content: space-between;
@@ -108,17 +112,6 @@ body {
     overflow: hidden;
     padding: 90px var(--gutter) 120px;
     position: relative;
-}
-
-.hero-glow {
-    background: radial-gradient(closest-side, rgba(120, 130, 160, 0.16), transparent);
-    height: 720px;
-    pointer-events: none;
-    position: absolute;
-    right: -8%;
-    top: -10%;
-    width: 720px;
-    z-index: -1;
 }
 
 .eyebrow {
@@ -327,21 +320,15 @@ body {
     text-decoration: none;
 }
 
+/*
+ * These were three linear-gradients standing in for project artwork. A CSS
+ * gradient pretending to be a photograph is the single clearest "generated
+ * site" tell, and it was also dishonest — it implied imagery that does not
+ * exist yet. The cards are navigational, so they carry no artwork at all
+ * now and let type do the work. Drop a real <img> in here when there is one.
+ */
 .tile-art {
-    display: block;
-    height: 132px;
-}
-
-.tile-art-1 {
-    background: linear-gradient(140deg, #1e3a5f, #4a6fa5 55%, #16202e);
-}
-
-.tile-art-2 {
-    background: linear-gradient(140deg, #4a2c1a, #b8763c 50%, #241408);
-}
-
-.tile-art-3 {
-    background: linear-gradient(140deg, #1f2d24, #5c8a6e 55%, #101a14);
+    display: none;
 }
 
 .tile-body {

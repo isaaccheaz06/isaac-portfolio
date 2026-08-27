@@ -1,17 +1,21 @@
 const navbar = document.querySelector('.navbar');
 let lastScrollY = window.scrollY;
 
-window.addEventListener('scroll', () => {
-    const currentScrollY = window.scrollY;
+// guarded: this file is shared with pages that may not render a navbar,
+// and an unguarded classList call here throws on every scroll frame
+if (navbar) {
+    window.addEventListener('scroll', () => {
+        const currentScrollY = window.scrollY;
 
-    if (currentScrollY > lastScrollY && currentScrollY > 80) {
-        navbar.classList.add('navbar-hidden');
-    } else if (currentScrollY < lastScrollY) {
-        navbar.classList.remove('navbar-hidden');
-    }
+        if (currentScrollY > lastScrollY && currentScrollY > 80) {
+            navbar.classList.add('navbar-hidden');
+        } else if (currentScrollY < lastScrollY) {
+            navbar.classList.remove('navbar-hidden');
+        }
 
-    lastScrollY = currentScrollY;
-});
+        lastScrollY = currentScrollY;
+    });
+}
 
 const collage = document.getElementById('collage');
 const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
@@ -141,8 +145,8 @@ if (!reduceMotion.matches && !coarsePointer.matches) {
 const magneticRoots = document.querySelectorAll('.magnetic-text');
 
 if (magneticRoots.length && !reduceMotion.matches && !coarsePointer.matches) {
-    const RADIUS = 90;
-    const MAX_PUSH = 13;
+    const RADIUS = 84;
+    const MAX_LIFT = 15;
     const letters = [];
 
     let points = [];
@@ -217,6 +221,16 @@ if (magneticRoots.length && !reduceMotion.matches && !coarsePointer.matches) {
 
     window.addEventListener('resize', measure);
 
+    /*
+     * The display face is loaded async with font-display: swap, so it can
+     * land after the reveal finishes. When it does, every glyph advance
+     * changes and the cached centres are silently wrong — letters would
+     * then lift while the cursor is nowhere near them.
+     */
+    if (document.fonts && document.fonts.ready) {
+        document.fonts.ready.then(measure);
+    }
+
     let frame = null;
 
     document.addEventListener('mousemove', (event) => {
@@ -226,19 +240,23 @@ if (magneticRoots.length && !reduceMotion.matches && !coarsePointer.matches) {
             frame = null;
 
             for (const { el, cx, cy } of points) {
-                const dx = cx - event.clientX;
-                const dy = cy - event.clientY;
-                const distance = Math.hypot(dx, dy);
+                const distance = Math.hypot(cx - event.clientX, cy - event.clientY);
 
                 if (distance >= RADIUS) {
                     el.style.transform = '';
                     continue;
                 }
 
+                /*
+                 * Lift straight up rather than pushing radially away. A
+                 * radial push scatters letters in every direction at once
+                 * and reads as noise on a line of text; a vertical hop
+                 * keeps the baseline legible and reads as the cursor
+                 * sweeping letters up as it passes. Quadratic falloff so
+                 * only letters genuinely near the cursor move much.
+                 */
                 const strength = (1 - distance / RADIUS) ** 2;
-                const angle = Math.atan2(dy, dx);
-                const push = strength * MAX_PUSH;
-                el.style.transform = `translate(${Math.cos(angle) * push}px, ${Math.sin(angle) * push}px)`;
+                el.style.transform = `translateY(${-strength * MAX_LIFT}px)`;
             }
         });
     });
