@@ -67,6 +67,27 @@ body > main {
     color: var(--bg);
 }
 
+/*
+ * Text for screen readers only. Used to spell out "(opens in a new tab)"
+ * beside the ↗ glyph on external links: the glyph carries that meaning to
+ * anyone who can see it, and is aria-hidden precisely so it is not read out
+ * as a character name, which leaves nothing for a screen reader without this.
+ *
+ * Not display:none and not visibility:hidden — both remove it from the
+ * accessibility tree too, which defeats the point. A 1px clipped box stays
+ * in the tree while occupying no visible space.
+ */
+.visually-hidden {
+    border: 0;
+    clip-path: inset(50%);
+    height: 1px;
+    overflow: hidden;
+    padding: 0;
+    position: absolute;
+    white-space: nowrap;
+    width: 1px;
+}
+
 /* ---------- nav ---------- */
 
 .navbar {

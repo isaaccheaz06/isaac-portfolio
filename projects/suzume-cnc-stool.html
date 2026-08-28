@@ -75,14 +75,26 @@
         </dl>
 
         <!--
-          OPTIONAL LIVE DEMO. Delete this comment and uncomment the markup to
-          add a link out to a running build, repository or video.
+          OPTIONAL EXTERNAL LINKS — a devlog, a repository, a running build.
+          Delete this comment and uncomment the list to add them. It holds one
+          link or several and wraps on a phone. See museum-npc.html for a live
+          example.
 
-          <p class="project-links">
-              <a class="project-link" href="https://example.com" target="_blank" rel="noopener noreferrer">
-                  View live project <span aria-hidden="true">&#8599;</span>
-              </a>
-          </p>
+          These live in the page markup, not in media.js: a link is content and
+          has to survive JavaScript being off. Only media is JS-injected here.
+
+          Each link needs all three parts — the rel keeps the new tab from
+          reaching back into this page, the ↗ marks it outbound for people who
+          can see it, and the hidden span says so for people who cannot.
+
+          <ul class="project-links">
+              <li>
+                  <a class="project-link" href="https://example.com" target="_blank" rel="noopener noreferrer">
+                      View live project<span class="project-link-external" aria-hidden="true">&#8599;</span>
+                      <span class="visually-hidden">(opens in a new tab)</span>
+                  </a>
+              </li>
+          </ul>
         -->
 
         <!--

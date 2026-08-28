@@ -9,8 +9,28 @@
  *
  * HOW TO ADD SOMETHING
  *   1. Drop the file in assets/<project-slug>/
- *   2. Replace the matching `null` or empty [] below with a media object
- *   3. Reload. Nothing else to wire up.
+ *   2. Fill in its row in assets/MEDIA-MANIFEST.md — what it shows, its alt
+ *      text, its caption. That file is the authoritative description of every
+ *      asset, because a filename cannot tell you what is in the frame.
+ *   3. Replace the matching `null` or empty [] below with a media object,
+ *      copying the alt and caption across from the manifest.
+ *   4. Reload. Nothing else to wire up.
+ *
+ * FILENAMES follow the convention in assets/README.md:
+ *   card / card-loop / hero / cad-NN / process-NN / final-NN /
+ *   process-film / process-film-poster / unity-editor-NN / game-view-NN /
+ *   conversation-NN
+ * Lowercase kebab-case, two-digit numbers. No file is required; anything
+ * absent is simply not configured here.
+ *
+ * EXTENSIONS: .webp and .jpg are both fine. Write the extension the file
+ * actually has. Nothing rewrites .jpg to .webp, nothing tries a second
+ * extension, and there is no fallback if a path 404s — so never write a
+ * .webp path on the assumption that a WebP twin exists.
+ *
+ * CASE MATTERS. GitHub Pages is case-sensitive; Windows is not. "hero.JPG"
+ * on disk written as "hero.jpg" here works perfectly on your machine and
+ * 404s on the live site. Keep every filename lowercase, extension included.
  *
  * PATHS are always written from the site root ("assets/..."), never with
  * "../". script.js resolves them against this file's own URL, so the same
@@ -32,10 +52,15 @@
  *                                     right box before the file downloads,
  *                                     which is what stops the page jumping.
  *
+ *     mode:    'preview' | 'player'   video only. See VIDEO MODES below.
+ *                                     Defaults to 'preview' when omitted.
+ *
  *     poster:  'assets/slug/demo-poster.webp'   video only, strongly advised.
  *                                     Shown before playback, and shown INSTEAD
  *                                     of the video for visitors who have asked
- *                                     for reduced motion.
+ *                                     for reduced motion. REQUIRED in practice
+ *                                     for mode:'player' — without one the
+ *                                     player is a black box until pressed.
  *     sources: [                      video only, optional. Offer .webm first
  *       { src: 'assets/slug/demo.webm', type: 'video/webm' },
  *       { src: 'assets/slug/demo.mp4',  type: 'video/mp4'  }
@@ -62,9 +87,39 @@
  *                                     shape other than the file's own.
  *   }
  *
- * Videos always render muted, looped and playsinline, pause themselves when
- * scrolled out of view or when the tab is hidden, and are replaced by their
- * poster under prefers-reduced-motion. You do not need to configure any of it.
+ * ---------------------------------------------------------------------------
+ * VIDEO MODES
+ * ---------------------------------------------------------------------------
+ * Two kinds of video, and they must not be confused. Pick with `mode`.
+ *
+ *   mode: 'preview'   (the default)
+ *     For card-loop.mp4 and other short silent loops used as imagery.
+ *       - muted, autoplaying, looping, playsinline
+ *       - no controls, not focusable, hidden from screen readers
+ *       - plays only while on screen; pauses offscreen and in a hidden tab
+ *       - shows its poster instead of playing under prefers-reduced-motion
+ *     Keep these to 6-10 seconds and strip the audio track entirely — a
+ *     muted track is still weight, and a track at all can block autoplay.
+ *
+ *   mode: 'player'
+ *     For process-film.mp4 and the full Blender animation.
+ *       - controls, playsinline, preload='metadata'
+ *       - does NOT autoplay, does NOT loop, audio permitted
+ *       - stays paused until the visitor presses play
+ *       - keyboard operable through the native controls; `alt` becomes its
+ *         accessible name
+ *       - untouched by prefers-reduced-motion, because it never moves on its
+ *         own in the first place
+ *     Give it a `poster`. Without one it renders as a black rectangle.
+ *
+ * A complete film is not wallpaper. Configuring one as a preview would loop
+ * it silently forever and hide it from screen readers; that is why the modes
+ * exist. Entries with no `mode` behave exactly as they did before it was
+ * added, so nothing already configured needs revisiting.
+ *
+ * On the homepage cards `mode` is ignored and everything is a preview —
+ * native controls inside a card's link would be a control nested in a link.
+ * Full films belong on the project page the card leads to.
  * ========================================================================= */
 
 window.SITE_MEDIA = {
@@ -141,20 +196,45 @@ window.SITE_MEDIA = {
      *       width: 1200, height: 900
      *   },
      *
-     * EXAMPLE — a silent loop:
-     *   'museum-npc': {
+     * EXAMPLE — the same card as a JPG, because that is what you uploaded:
+     *   'suzume-cnc-stool': {
+     *       type: 'image',
+     *       src: 'assets/suzume-cnc-stool/card.jpg',
+     *       alt: 'The finished stool seen from the front, three legs splayed',
+     *       width: 1200, height: 900
+     *   },
+     *
+     * EXAMPLE — a silent loop (mode:'preview' is the default, shown here for
+     * clarity). Its poster is the card still:
+     *   'butterfly-pavilion': {
      *       type: 'video',
-     *       poster: 'assets/museum-npc/card-poster.webp',
-     *       alt: 'A visitor talking with an NPC in the museum scene',
+     *       mode: 'preview',
+     *       poster: 'assets/butterfly-pavilion/card.webp',
+     *       alt: 'The pavilion model rotating slowly on a turntable',
      *       width: 1200, height: 900,
-     *       sources: [
-     *           { src: 'assets/museum-npc/card.webm', type: 'video/webm' },
-     *           { src: 'assets/museum-npc/card.mp4',  type: 'video/mp4'  }
-     *       ]
+     *       src: 'assets/butterfly-pavilion/card-loop.mp4'
      *   },
      * ------------------------------------------------------------------- */
     featured: {
-        'digital-kintsugi': null,
+        /*
+         * The COMPLETED piece. The earlier card was cropped from a photograph
+         * taken before the fabricated replacement component was fitted — the
+         * base is notched and empty in it — so it showed an unfinished object
+         * as the finished one. This frame carries the teal replacement band
+         * and the gold seam that joins it.
+         *
+         * Cropped to 4:3 deliberately: the card slot is landscape and crops
+         * with object-fit, so an upright frame handed to it straight would
+         * keep only a middle band. The crop was framed to contain the whole
+         * object, replacement component included.
+         */
+        'digital-kintsugi': {
+            type: 'image',
+            src: 'assets/digital-kintsugi/digital-kintsugi-final-card.webp',
+            alt: 'Completed blue ceramic Digital Kintsugi vase with gold repair '
+                + 'seams and a custom fabricated replacement component.',
+            width: 1200, height: 900
+        },
         'museum-npc': null,
         'suzume-cnc-stool': null,
         'butterfly-pavilion': null
@@ -163,9 +243,11 @@ window.SITE_MEDIA = {
     /* ---------------------------------------------------------------------
      * PROJECT PAGES
      * `hero` is the single lead image or video, shown under the metadata.
-     * `gallery` is everything after it, in the order you list it.
+     * `gallery` is everything after it, in the order you list it — so the
+     * array order IS the reading order. List cad-NN, process-NN and final-NN
+     * in the sequence you want them read, not alphabetically.
      *
-     * EXAMPLE:
+     * EXAMPLE — the shape a finished project takes:
      *   'digital-kintsugi': {
      *       hero: {
      *           type: 'image',
@@ -174,28 +256,237 @@ window.SITE_MEDIA = {
      *           width: 1600, height: 900
      *       },
      *       gallery: [
-     *           { type: 'image', src: 'assets/digital-kintsugi/process-01.webp',
-     *             alt: 'The vessel mid-print on the ceramic printer',
-     *             width: 1200, height: 900, caption: 'Ceramic print in progress' },
-     *
-     *           { type: 'image', src: 'assets/digital-kintsugi/process-02.webp',
+     *           { type: 'image', src: 'assets/digital-kintsugi/cad-01.webp',
      *             alt: 'Scanned mesh of the fractured piece open in Rhino',
      *             width: 1200, height: 900, caption: 'Scan reconstruction' },
      *
-     *           { type: 'video', span: 'full',
-     *             poster: 'assets/digital-kintsugi/assembly-poster.webp',
-     *             alt: 'The PLA component being fitted to the break',
-     *             width: 1600, height: 900,
-     *             caption: 'Fitting the repair component',
-     *             sources: [
-     *                 { src: 'assets/digital-kintsugi/assembly.webm', type: 'video/webm' },
-     *                 { src: 'assets/digital-kintsugi/assembly.mp4',  type: 'video/mp4'  }
-     *             ] }
+     *           // a JPG straight off the camera, not converted — fine
+     *           { type: 'image', src: 'assets/digital-kintsugi/process-01.jpg',
+     *             alt: 'The vessel mid-print on the ceramic printer',
+     *             width: 1200, height: 900, caption: 'Ceramic print in progress' },
+     *
+     *           { type: 'image', src: 'assets/digital-kintsugi/final-01.webp',
+     *             alt: 'The repaired vessel lit from the side',
+     *             width: 1200, height: 900 },
+     *
+     *           // THE FULL FILM. mode:'player' — controls, no autoplay, no
+     *           // loop, audio allowed, nothing downloaded until pressed.
+     *           { type: 'video', mode: 'player', span: 'full',
+     *             src: 'assets/digital-kintsugi/process-film.mp4',
+     *             poster: 'assets/digital-kintsugi/process-film-poster.webp',
+     *             alt: 'Process film: scanning, printing and fitting the repair',
+     *             width: 1920, height: 1080,
+     *             caption: 'Start to finish' }
      *       ]
      *   },
+     *
+     * Two files for one video, only if you have both encodes — the browser
+     * takes the first it understands:
+     *           { type: 'video', mode: 'player',
+     *             poster: 'assets/slug/process-film-poster.webp',
+     *             alt: '...', width: 1920, height: 1080,
+     *             sources: [
+     *                 { src: 'assets/slug/process-film.webm', type: 'video/webm' },
+     *                 { src: 'assets/slug/process-film.mp4',  type: 'video/mp4'  }
+     *             ] }
+     *
+     * OPTIONAL `links`: external links shown near the top of a project page.
+     * The Museum page carries two. They live in that page's own markup rather
+     * than here, because a link is content and must survive JavaScript being
+     * off — see projects/museum-npc.html.
      * ------------------------------------------------------------------- */
     projects: {
-        'digital-kintsugi': { hero: null, gallery: [] },
+        /*
+         * DIGITAL KINTSUGI — sectioned layout.
+         *
+         * `sections` replaces hero/gallery for this project. Rendered flat,
+         * thirteen upright clips and photographs read as a pile of GIFs with
+         * no argument; this gives the same assets a rhythm — a dominant final
+         * frame against a small loop, alternating feature/support blocks, one
+         * viewer for the object-to-model sequence, and a quiet close.
+         *
+         * Every source is portrait, so nothing is run at the full measure.
+         */
+        'digital-kintsugi': {
+            sections: [
+
+                /* --- the finished object, and it turning --- */
+                {
+                    layout: 'split',
+                    lead: {
+                        type: 'image',
+                        src: 'assets/digital-kintsugi/digital-kintsugi-final-hero.webp',
+                        alt: 'Completed blue ceramic Digital Kintsugi vase with gold repair '
+                            + 'seams and a custom fabricated replacement component.',
+                        width: 1200, height: 1600
+                    },
+                    aside: {
+                        type: 'video', mode: 'preview',
+                        src: 'assets/digital-kintsugi/final-loop.mp4',
+                        poster: 'assets/digital-kintsugi/final-loop-poster.webp',
+                        alt: 'The completed vase turning slowly, gold seams catching the light',
+                        width: 720, height: 1280
+                    }
+                },
+
+                /* --- printing the form, and the things that broke --- */
+                {
+                    layout: 'editorial',
+                    label: 'Prototype',
+                    blocks: [
+                        {
+                            feature: {
+                                type: 'video', mode: 'preview',
+                                src: 'assets/digital-kintsugi/ceramic-printing-loop.mp4',
+                                poster: 'assets/digital-kintsugi/ceramic-printing-loop-poster.webp',
+                                alt: 'A clay extruder mounted on a gantry printing a small '
+                                    + 'vessel on a fab lab workbench',
+                                width: 540, height: 960,
+                                // caption: 'Ceramic printing and material testing'
+                            },
+                            support: [
+                                {
+                                    type: 'image', src: 'assets/digital-kintsugi/process-02.webp',
+                                    alt: 'The extruder nozzle laying a coil of clay onto a small '
+                                        + 'cylindrical test print',
+                                    width: 900, height: 1200
+                                },
+                                {
+                                    type: 'image', src: 'assets/digital-kintsugi/process-03.webp',
+                                    alt: 'The same test print after failure, one extrusion '
+                                        + 'slumped away from the wall',
+                                    width: 900, height: 1200
+                                }
+                            ]
+                        },
+                        {
+                            flip: true,
+                            feature: {
+                                type: 'image', src: 'assets/digital-kintsugi/process-04.webp',
+                                alt: 'A hand holding a broken fragment above a painted prototype '
+                                    + 'vessel missing a piece of its wall, shards on the cutting mat',
+                                width: 900, height: 1200,
+                                // caption: 'Early prototype and fit testing'
+                            },
+                            support: [
+                                {
+                                    type: 'image', src: 'assets/digital-kintsugi/process-01.webp',
+                                    alt: 'An unfired printed clay vase on a plywood board, its '
+                                        + 'coil layers visible',
+                                    width: 900, height: 1200
+                                }
+                            ]
+                        }
+                    ]
+                },
+
+                /*
+                 * The object-to-model sequence, as one viewer rather than five
+                 * more clips in a column. Each entry is a stage with a name,
+                 * which is what makes the run legible; the viewer plays only
+                 * the active one.
+                 *
+                 * Four stages, not five. A 'Prototype insert fitting' slide sat
+                 * here showing process-05 — an insert being tried in an early
+                 * PROTOTYPE vessel, not the final piece. In a sequence about
+                 * reconstructing the finished vase it read as part of that
+                 * work, which it is not. The file is untouched on disk and its
+                 * source is untouched in the archive; it is simply not shown.
+                 */
+                {
+                    layout: 'carousel',
+                    label: 'Final Design',
+                    slides: [
+                        {
+                            title: 'Physical 3D scanning',
+                            media: {
+                                type: 'video', mode: 'preview',
+                                src: 'assets/digital-kintsugi/scanning-loop.mp4',
+                                poster: 'assets/digital-kintsugi/scanning-loop-poster.webp',
+                                alt: 'A handheld 3D scanner passing over the fractured vessel, '
+                                    + 'projected light on the table and the capture building on screen',
+                                width: 540, height: 960
+                            }
+                        },
+
+                        {
+                            title: 'Scan result',
+                            media: {
+                                type: 'video', mode: 'preview',
+                                src: 'assets/digital-kintsugi/scan-result-loop.mp4',
+                                poster: 'assets/digital-kintsugi/scan-result-loop-poster.webp',
+                                alt: 'The raw scan mesh on screen, the vessel wall captured '
+                                    + 'alongside a large flat artefact',
+                                width: 540, height: 960
+                            }
+                        },
+
+                        {
+                            title: 'Rhino replacement fitting',
+                            media: {
+                                type: 'video', mode: 'preview',
+                                src: 'assets/digital-kintsugi/rhino-fit-loop.mp4',
+                                poster: 'assets/digital-kintsugi/rhino-fit-loop-poster.webp',
+                                alt: 'The scanned mesh open in Rhino with a wireframe '
+                                    + 'replacement component positioned against the break',
+                                width: 540, height: 960
+                            }
+                        },
+
+                        {
+                            title: 'Gold repair',
+                            media: {
+                                type: 'video', mode: 'preview',
+                                src: 'assets/digital-kintsugi/gold-repair.mp4',
+                                poster: 'assets/digital-kintsugi/gold-repair-poster.webp',
+                                alt: 'Mixing gold pigment into epoxy and working it into '
+                                    + 'the breaks of the vessel',
+                                width: 720, height: 1280
+                            }
+                        }
+                    ]
+                },
+
+                /*
+                 * The full film stays on Google Drive. The smallest watchable
+                 * encode is ~19MB — twice the rest of the page — and git would
+                 * keep every version forever, so nothing is copied in here.
+                 * The iframe is created only when the play control is pressed,
+                 * so no third-party request happens until it is asked for.
+                 */
+                {
+                    layout: 'film',
+                    title: 'Full Project Film',
+                    text: 'A complete record of the project\u2019s development, from initial '
+                        + 'planning and material testing through fabrication, reconstruction, '
+                        + 'and final assembly.',
+                    src: 'https://drive.google.com/file/d/1j3IB8NMIRCQF6sBq-4mrryxqNUZlOXpF/preview',
+                    href: 'https://drive.google.com/file/d/1j3IB8NMIRCQF6sBq-4mrryxqNUZlOXpF/view',
+                    iframeTitle: 'Digital Kintsugi full project film',
+                    playLabel: 'Play full project film',
+                    linkLabel: 'Open film in Google Drive',
+                    ratio: '9 / 16',
+                    poster: {
+                        type: 'image',
+                        src: 'assets/digital-kintsugi/digital-kintsugi-final-hero.webp',
+                        alt: '',
+                        width: 1200, height: 1600
+                    },
+                    // the frame is 9:16 and the still 3:4, so cover crops the
+                    // width; hold it on the vase rather than the default centre
+                    posterPosition: '52% 46%'
+                }
+
+                /*
+                 * The page ends on the film. A closing detail crop sat here —
+                 * a tight frame of the lower vase — and read as one more media
+                 * block rather than a conclusion, so it is no longer shown.
+                 * digital-kintsugi-final-detail.webp is still on disk, and the
+                 * photograph it was cropped from still leads the page and
+                 * posters the film.
+                 */
+            ]
+        },
         'museum-npc': { hero: null, gallery: [] },
         'suzume-cnc-stool': { hero: null, gallery: [] },
         'butterfly-pavilion': { hero: null, gallery: [] }

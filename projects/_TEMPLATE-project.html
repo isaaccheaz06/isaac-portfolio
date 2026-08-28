@@ -118,12 +118,27 @@
             </div>
         </dl>
 
-        <!-- Optional. Delete if there is nothing running to link to. -->
-        <p class="project-links">
-            <a class="project-link" href="{{LIVE URL}}" target="_blank" rel="noopener noreferrer">
-                View live project <span aria-hidden="true">&#8599;</span>
-            </a>
-        </p>
+        <!--
+          Optional external links — a devlog, a repository, a running build.
+          Delete the whole list if there is nothing to link to; add an <li>
+          for each extra link. See museum-npc.html for a live example.
+
+          These belong in the markup, not in media.js: a link is content and
+          has to work with JavaScript off. Only media is JS-injected.
+
+          All three parts matter. rel="noopener noreferrer" keeps the new tab
+          from reaching back into this page; the ↗ marks the link outbound for
+          people who can see it; the hidden span says the same for people who
+          cannot, since the glyph is aria-hidden.
+        -->
+        <ul class="project-links">
+            <li>
+                <a class="project-link" href="{{LIVE URL}}" target="_blank" rel="noopener noreferrer">
+                    View live project<span class="project-link-external" aria-hidden="true">&#8599;</span>
+                    <span class="visually-hidden">(opens in a new tab)</span>
+                </a>
+            </li>
+        </ul>
 
         <!--
           MEDIA.
@@ -134,21 +149,32 @@
                   hero: { type: 'image', src: 'assets/{{PROJECT SLUG}}/hero.webp',
                           alt: 'What the picture shows', width: 1600, height: 900 },
                   gallery: [
-                      { type: 'image', src: 'assets/{{PROJECT SLUG}}/process-01.webp',
+                      { type: 'image', src: 'assets/{{PROJECT SLUG}}/cad-01.webp',
                         alt: '...', width: 1200, height: 900, caption: 'Short caption' },
-                      { type: 'video', span: 'full',
-                        poster: 'assets/{{PROJECT SLUG}}/demo-poster.webp',
-                        width: 1600, height: 900, caption: 'Short caption',
-                        sources: [
-                            { src: 'assets/{{PROJECT SLUG}}/demo.webm', type: 'video/webm' },
-                            { src: 'assets/{{PROJECT SLUG}}/demo.mp4',  type: 'video/mp4'  }
-                        ] }
+
+                      // .jpg is equally fine — write the extension the file
+                      // actually has; nothing rewrites it, and case matters
+                      { type: 'image', src: 'assets/{{PROJECT SLUG}}/process-01.jpg',
+                        alt: '...', width: 1200, height: 900, caption: 'Short caption' },
+
+                      // the full film: controls, no autoplay, no loop, audio
+                      // allowed, nothing downloaded until someone presses play
+                      { type: 'video', mode: 'player', span: 'full',
+                        src: 'assets/{{PROJECT SLUG}}/process-film.mp4',
+                        poster: 'assets/{{PROJECT SLUG}}/process-film-poster.webp',
+                        alt: 'What the film shows', width: 1920, height: 1080,
+                        caption: 'Start to finish' }
                   ]
               }
 
+          Array order is reading order. Filenames follow the convention in
+          assets/README.md; describe each file in assets/MEDIA-MANIFEST.md
+          before configuring it, since that is where the alt text comes from.
+
           media.js documents every field. The hero loads eagerly, gallery
-          images lazy load, videos play muted and looped only while on screen,
-          and everything falls back to a still under prefers-reduced-motion.
+          images lazy load, mode:'preview' videos play muted and looped only
+          while on screen and fall back to a still under prefers-reduced-motion,
+          and mode:'player' videos wait to be pressed.
           While the entry is empty this slot renders nothing at all.
         -->
         <div data-media-slot></div>

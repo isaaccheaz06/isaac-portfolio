@@ -346,6 +346,18 @@ if (siteMedia) {
         if (Number(m.width) > 0) el.width = Number(m.width);
         if (Number(m.height) > 0) el.height = Number(m.height);
         if (hasText(m.ratio)) el.style.aspectRatio = m.ratio;
+
+        /*
+         * Upright media gets flagged so CSS can cap its width. A landscape
+         * lead image run across the full measure is a hero; the same rule
+         * applied to a 3:4 photograph is 1400px of vertical scroll for one
+         * picture, and to a 9:16 phone clip it is worse.
+         *
+         * Read from the configured dimensions rather than measured ones so
+         * the class is on the element before it lays out — deciding this
+         * after the file loads would mean a visible reflow.
+         */
+        if (Number(m.height) > Number(m.width)) el.classList.add('is-portrait');
     };
 
     const buildImage = (m, opts) => {
@@ -388,11 +400,46 @@ if (siteMedia) {
     };
 
     /*
-     * Videos never carry the autoplay attribute. Playback is driven by the
-     * IntersectionObserver below, so a clip that is never scrolled to is
+     * VIDEO MODES.
+     *
+     *   preview  a short silent loop used as imagery — a card loop, a few
+     *            seconds of a machine running. Muted, looping, no controls,
+     *            plays only while on screen.
+     *
+     *   player   a film someone chooses to watch — a full process film, the
+     *            Blender animation. Controls, no autoplay, no loop, audio
+     *            allowed, and nothing downloads past the metadata until play
+     *            is pressed.
+     *
+     * A complete film is not wallpaper, and a decorative loop is not a media
+     * player. Conflating them either starts audio nobody asked for or buries
+     * a ten-minute film behind a silent three-second cut.
+     *
+     * Entries with no `mode` are treated as previews, which is exactly what
+     * this file did before the modes existed.
+     */
+    const videoMode = (m) => (m.mode === 'player' ? 'player' : 'preview');
+
+    const attachSources = (video, m) => {
+        if (Array.isArray(m.sources) && m.sources.length) {
+            for (const s of m.sources) {
+                if (!hasText(s && s.src)) continue;
+                const source = document.createElement('source');
+                source.src = resolveURL(s.src);
+                if (hasText(s.type)) source.type = s.type;
+                video.appendChild(source);
+            }
+        } else {
+            video.src = resolveURL(m.src);
+        }
+    };
+
+    /*
+     * Preview. Never carries the autoplay attribute — playback is driven by
+     * the IntersectionObserver below, so a clip that is never scrolled to is
      * never fetched and never decoded.
      */
-    const buildVideo = (m) => {
+    const buildPreviewVideo = (m) => {
         const video = document.createElement('video');
         video.muted = true;
         video.defaultMuted = true;
@@ -407,38 +454,63 @@ if (siteMedia) {
         // a11y tree and let the caption beside it carry the meaning
         video.setAttribute('aria-hidden', 'true');
 
-        if (Array.isArray(m.sources) && m.sources.length) {
-            for (const s of m.sources) {
-                if (!hasText(s && s.src)) continue;
-                const source = document.createElement('source');
-                source.src = resolveURL(s.src);
-                if (hasText(s.type)) source.type = s.type;
-                video.appendChild(source);
-            }
-        } else {
-            video.src = resolveURL(m.src);
-        }
-
+        attachSources(video, m);
         applyBox(video, m);
         video.dataset.autoplayInView = 'true';
         return video;
     };
 
     /*
-     * Under prefers-reduced-motion a looping clip becomes its poster frame.
-     * With no poster to fall back to the video is still rendered, but given
-     * controls and left paused, so the content stays reachable without
-     * anything moving on its own.
+     * Player. Deliberately the opposite of the preview in every respect that
+     * matters: it waits to be asked.
+     *
+     * No autoplayInView flag, so the observer below never touches it — it
+     * stays paused when scrolled past and is not stopped mid-sentence when
+     * the tab is hidden. preload='metadata' fetches the header only, so a
+     * film costs a few kilobytes until someone presses play.
+     *
+     * It stays in the accessibility tree and keeps native controls, which are
+     * keyboard operable as they come: tab to the video, space to play.
+     */
+    const buildPlayerVideo = (m) => {
+        const video = document.createElement('video');
+        video.controls = true;
+        video.loop = false;
+        video.playsInline = true;
+        video.setAttribute('playsinline', '');
+        video.preload = 'metadata';
+        if (hasText(m.poster)) video.poster = resolveURL(m.poster);
+
+        // controls make it focusable already; this only names it, so a
+        // screen reader says what the film is rather than "video"
+        const label = hasText(m.alt) ? m.alt : m.caption;
+        if (hasText(label)) video.setAttribute('aria-label', label);
+
+        attachSources(video, m);
+        applyBox(video, m);
+        return video;
+    };
+
+    /*
+     * Reduced motion applies to the preview only. A player never moves until
+     * it is asked to, so there is nothing to reduce — silently swapping a
+     * film someone chose to watch for a still would be the bug, not the fix.
+     *
+     * A preview becomes its poster frame. With no poster to fall back to the
+     * video is still rendered, but given controls and left paused, so the
+     * content stays reachable without anything moving on its own.
      */
     const buildMediaElement = (m, opts) => {
         if (m.type === 'image') return buildImage(m, opts);
+
+        if (videoMode(m) === 'player') return buildPlayerVideo(m);
 
         if (reduceMotion.matches) {
             if (hasText(m.poster)) {
                 const o = Object.assign({}, opts, { src: m.poster });
                 return buildImage(m, o);
             }
-            const video = buildVideo(m);
+            const video = buildPreviewVideo(m);
             delete video.dataset.autoplayInView;
             video.controls = true;
             video.preload = 'metadata';
@@ -447,7 +519,7 @@ if (siteMedia) {
             return video;
         }
 
-        return buildVideo(m);
+        return buildPreviewVideo(m);
     };
 
     /* ---------- home page cards ---------- */
@@ -458,11 +530,21 @@ if (siteMedia) {
         const m = featuredConfig[card.dataset.project];
         if (!isValidMedia(m)) continue;
 
+        /*
+         * A card is entirely one link, so its media can only ever be a
+         * preview. Native controls inside an anchor are interactive content
+         * nested in a link — invalid markup, and in practice a keyboard trap
+         * where the play button and the card fight over the same Enter press.
+         * `mode` is therefore ignored here rather than obeyed; a full film
+         * belongs on the project page, which is where the card leads.
+         */
+        const forPreview = m.mode === 'player' ? Object.assign({}, m, { mode: 'preview' }) : m;
+
         // span, not div: the other children of the anchor are spans, so this
         // keeps one consistent inline-level content model inside the link
         const wrap = document.createElement('span');
         wrap.className = 'feature-media';
-        wrap.appendChild(buildMediaElement(m));
+        wrap.appendChild(buildMediaElement(forPreview));
         card.insertBefore(wrap, card.firstChild);
         card.classList.add('has-media');
     }
@@ -502,17 +584,482 @@ if (siteMedia) {
         const config = (siteMedia.projects || {})[page.dataset.project] || {};
         const slot = page.querySelector('[data-media-slot]');
 
-        if (slot) {
-            const buildFigure = (m, opts) => {
-                const figure = document.createElement('figure');
-                figure.appendChild(buildMediaElement(m, opts));
-                if (hasText(m.caption)) {
-                    const cap = document.createElement('figcaption');
-                    cap.textContent = m.caption;
-                    figure.appendChild(cap);
+        const buildFigure = (m, opts) => {
+            const figure = document.createElement('figure');
+            figure.appendChild(buildMediaElement(m, opts));
+            if (hasText(m.caption)) {
+                const cap = document.createElement('figcaption');
+                cap.textContent = m.caption;
+                figure.appendChild(cap);
+            }
+            return figure;
+        };
+
+        const el = (tag, cls, text) => {
+            const node = document.createElement(tag);
+            if (cls) node.className = cls;
+            if (text !== undefined) node.textContent = text;
+            return node;
+        };
+
+        const pad = (n) => String(n).padStart(2, '0');
+
+        /* =================================================================
+         * SECTIONED LAYOUT
+         *
+         * Opt-in: a project that defines `sections` gets the editorial
+         * composition below, one that defines hero/gallery keeps the plain
+         * stacked gallery. Both paths live here so adding the first does not
+         * disturb the second.
+         * ================================================================= */
+
+        const sectionHead = (section, index) => {
+            if (!hasText(section.label)) return null;
+            const head = el('div', 'pm-head');
+            head.appendChild(el('span', 'pm-num', pad(index)));
+            head.appendChild(el('h2', 'pm-label', section.label));
+            return head;
+        };
+
+        /* --- 1. asymmetric hero: one dominant frame, one counterweight --- */
+        const buildSplit = (section) => {
+            const wrap = el('div', 'pm-split');
+            if (isValidMedia(section.lead)) {
+                const lead = el('div', 'pm-split-lead');
+                // the only media above the fold, so the only one fetched eagerly
+                lead.appendChild(buildFigure(section.lead, { eager: true }));
+                wrap.appendChild(lead);
+            }
+            if (isValidMedia(section.aside)) {
+                const aside = el('div', 'pm-split-aside');
+                aside.appendChild(buildFigure(section.aside));
+                wrap.appendChild(aside);
+            }
+            return wrap.children.length ? wrap : null;
+        };
+
+        /* --- 2. feature + supports, alternating sides --- */
+        const buildEditorial = (section) => {
+            const wrap = el('div', 'pm-editorial');
+            for (const block of section.blocks || []) {
+                if (!isValidMedia(block.feature)) continue;
+                const row = el('div', 'pm-block' + (block.flip ? ' is-flipped' : ''));
+
+                const feature = el('div', 'pm-feature');
+                feature.appendChild(buildFigure(block.feature));
+                row.appendChild(feature);
+
+                const items = (block.support || []).filter(isValidMedia);
+                if (items.length) {
+                    const support = el('div', 'pm-support');
+                    for (const m of items) support.appendChild(buildFigure(m));
+                    row.appendChild(support);
                 }
-                return figure;
+                wrap.appendChild(row);
+            }
+            return wrap.children.length ? wrap : null;
+        };
+
+        /* --- 4. closing frame --- */
+        const buildFinale = (section) => {
+            if (!isValidMedia(section.media)) return null;
+            const wrap = el('div', 'pm-finale pm-rail');
+            wrap.appendChild(buildFigure(section.media));
+            return wrap;
+        };
+
+        /* --- a single quiet frame, used for the pre-replacement stage --- */
+        const buildNote = (section) => {
+            if (!isValidMedia(section.media)) return null;
+            const wrap = el('div', 'pm-note pm-rail');
+            wrap.appendChild(buildFigure(section.media));
+            return wrap;
+        };
+
+        const icon = (d) => {
+            const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+            svg.setAttribute('viewBox', '0 0 24 24');
+            svg.setAttribute('aria-hidden', 'true');
+            svg.setAttribute('focusable', 'false');
+            const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+            path.setAttribute('d', d);
+            path.setAttribute('fill', 'currentColor');
+            svg.appendChild(path);
+            return svg;
+        };
+
+        const ICON = {
+            prev: 'M15.5 3.2 6.7 12l8.8 8.8 1.5-1.6L9.8 12l7.2-7.2z',
+            next: 'M8.5 3.2 7 4.8 14.2 12 7 19.2l1.5 1.6L17.3 12z',
+            play: 'M6 3.5v17l14-8.5z',
+            pause: 'M6 4h4.2v16H6zM13.8 4H18v16h-4.2z'
+        };
+
+        /* =================================================================
+         * 3. PROCESS VIEWER
+         *
+         * One stage, one slide visible. Rotation is a convenience that yields
+         * to the visitor at the first sign of attention: hover, focus, a tap,
+         * a hidden tab, or scrolling away all stop it, and it never resumes
+         * on its own after a deliberate interaction.
+         *
+         * A clip advances when it ENDS rather than on a timer, so nothing is
+         * ever cut off mid-shot. Stills get a fixed dwell.
+         * ================================================================= */
+        const buildViewer = (section) => {
+            const slides = (section.slides || []).filter((s) => s && isValidMedia(s.media));
+            if (!slides.length) return null;
+
+            const IMAGE_DWELL = 5600;
+
+            const wrap = el('div', 'pm-viewer');
+            wrap.setAttribute('role', 'group');
+            wrap.setAttribute('aria-roledescription', 'carousel');
+            wrap.setAttribute('aria-label', section.label || 'Process viewer');
+
+            const stage = el('div', 'pm-stage');
+            stage.tabIndex = 0;
+            stage.setAttribute('aria-label',
+                'Process stages. Use the left and right arrow keys to move between them.');
+
+            const nodes = slides.map((slide, i) => {
+                const holder = el('div', 'pm-slide');
+                holder.setAttribute('role', 'group');
+                holder.setAttribute('aria-roledescription', 'slide');
+                holder.setAttribute('aria-label',
+                    pad(i + 1) + ' of ' + pad(slides.length) + '. ' + (slide.title || ''));
+
+                const media = buildMediaElement(slide.media);
+                /*
+                 * The page-wide "play what is on screen" observer must not
+                 * touch these — the viewer decides which single clip runs.
+                 * Looping is off so `ended` can fire and drive the advance.
+                 */
+                delete media.dataset.autoplayInView;
+                if (media.tagName === 'VIDEO') media.loop = false;
+
+                holder.appendChild(media);
+                stage.appendChild(holder);
+                return { holder, media, title: slide.title || '' };
+            });
+
+            const bar = el('div', 'pm-bar');
+            const step = el('div', 'pm-step');
+            const count = el('span', 'pm-count');
+            const title = el('span', 'pm-title');
+            step.append(count, title);
+            // announced politely so a screen reader hears the stage change
+            step.setAttribute('aria-live', 'polite');
+            step.setAttribute('aria-atomic', 'true');
+
+            const controls = el('div', 'pm-controls');
+            const mkBtn = (name, label) => {
+                const b = el('button', 'pm-btn');
+                b.type = 'button';
+                b.setAttribute('aria-label', label);
+                b.appendChild(icon(ICON[name]));
+                controls.appendChild(b);
+                return b;
             };
+            const prevBtn = mkBtn('prev', 'Previous stage');
+            const toggleBtn = mkBtn('pause', 'Pause automatic rotation');
+            const nextBtn = mkBtn('next', 'Next stage');
+            bar.append(step, controls);
+
+            const rail = el('ul', 'pm-thumbs');
+            rail.style.setProperty('--pm-thumbs', String(slides.length));
+            const thumbs = nodes.map((n, i) => {
+                const li = el('li');
+                const b = el('button', 'pm-thumb');
+                b.type = 'button';
+                b.setAttribute('aria-label', 'Stage ' + (i + 1) + ': ' + n.title);
+                b.appendChild(el('span', 'pm-thumb-num', pad(i + 1)));
+                b.appendChild(document.createTextNode(n.title));
+                li.appendChild(b);
+                rail.appendChild(li);
+                return b;
+            });
+
+            wrap.append(stage, bar, rail);
+
+            /* ---------------- state ---------------- */
+
+            let index = 0;
+            let timer = null;
+            // rotation is off entirely for reduced motion, and stays off once
+            // the visitor has taken control
+            let wanted = !reduceMotion.matches;
+            let onScreen = false;
+            let hovering = false;
+
+            const clearTimer = () => {
+                if (timer) { clearTimeout(timer); timer = null; }
+            };
+
+            /*
+             * Playing and advancing are separate questions.
+             *
+             * A clip on the stage should run whenever the stage is actually
+             * being looked at — that is what the slide IS. Advancing past it
+             * is a different matter, and yields to hover, focus and to any
+             * deliberate navigation. Conflating the two meant that clicking
+             * "next" once froze every later slide on its first frame.
+             */
+            const canPlay = () => onScreen && !document.hidden;
+
+            const canAdvance = () => wanted && onScreen && !hovering
+                && !document.hidden && !reduceMotion.matches;
+
+            const show = (next, viaUser) => {
+                const from = index;
+                index = (next + nodes.length) % nodes.length;
+
+                nodes.forEach((n, i) => {
+                    const active = i === index;
+                    n.holder.classList.toggle('is-active', active);
+                    n.holder.setAttribute('aria-hidden', active ? 'false' : 'true');
+                    // slide in from the direction of travel; a reversed move
+                    // enters from the other edge, so the motion reads as spatial
+                    if (!active) {
+                        n.holder.style.setProperty('--pm-shift',
+                            (i < index ? '-4%' : '4%'));
+                    } else {
+                        n.holder.style.removeProperty('--pm-shift');
+                    }
+                    if (n.media.tagName !== 'VIDEO') return;
+                    if (!active) {
+                        // inactive clips are stopped AND rewound, so only one
+                        // is ever decoding and none resume mid-shot
+                        n.media.pause();
+                        try { n.media.currentTime = 0; } catch (e) { /* not seekable yet */ }
+                    } else if (from !== index) {
+                        // and the incoming one always starts at the beginning
+                        try { n.media.currentTime = 0; } catch (e) { /* not seekable yet */ }
+                    }
+                });
+
+                count.textContent = pad(index + 1) + ' / ' + pad(nodes.length);
+                title.textContent = nodes[index].title;
+                thumbs.forEach((b, i) => b.setAttribute('aria-current', i === index ? 'true' : 'false'));
+
+                if (viaUser) surrender();
+                schedule();
+            };
+
+            /* One deliberate interaction ends automatic rotation for good.
+               Nobody should have to race a carousel back to the slide they
+               were reading. */
+            const surrender = () => {
+                if (!wanted) return;
+                wanted = false;
+                setToggle();
+            };
+
+            const setToggle = () => {
+                toggleBtn.replaceChildren(icon(wanted ? ICON.pause : ICON.play));
+                toggleBtn.setAttribute('aria-label',
+                    wanted ? 'Pause automatic rotation' : 'Play stages automatically');
+            };
+
+            /*
+             * One timer, cleared before every reschedule, so manual navigation
+             * can never leave a stale timer racing the new slide.
+             */
+            const schedule = () => {
+                clearTimer();
+                const current = nodes[index].media;
+
+                if (current.tagName === 'VIDEO') {
+                    if (canPlay()) {
+                        const p = current.play();
+                        if (p && p.catch) p.catch(() => {});
+                    } else {
+                        current.pause();
+                    }
+                    // a clip is never cut off part-way: the advance is driven
+                    // by 'ended', never by a timer running underneath it
+                    return;
+                }
+
+                if (canAdvance()) timer = setTimeout(() => show(index + 1), IMAGE_DWELL);
+            };
+
+            nodes.forEach((n) => {
+                if (n.media.tagName !== 'VIDEO') return;
+                n.media.addEventListener('ended', () => {
+                    if (nodes[index].media !== n.media) return;
+                    if (canAdvance()) { show(index + 1); return; }
+                    // rotation is off, so the clip repeats in place rather
+                    // than leaving a frozen last frame on the stage
+                    try { n.media.currentTime = 0; } catch (e) { /* ignore */ }
+                    if (canPlay()) {
+                        const p = n.media.play();
+                        if (p && p.catch) p.catch(() => {});
+                    }
+                });
+            });
+
+            prevBtn.addEventListener('click', () => show(index - 1, true));
+            nextBtn.addEventListener('click', () => show(index + 1, true));
+            thumbs.forEach((b, i) => b.addEventListener('click', () => show(i, true)));
+
+            toggleBtn.addEventListener('click', () => {
+                wanted = !wanted && !reduceMotion.matches;
+                setToggle();
+                schedule();
+            });
+
+            wrap.addEventListener('keydown', (e) => {
+                if (e.key === 'ArrowLeft') { e.preventDefault(); show(index - 1, true); }
+                else if (e.key === 'ArrowRight') { e.preventDefault(); show(index + 1, true); }
+            });
+
+            // hover and keyboard focus both hold rotation; leaving resumes it
+            // only if the visitor never took over
+            const hold = (on) => { hovering = on; schedule(); };
+            wrap.addEventListener('pointerenter', () => hold(true));
+            wrap.addEventListener('pointerleave', () => hold(false));
+            wrap.addEventListener('focusin', () => hold(true));
+            wrap.addEventListener('focusout', (e) => {
+                if (!wrap.contains(e.relatedTarget)) hold(false);
+            });
+
+            /* swipe: a horizontal drag past a threshold moves one stage */
+            let startX = null;
+            let startY = null;
+            stage.addEventListener('pointerdown', (e) => {
+                if (e.pointerType === 'mouse') return;   // mouse has the buttons
+                startX = e.clientX; startY = e.clientY;
+            });
+            stage.addEventListener('pointerup', (e) => {
+                if (startX === null) return;
+                const dx = e.clientX - startX;
+                const dy = e.clientY - startY;
+                startX = startY = null;
+                // must be clearly horizontal, or it was a scroll
+                if (Math.abs(dx) > 45 && Math.abs(dx) > Math.abs(dy) * 1.4) {
+                    show(index + (dx < 0 ? 1 : -1), true);
+                }
+            });
+            stage.addEventListener('pointercancel', () => { startX = startY = null; });
+
+            document.addEventListener('visibilitychange', schedule);
+            reduceMotion.addEventListener('change', () => {
+                if (reduceMotion.matches) { wanted = false; setToggle(); }
+                schedule();
+            });
+
+            if ('IntersectionObserver' in window) {
+                new IntersectionObserver((entries) => {
+                    onScreen = entries[0].isIntersecting;
+                    schedule();
+                }, { threshold: 0.25 }).observe(wrap);
+            } else {
+                onScreen = true;
+            }
+
+            setToggle();
+            show(0);
+            return wrap;
+        };
+
+        /* =================================================================
+         * 5. FULL FILM — click to load
+         *
+         * Nothing third-party is requested until the visitor asks for it: the
+         * frame holds a poster, and the iframe is created on activation. That
+         * keeps the page's weight and its outbound requests honest, and means
+         * the film costs nothing to anyone who does not watch it.
+         *
+         * The Drive link below is not a fallback bolted on — it is always
+         * visible, so a blocked iframe still leaves a way through.
+         * ================================================================= */
+        const buildFilm = (section) => {
+            if (!hasText(section.src)) return null;
+
+            const wrap = el('div', 'pm-film');
+
+            const text = el('div', 'pm-film-text');
+            if (hasText(section.title)) text.appendChild(el('h2', null, section.title));
+            if (hasText(section.text)) text.appendChild(el('p', null, section.text));
+
+            if (hasText(section.href)) {
+                const note = el('p', 'pm-film-note');
+                const a = el('a', 'project-link');
+                a.href = section.href;
+                a.target = '_blank';
+                a.rel = 'noopener noreferrer';
+                a.appendChild(document.createTextNode(section.linkLabel || 'Open film'));
+                const mark = el('span', 'project-link-external', '↗');
+                mark.setAttribute('aria-hidden', 'true');
+                a.appendChild(mark);
+                a.appendChild(el('span', 'visually-hidden', '(opens in a new tab)'));
+                note.appendChild(a);
+                text.appendChild(note);
+            }
+
+            const frame = el('div', 'pm-film-frame');
+            if (hasText(section.ratio)) frame.style.aspectRatio = section.ratio;
+
+            if (isValidMedia(section.poster)) {
+                const poster = buildImage(section.poster);
+                if (hasText(section.posterPosition)) {
+                    poster.style.objectPosition = section.posterPosition;
+                }
+                frame.appendChild(poster);
+            }
+
+            const play = el('button', 'pm-film-play');
+            play.type = 'button';
+            const label = section.playLabel || 'Play film';
+            play.setAttribute('aria-label', label);
+            const ring = el('span', 'pm-film-play-icon');
+            ring.appendChild(icon(ICON.play));
+            play.append(ring, el('span', 'pm-film-play-text', label));
+
+            play.addEventListener('click', () => {
+                const iframe = document.createElement('iframe');
+                iframe.src = section.src;
+                iframe.title = section.iframeTitle || label;
+                iframe.allow = 'fullscreen';
+                iframe.allowFullscreen = true;
+                iframe.loading = 'lazy';
+                iframe.referrerPolicy = 'no-referrer-when-downgrade';
+                frame.replaceChildren(iframe);
+                iframe.focus();
+            });
+
+            frame.appendChild(play);
+            wrap.append(text, frame);
+            return wrap;
+        };
+
+        const LAYOUTS = {
+            split: buildSplit,
+            editorial: buildEditorial,
+            carousel: buildViewer,
+            film: buildFilm,
+            note: buildNote,
+            finale: buildFinale
+        };
+
+        if (slot && Array.isArray(config.sections) && config.sections.length) {
+            let n = 0;
+            for (const section of config.sections) {
+                const build = LAYOUTS[section.layout];
+                if (!build) continue;
+                const body = build(section);
+                if (!body) continue;
+
+                const wrap = el('section', 'pm-section pm-' + section.layout + '-section');
+                const head = sectionHead(section, ++n);
+                if (head) wrap.appendChild(head);
+                else n--;                    // unlabelled sections are not numbered
+                wrap.appendChild(body);
+                slot.appendChild(wrap);
+            }
+        } else if (slot) {
+            /* ---- the original hero + gallery path, unchanged ---- */
 
             // the lead image sits above the fold, so it is the one piece of
             // media that must not be lazy loaded

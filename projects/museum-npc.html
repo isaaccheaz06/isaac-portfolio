@@ -75,15 +75,36 @@
         </dl>
 
         <!--
-          OPTIONAL LIVE DEMO. Delete this comment and uncomment the markup to
-          add a link out to a running build, repository or video.
+          EXTERNAL LINKS.
+          Written here rather than injected from media.js, because a link is
+          content: it has to work with JavaScript off and be visible to
+          anything reading the page without running it. Only media is
+          JS-injected on this site.
 
-          <p class="project-links">
-              <a class="project-link" href="https://example.com" target="_blank" rel="noopener noreferrer">
-                  View live project <span aria-hidden="true">&#8599;</span>
-              </a>
-          </p>
+          This page stays a case study in its own right — it does not redirect
+          to itch.io, and no playable build is embedded.
+
+          To add another link, copy one <li>. Every one needs:
+            target="_blank" rel="noopener noreferrer"   opens safely
+            <span class="project-link-external">        the visible ↗
+            <span class="visually-hidden">              the words behind it
         -->
+        <ul class="project-links">
+            <li>
+                <a class="project-link" href="https://isaaccheaz.itch.io/museum/devlog" target="_blank"
+                    rel="noopener noreferrer">
+                    View development log<span class="project-link-external" aria-hidden="true">&#8599;</span>
+                    <span class="visually-hidden">(opens in a new tab)</span>
+                </a>
+            </li>
+            <li>
+                <a class="project-link" href="https://isaaccheaz.itch.io/museum" target="_blank"
+                    rel="noopener noreferrer">
+                    View project on itch.io<span class="project-link-external" aria-hidden="true">&#8599;</span>
+                    <span class="visually-hidden">(opens in a new tab)</span>
+                </a>
+            </li>
+        </ul>
 
         <!--
           MEDIA.
