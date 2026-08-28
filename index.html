@@ -168,6 +168,33 @@
                     </p>
                 </div>
 
+                <!--
+                  SELF-PORTRAIT — nothing to paste here.
+                  There is deliberately no <img> at this point. script.js reads
+                  window.SITE_MEDIA.portrait from media.js and, only once a real
+                  file is configured there, inserts a <figure class="about-portrait">
+                  in this gap and switches .about-grid into its three-column
+                  layout: introduction, portrait, capabilities.
+
+                  Leave the config null and the section stays exactly the
+                  balanced two-column composition it is now. No reserved column,
+                  no grey box, no "portrait coming soon", no broken image.
+
+                  TO ADD YOURS
+                    1. Save the file as   assets/images/isaac-portrait.webp
+                    2. Fill in the `portrait` block in media.js — the worked
+                       example there lists every field, including the alt text
+                       you need to confirm once you have chosen the photograph.
+
+                  A 4:5 upright crop is what the layout is built around; the
+                  frame is plain and rectangular by design.
+
+                  Because the portrait is inserted by script.js, like every
+                  other image on this site, it does not appear with JavaScript
+                  disabled. The introduction, capabilities and metadata do, and
+                  they carry the section on their own.
+                -->
+
                 <div class="about-side">
                     <h3 class="about-subhead">Capabilities</h3>
 
@@ -189,9 +216,43 @@
                                     target="_blank" rel="noopener noreferrer">B.S. Interactive Media Business</a>
                             </dd>
                         </div>
+                        <!--
+                          LOCATIONS — edit these three rows directly.
+                          City on the first span, what that city actually is to
+                          you on the second. Add or remove an <li> and the
+                          layout follows; nothing else reads this list.
+
+                          The descriptions were supplied, not inferred, so
+                          correct them here if any of them is wrong. The label
+                          above was "Based in", which made three place names
+                          read as three simultaneous addresses; "Location" plus
+                          a stated role for each city removes that reading.
+
+                          Both halves of every row are always rendered, so this
+                          reads the same with JavaScript off, under a screen
+                          reader, and on a phone where there is no hover.
+                          Pointer hover and keyboard focus only brighten a row —
+                          they never reveal anything that was hidden, which is
+                          why none of this text is a tab stop.
+                        -->
                         <div class="about-meta-row">
-                            <dt>Based in</dt>
-                            <dd>Boston • Shanghai • New York</dd>
+                            <dt>Location</dt>
+                            <dd>
+                                <ul class="location-list">
+                                    <li class="location">
+                                        <span class="location-city">Boston</span>
+                                        <span class="location-note">Home</span>
+                                    </li>
+                                    <li class="location">
+                                        <span class="location-city">Shanghai</span>
+                                        <span class="location-note">University</span>
+                                    </li>
+                                    <li class="location">
+                                        <span class="location-city">New York</span>
+                                        <span class="location-note">Open to opportunities</span>
+                                    </li>
+                                </ul>
+                            </dd>
                         </div>
                     </dl>
                 </div>
@@ -205,23 +266,59 @@
             </div>
 
             <p class="contact-lead">
-                Currently exploring internship opportunities...
+                Open to internships and creative technology collaborations.
             </p>
 
+            <!--
+              CONTACT ROWS.
+              Each mark is an inline SVG: no icon font, no sprite sheet, no
+              extra request, and it takes its colour from the link through
+              currentColor so it can never drift from the label beside it.
+
+              Every icon is aria-hidden with focusable="false", so a screen
+              reader announces each row as "Email", "LinkedIn" or "GitHub" and
+              never reads path data, and the SVG can never become a tab stop.
+              The whole row remains one link.
+
+              TO SWAP AN ICON: replace the <path> and set the viewBox that
+              frames it. Nothing else needs touching — .contact-icon renders
+              every mark into the same 1em x 0.8em box and lets each viewBox
+              letterbox itself inside it, which is what keeps the three labels
+              aligned even though an envelope is landscape and the two brand
+              marks are square.
+            -->
             <div class="contact-links">
                 <a href="https://mail.google.com/mail/?view=cm&fs=1&to=icheaz06@gmail.com&su=Portfolio%20Inquiry"
                     class="contact-link" target="_blank" rel="noopener noreferrer">
-                    <span>Email</span>
+                    <span class="contact-label">
+                        <svg class="contact-icon" viewBox="2 5 20 14" aria-hidden="true" focusable="false">
+                            <path fill="currentColor"
+                                d="M3 5h18a1 1 0 0 1 1 1v12a1 1 0 0 1-1 1H3a1 1 0 0 1-1-1V6a1 1 0 0 1 1-1Zm.8 2.1L12 12.7l8.2-5.6H3.8Z" />
+                        </svg>
+                        <span>Email</span>
+                    </span>
                     <span class="contact-arrow" aria-hidden="true">↗</span>
                 </a>
                 <a href="https://www.linkedin.com/in/isaac-cheaz-235302365/" class="contact-link" target="_blank"
                     rel="noopener noreferrer">
-                    <span>LinkedIn</span>
+                    <span class="contact-label">
+                        <svg class="contact-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+                            <path fill="currentColor"
+                                d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433a2.062 2.062 0 0 1-2.063-2.065 2.064 2.064 0 1 1 2.063 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z" />
+                        </svg>
+                        <span>LinkedIn</span>
+                    </span>
                     <span class="contact-arrow" aria-hidden="true">↗</span>
                 </a>
                 <a href="https://github.com/isaaccheaz06" class="contact-link" target="_blank"
                     rel="noopener noreferrer">
-                    <span>GitHub</span>
+                    <span class="contact-label">
+                        <svg class="contact-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+                            <path fill="currentColor"
+                                d="M12 .297c-6.63 0-12 5.373-12 12 0 5.303 3.438 9.8 8.205 11.385.6.113.82-.258.82-.577 0-.285-.01-1.04-.015-2.04-3.338.724-4.042-1.61-4.042-1.61C4.422 18.07 3.633 17.7 3.633 17.7c-1.087-.744.084-.729.084-.729 1.205.084 1.838 1.236 1.838 1.236 1.07 1.835 2.809 1.305 3.495.998.108-.776.417-1.305.76-1.605-2.665-.3-5.466-1.332-5.466-5.93 0-1.31.465-2.38 1.235-3.22-.135-.303-.54-1.523.105-3.176 0 0 1.005-.322 3.3 1.23.96-.267 1.98-.399 3-.405 1.02.006 2.04.138 3 .405 2.28-1.552 3.285-1.23 3.285-1.23.645 1.653.24 2.873.12 3.176.765.84 1.23 1.91 1.23 3.22 0 4.61-2.805 5.625-5.475 5.92.42.36.81 1.096.81 2.22 0 1.606-.015 2.896-.015 3.286 0 .315.21.69.825.57C20.565 22.092 24 17.592 24 12.297c0-6.627-5.373-12-12-12" />
+                        </svg>
+                        <span>GitHub</span>
+                    </span>
                     <span class="contact-arrow" aria-hidden="true">↗</span>
                 </a>
             </div>

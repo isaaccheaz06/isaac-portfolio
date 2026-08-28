@@ -43,6 +43,16 @@
  *                                     understands. If you only have one file,
  *                                     skip this and use `src`.
  *
+ *     srcset:  [                      images only, optional. Same file at
+ *       { src: 'assets/slug/hero.webp',    descriptor: '800w'  },
+ *       { src: 'assets/slug/hero@2x.webp', descriptor: '1600w' }
+ *     ]                               several sizes; the browser picks one.
+ *     sizes:   '(max-width: 900px) 320px, 30vw'
+ *                                     How wide the image will actually be
+ *                                     rendered. Only meaningful with srcset,
+ *                                     and only worth adding if you have more
+ *                                     than one file — `src` alone is fine.
+ *
  *     caption: 'Short caption'        gallery items only, optional
  *     span:    'full' | 'half'        gallery items only. 'full' runs the whole
  *                                     measure; 'half' pairs up beside its
@@ -58,6 +68,64 @@
  * ========================================================================= */
 
 window.SITE_MEDIA = {
+
+    /* ---------------------------------------------------------------------
+     * ABOUT PORTRAIT
+     * The single photograph of you in the About section. Images only.
+     *
+     * WHERE THE FILE GOES
+     *   assets/images/isaac-portrait.webp
+     *
+     * WHAT TO SHOOT / CROP
+     *   4:5 upright, you in a fabrication, prototyping or technical space.
+     *   The layout is built around that shape. A different ratio still works
+     *   — set `ratio` below and it is used verbatim — but 4:5 is what the
+     *   three-column composition was sized for.
+     *
+     * WHAT SIZE TO EXPORT
+     *   The portrait column is about 300px wide on a 1440px screen and 320px
+     *   at its widest on a phone, so it never needs to be large:
+     *     isaac-portrait.webp        800 x 1000   the one you must have
+     *     isaac-portrait@2x.webp    1600 x 2000   optional, for retina
+     *   `width` and `height` below must be the real pixel dimensions of the
+     *   1x file. They are what stop the page jumping while it downloads.
+     *
+     * While this stays null the About section renders as the two-column
+     * layout you already have. No gap is reserved, no placeholder is drawn.
+     *
+     * ---------------------------------------------------------------------
+     * EXAMPLE — fill this in and delete the `null` below:
+     *
+     *   portrait: {
+     *       type: 'image',
+     *       src: 'assets/images/isaac-portrait.webp',
+     *       width: 800,
+     *       height: 1000,
+     *
+     *       // >>> CONFIRM THIS ONCE YOU HAVE PICKED THE PHOTOGRAPH <<<
+     *       // Alt text describes what is actually in the frame, for someone
+     *       // who cannot see it. The draft below is a shape to fill in, not
+     *       // a fact — rewrite it to match your real photograph before it
+     *       // goes live, and do not ship it as-is.
+     *       //   e.g. 'Isaac at a workbench, setting up a part on the CNC'
+     *       //   e.g. 'Isaac holding a 3D-printed component in the lab'
+     *       // One sentence. No "photo of" or "image of" — a screen reader
+     *       // already says it is an image.
+     *       alt: 'Isaac ...',
+     *
+     *       // OPTIONAL retina / responsive set. Paths resolve exactly like
+     *       // `src`, so write them from the site root the same way.
+     *       srcset: [
+     *           { src: 'assets/images/isaac-portrait.webp',    descriptor: '800w'  },
+     *           { src: 'assets/images/isaac-portrait@2x.webp', descriptor: '1600w' }
+     *       ],
+     *       sizes: '(max-width: 900px) 320px, 30vw'
+     *
+     *       // OPTIONAL ratio override, only if your crop is not 4:5:
+     *       // ratio: '3 / 4'
+     *   },
+     * ------------------------------------------------------------------- */
+    portrait: null,
 
     /* ---------------------------------------------------------------------
      * HOME PAGE CARDS

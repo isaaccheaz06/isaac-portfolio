@@ -362,6 +362,27 @@ if (siteMedia) {
         } else {
             img.loading = 'lazy';
         }
+
+        /*
+         * Optional responsive set. Skipped when the caller has overridden the
+         * source — that only happens for a video's poster frame under reduced
+         * motion, and the set describes the video, not the still.
+         *
+         * Each candidate is resolved the same way `src` is, so the config can
+         * keep writing every path from the site root.
+         */
+        if (!o.src && Array.isArray(m.srcset)) {
+            const set = m.srcset
+                .filter((s) => hasText(s && s.src))
+                .map((s) => resolveURL(s.src) + (hasText(s.descriptor) ? ' ' + s.descriptor.trim() : ''))
+                .join(', ');
+
+            if (set) {
+                img.srcset = set;
+                if (hasText(m.sizes)) img.sizes = m.sizes;
+            }
+        }
+
         applyBox(img, m);
         return img;
     };
@@ -444,6 +465,33 @@ if (siteMedia) {
         wrap.appendChild(buildMediaElement(m));
         card.insertBefore(wrap, card.firstChild);
         card.classList.add('has-media');
+    }
+
+    /* ---------- about portrait ---------- */
+
+    /*
+     * Inserted rather than filled in: an empty slot element would still be a
+     * grid item and would still hold a column open, which is the one thing
+     * the About section must not do while there is no photograph. So the
+     * figure and the class that reflows the grid arrive together, or neither
+     * does, and the two-column layout in the markup stands on its own.
+     *
+     * Images only. A portrait is a still by definition, and a looping clip
+     * here would pull attention off the work.
+     */
+    const aboutGrid = document.querySelector('.about-grid');
+    const aboutSide = aboutGrid && aboutGrid.querySelector('.about-side');
+    const portrait = siteMedia.portrait;
+
+    if (aboutGrid && aboutSide && portrait && portrait.type === 'image' && isValidMedia(portrait)) {
+        const figure = document.createElement('figure');
+        figure.className = 'about-portrait';
+        figure.appendChild(buildImage(portrait));
+
+        // between the introduction and the capabilities, so the rendered
+        // order matches the reading order at every width
+        aboutGrid.insertBefore(figure, aboutSide);
+        aboutGrid.classList.add('has-portrait');
     }
 
     /* ---------- project pages ---------- */

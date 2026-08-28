@@ -591,6 +591,50 @@ main [id] {
     margin-top: 48px;
 }
 
+/*
+ * SELF-PORTRAIT.
+ * .has-portrait is added by script.js at the same moment it inserts the
+ * figure, and only when media.js actually points at a file. So the two
+ * columns above are the resting composition rather than a fallback with a
+ * hole in it: with no portrait configured there is no third track, no
+ * reserved space and nothing to collapse.
+ *
+ * Measured at 1440px the three tracks take 35 / 26 / 28 percent of the
+ * section, the two 56px gaps accounting for the rest — introduction,
+ * portrait, capabilities. The fr values are weighted rather than round
+ * because the gaps are a fixed 9 percent of the measure, so equal-looking
+ * numbers would not divide the remainder the way the composition needs.
+ *
+ * Held back to wide viewports: below about 1200px a third track squeezes
+ * the capability list into two cramped columns, so it folds instead. See
+ * the pair of rules in the responsive section.
+ */
+@media (min-width: 1201px) {
+    .about-grid.has-portrait {
+        column-gap: 56px;
+        grid-template-columns: minmax(0, 1.5fr) minmax(0, 1.1fr) minmax(0, 1.2fr);
+    }
+}
+
+.about-portrait {
+    margin: 0;
+}
+
+/*
+ * Rectangular and unadorned: no radius, no frame, no overlay, no crop to a
+ * circle. 4:5 upright is the default shape; a `ratio` in the media config
+ * writes an inline aspect-ratio that overrides this if the file is cut
+ * differently. object-fit means an off-ratio file is cropped rather than
+ * stretched, so the layout never distorts a face.
+ */
+.about-portrait img {
+    aspect-ratio: 4 / 5;
+    display: block;
+    height: auto;
+    object-fit: cover;
+    width: 100%;
+}
+
 .about-lead {
     font-family: var(--font-display);
     font-size: clamp(21px, 2.3vw, 30px);
@@ -677,6 +721,76 @@ main [id] {
     outline-offset: 3px;
 }
 
+/*
+ * LOCATIONS.
+ * Each city carries what it actually is, so three place names can no longer
+ * be read as three simultaneous addresses.
+ *
+ * Both halves are always visible and both clear WCAG AA at rest on --bg:
+ * --muted is 7.66:1 and --faint 4.61:1. Nothing is hidden and then revealed,
+ * which is what makes this work identically for a mouse, a screen reader, a
+ * touch screen with no hover, and a browser with JavaScript off. Hover only
+ * lifts the colour, so the descriptions never had to become tab stops to
+ * stay reachable by keyboard — they are simply already on the page.
+ */
+.location-list {
+    display: grid;
+    gap: 7px;
+    list-style: none;
+}
+
+.location {
+    align-items: baseline;
+    display: grid;
+    gap: 2px 14px;
+    grid-template-columns: minmax(0, auto) minmax(0, 1fr);
+}
+
+.location-city {
+    color: var(--muted);
+    transition: color 0.25s ease;
+}
+
+/*
+ * Set in the smaller metadata size so the pairing reads as city-then-gloss
+ * at a glance, rather than as two equal columns of place names.
+ */
+.location-note {
+    color: var(--faint);
+    font-size: 13px;
+    letter-spacing: 0.03em;
+    transition: color 0.25s ease;
+    /*
+     * A city and what it is to you are one statement, so the description is
+     * never broken across two lines beside a one-line city name. The rules
+     * below guarantee the room this needs before it is asked to hold.
+     */
+    white-space: nowrap;
+}
+
+/*
+ * NARROW METADATA COLUMN.
+ * Label beside value costs 124px of the row, which is affordable in the
+ * two-column About and is not once a third column exists: with the portrait
+ * in, .about-side is about 350px and the descriptions are left roughly
+ * 227px, which "Open to opportunities" overruns. The label moves above its
+ * value instead, handing the row its full width — around 110px more than
+ * the longest description needs, so it holds even as the typeface renders
+ * wider than the fallback used to measure it.
+ *
+ * Both rows move together; a stacked Location beside an inline Education
+ * would read as a mistake.
+ */
+.about-grid.has-portrait .about-meta-row {
+    gap: 6px;
+    grid-template-columns: minmax(0, 1fr);
+}
+
+.location:hover .location-city,
+.location:hover .location-note {
+    color: var(--text);
+}
+
 /* ---------- contact ---------- */
 
 .contact-lead {
@@ -712,12 +826,66 @@ main [id] {
     padding-left: 18px;
 }
 
+/*
+ * The row had no focus style of its own and was relying on the browser
+ * default. This matches the outline already used by .feature and by the
+ * discipline links, so every focusable thing on the page rings the same way.
+ */
+.contact-link:focus-visible {
+    outline: 2px solid var(--text);
+    outline-offset: 4px;
+}
+
+/*
+ * Icon and label as one unit, so the gap between them stays fixed while
+ * justify-content pushes the arrow to the far edge of the row.
+ */
+.contact-label {
+    align-items: center;
+    display: inline-flex;
+    gap: 0.55em;
+}
+
+/*
+ * Every mark renders into the same 1em x 0.8em box, sized in em so it tracks
+ * the row's clamped type instead of being pinned to a pixel size that only
+ * looks right at one viewport.
+ *
+ * The box is deliberately wider than it is tall, and each icon letterboxes
+ * itself inside it through the default preserveAspectRatio. The landscape
+ * envelope therefore fills the width at 0.7em tall, while the two square
+ * brand marks centre at 0.8em — optically the same weight, and, because the
+ * box itself never changes size, the three labels start at the same x
+ * however differently the next icon is drawn.
+ *
+ * flex: none keeps that box from being squeezed by a long label on a narrow
+ * screen. Colour comes from currentColor via the fill on each path.
+ */
+.contact-icon {
+    color: var(--faint);
+    flex: none;
+    height: 0.8em;
+    transition: transform 0.35s var(--ease), color 0.25s ease;
+    width: 1em;
+}
+
+/*
+ * A 2px lead on top of the 18px the whole row already travels: enough for
+ * the icon to read as pulling the row rather than riding along with it.
+ */
+.contact-link:hover .contact-icon,
+.contact-link:focus-visible .contact-icon {
+    color: var(--text);
+    transform: translateX(2px);
+}
+
 .contact-arrow {
     color: var(--faint);
     transition: transform 0.35s var(--ease), color 0.25s ease;
 }
 
-.contact-link:hover .contact-arrow {
+.contact-link:hover .contact-arrow,
+.contact-link:focus-visible .contact-arrow {
     color: var(--text);
     transform: translate(4px, -4px);
 }
@@ -739,6 +907,23 @@ main [id] {
 
 /* ---------- responsive ---------- */
 
+/*
+ * Portrait, middle widths. A third track here would leave the capability
+ * list about 260px wide and break "Unity / web development" over two lines,
+ * so introduction and portrait pair up and the capabilities take the full
+ * measure underneath. Only applies when a portrait exists.
+ */
+@media (min-width: 901px) and (max-width: 1200px) {
+    .about-grid.has-portrait {
+        column-gap: 64px;
+        grid-template-columns: minmax(0, 1.3fr) minmax(0, 1fr);
+    }
+
+    .about-grid.has-portrait .about-side {
+        grid-column: 1 / -1;
+    }
+}
+
 @media (max-width: 900px) {
     :root {
         --gutter: 6vw;
@@ -746,6 +931,26 @@ main [id] {
 
     .about-grid {
         grid-template-columns: 1fr;
+    }
+
+    /*
+     * Stated at equal specificity to .about-grid.has-portrait, which would
+     * otherwise keep its multi-column tracks inside this breakpoint. One
+     * column puts the source order on screen unchanged: introduction,
+     * portrait, capabilities, then education and location.
+     */
+    .about-grid.has-portrait {
+        column-gap: 0;
+        grid-template-columns: minmax(0, 1fr);
+    }
+
+    /*
+     * Left-aligned rather than centred, and capped, because a 4:5 crop run
+     * to the full width of a phone is close to a full screen of photograph
+     * between two blocks of text.
+     */
+    .about-portrait img {
+        max-width: 320px;
     }
 
     /* cards collapse to a stacked, un-rotated list */
@@ -775,6 +980,19 @@ main [id] {
     .disciplines {
         gap: 14px;
         justify-content: flex-start;
+    }
+}
+
+/*
+ * Same reasoning as .has-portrait above, for the other case where the
+ * metadata column gets tight. On a phone the row is about 343px, which
+ * leaves the descriptions roughly 219px once the label has taken its
+ * share — not enough. Stacked, they get the whole row.
+ */
+@media (max-width: 1000px) {
+    .about-meta-row {
+        gap: 6px;
+        grid-template-columns: minmax(0, 1fr);
     }
 }
 
@@ -855,5 +1073,18 @@ main [id] {
     * {
         animation-duration: 0.01ms !important;
         transition-duration: 0.01ms !important;
+    }
+
+    /*
+     * The rule above only collapses the duration, so a transform still
+     * arrives — instantly, which is a jump rather than a motion. The contact
+     * icons drop the travel altogether and keep the colour lift, so hover and
+     * focus still read as a state change with nothing moving on the page.
+     */
+    .contact-link:hover .contact-icon,
+    .contact-link:focus-visible .contact-icon,
+    .contact-link:hover .contact-arrow,
+    .contact-link:focus-visible .contact-arrow {
+        transform: none;
     }
 }
