@@ -33,7 +33,7 @@
             class="nav-resume" target="_blank" rel="noopener noreferrer">Resume</a>
     </header>
 
-    <main class="project-page">
+    <main class="project-page" data-project="digital-kintsugi">
 
         <a href="../index.html#work" class="back-link">← Back</a>
 
@@ -47,24 +47,28 @@
             repair component.
         </p>
 
+        <!--
+          PROJECT METADATA.
+          A row is left out rather than filled with a guess, so nothing here
+          states a fact that has not been supplied. To add one, copy the Tools
+          row and change the dt and dd:
+
+              <div class="project-meta-row">
+                  <dt>Role</dt>
+                  <dd>What you actually did</dd>
+              </div>
+
+              <div class="project-meta-row">
+                  <dt>Year</dt>
+                  <dd>2025</dd>
+              </div>
+
+              <div class="project-meta-row">
+                  <dt>Context</dt>
+                  <dd>Course, brief or client this was made for</dd>
+              </div>
+        -->
         <dl class="project-meta">
-            <!--
-              TODO: add Role and Year for this project.
-
-              Rows are absent rather than blank on purpose: nothing here states
-              a fact that has not been supplied. To add one, copy the Tools row
-              below and change the dt and dd:
-
-                  <div class="project-meta-row">
-                      <dt>Role</dt>
-                      <dd>YOUR ROLE</dd>
-                  </div>
-
-                  <div class="project-meta-row">
-                      <dt>Year</dt>
-                      <dd>YEAR</dd>
-                  </div>
-            -->
             <div class="project-meta-row">
                 <dt>Tools</dt>
                 <dd>Rhino · 3D Scanning · Ceramic 3D Printing · FDM 3D Printing</dd>
@@ -72,105 +76,28 @@
         </dl>
 
         <!--
-          HERO MEDIA. Nothing is rendered until you add a file, so this page
-          currently shows no image area at all rather than an empty box.
+          OPTIONAL LIVE DEMO. Delete this comment and uncomment the markup to
+          add a link out to a running build, repository or video.
 
-          Put the file at:  assets/digital-kintsugi/hero.webp
-          (from this page the path is ../assets/digital-kintsugi/hero.webp)
-
-          Then replace this entire comment with:
-
-              <figure class="project-media">
-                  <picture>
-                      <source srcset="../assets/digital-kintsugi/hero.webp" type="image/webp">
-                      <img src="../assets/digital-kintsugi/hero.jpg"
-                           alt="Describe what the photograph shows"
-                           width="1600" height="900" decoding="async">
-                  </picture>
-                  <figcaption class="project-caption">Optional caption.</figcaption>
-              </figure>
-
-          The hero is the one image that should NOT be lazy loaded: it is
-          above the fold, so leave loading="lazy" off it. Keep the width and
-          height attributes on every image; the browser reserves the correct
-          box from their ratio before the file arrives, which is what stops
-          the page jumping as it loads.
+          <p class="project-links">
+              <a class="project-link" href="https://example.com" target="_blank" rel="noopener noreferrer">
+                  View live project <span aria-hidden="true">&#8599;</span>
+              </a>
+          </p>
         -->
 
         <!--
-          MEDIA GALLERY. Process and outcome images, in any number.
+          MEDIA.
+          This slot stays empty until media.js has an entry for
+          "digital-kintsugi". Fill in `hero` and `gallery` there and the
+          lead image and gallery appear here, in that order. Nothing is
+          rendered while it is empty, so the page never shows a hollow frame.
 
-          Suggested files under assets/digital-kintsugi/ :
-              process-01.webp, process-02.webp, ...
-              outcome-01.webp, outcome-02.webp, ...
-
-          Replace this entire comment with:
-
-              <div class="project-gallery">
-                  <figure>
-                      <img src="../assets/digital-kintsugi/process-01.webp"
-                           alt="Describe what this step shows"
-                           width="1200" height="900" loading="lazy" decoding="async">
-                      <figcaption>Short caption.</figcaption>
-                  </figure>
-
-                  <figure>
-                      <img src="../assets/digital-kintsugi/process-02.webp"
-                           alt="Describe what this step shows"
-                           width="1200" height="900" loading="lazy" decoding="async">
-                      <figcaption>Short caption.</figcaption>
-                  </figure>
-
-                  <figure class="span-full">
-                      <img src="../assets/digital-kintsugi/outcome-01.webp"
-                           alt="Describe the finished result"
-                           width="1600" height="900" loading="lazy" decoding="async">
-                      <figcaption>Add class="span-full" to run one image the full width.</figcaption>
-                  </figure>
-              </div>
-
-          Two images sit side by side, one sits full width, and the grid
-          collapses to a single column on a phone with no extra work.
-
-          For a video, use the same figure but swap the img for:
-
-              <video src="../assets/digital-kintsugi/demo.mp4"
-                     poster="../assets/digital-kintsugi/demo-poster.webp"
-                     width="1600" height="900"
-                     controls muted playsinline preload="none"></video>
-
-          Supply .webm alongside .mp4 if you want the smaller file to win:
-
-              <video poster="..." width="1600" height="900" controls muted playsinline preload="none">
-                  <source src="../assets/digital-kintsugi/demo.webm" type="video/webm">
-                  <source src="../assets/digital-kintsugi/demo.mp4" type="video/mp4">
-              </video>
+          Images lazy load below the fold, videos play muted and looped only
+          while on screen, and both fall back to a poster still under
+          prefers-reduced-motion. None of that needs configuring.
         -->
-
-        <!--
-          OPTIONAL TEXT SECTIONS.
-
-          This page no longer forces the full case-study arc. Add only the
-          sections this project actually needs, in any order, like this:
-
-              <section class="project-section">
-                  <h2>Process</h2>
-                  <p>Your copy here.</p>
-              </section>
-
-          These were the section prompts this page carried before, kept so the
-          guidance is not lost. They were removed from the visible page because
-          they published as grey instruction text to every visitor.
-
-              Overview               Add a short framing of the project here.
-              Problem / Concept      What question or idea drove the piece?
-              Research & Inspiration Kintsugi references, material studies, precedents.
-              Process                Printing, fracturing, scanning, reconstruction.
-              Iterations             What changed between attempts, and why.
-              Fabrication            Print settings, materials, the PLA repair component.
-              Final Outcome          Finished piece and what it demonstrates.
-              Reflection             What you would do differently next time.
-        -->
+        <div data-media-slot></div>
 
         <nav class="project-nav" aria-label="More work">
             <a class="project-nav-link" href="museum-npc.html">
@@ -186,6 +113,8 @@
         <p>Shanghai</p>
     </footer>
 
+    <!-- media paths live in media.js; it must load first -->
+    <script src="../media.js"></script>
     <script src="../script.js"></script>
 </body>
 

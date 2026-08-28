@@ -360,6 +360,31 @@
 }
 
 
+/* ---------- optional live-demo link ---------- */
+
+.project-links {
+    margin: -20px 0 56px;
+}
+
+.project-link {
+    color: var(--text);
+    font-size: 15px;
+    text-decoration: none;
+    text-decoration-color: var(--border-strong);
+    text-underline-offset: 5px;
+    transition: text-decoration-color 0.25s ease;
+}
+
+.project-link:hover {
+    text-decoration: underline;
+    text-decoration-color: var(--text);
+}
+
+.project-link:focus-visible {
+    outline: 2px solid var(--text);
+    outline-offset: 4px;
+}
+
 /* ---------- media ---------- */
 
 /*
@@ -372,6 +397,15 @@
  * their ratio to reserve the right box before the file arrives, which is
  * what stops the page jumping as images load.
  */
+/*
+ * The slot script.js fills from media.js. It is an ordinary empty div until
+ * something is configured, so it occupies no height and draws nothing: an
+ * unconfigured page has no media area rather than an empty one.
+ */
+[data-media-slot]:empty {
+    display: none;
+}
+
 .project-media {
     display: block;
     margin: 0 0 clamp(48px, 6vw, 80px);

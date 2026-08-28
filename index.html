@@ -34,7 +34,7 @@
 
     <main id="top">
 
-        <section class="hero">
+        <section class="hero has-comets">
             <p class="eyebrow">hello, welcome to my portfolio...</p>
             <h1 class="hero-title magnetic-text">
                 <span class="line-mask"><span class="line-inner">I want to design</span></span>
@@ -56,36 +56,31 @@
 
             <!--
               FEATURED PROJECTS.
-              Four project cards, each linking straight to its case study. The
-              whole card is the anchor, so title, descriptor and tools are spans
+              Four cards, each linking straight to its case study. The whole
+              card is the anchor, so title, descriptor and tools are spans
               rather than block elements.
 
-              The order here also drives the "next project" link at the foot of
-              each case study. If you reorder these, update those to match.
+              MEDIA: do not paste image markup here. Each card carries a
+              data-project attribute, and media.js maps that name to an
+              optional image or video. Fill the entry in media.js and the
+              picture appears above the title; leave it null and the card
+              renders as type alone, which is how it is designed to look.
+              That keeps the four cards from ever showing an empty frame.
 
-              Every card carries a commented MEDIA SLOT. Nothing renders until a
-              real file exists, and the card is built to look finished without
-              one, so there is no hollow image box in the meantime.
+              An optional year can be added inside .feature-top as
+              <span class="feature-year">2025</span> if you want one.
+
+              The order here also drives the "next project" link at the foot
+              of each case study. If you reorder these, update those to match.
             -->
             <div class="featured" id="featured">
 
-                <a class="feature feature-1" href="projects/digital-kintsugi.html" data-depth="1.2">
-                    <!--
-                      MEDIA SLOT. Add assets/digital-kintsugi/card.webp, then
-                      replace this entire comment with the block below.
-                      Keep width and height so the card cannot shift as it loads.
-
-                      <span class="feature-media">
-                          <img src="assets/digital-kintsugi/card.webp"
-                               alt="Describe what the photograph shows"
-                               width="1200" height="900" loading="lazy" decoding="async">
-                      </span>
-                    -->
+                <a class="feature feature-1" href="projects/digital-kintsugi.html" data-project="digital-kintsugi"
+                    data-depth="1.2">
                     <span class="feature-body">
                         <span class="feature-top">
                             <span class="feature-index" aria-hidden="true">01</span>
                             <span class="feature-descriptor">Digital Fabrication</span>
-                            <!-- TODO: add year, then add: <span class="feature-year">{{YEAR}}</span> -->
                         </span>
                         <span class="feature-title">Digital Kintsugi</span>
                         <span class="feature-tools">Rhino · 3D Scanning · Ceramic 3D Printing · FDM 3D
@@ -93,66 +88,35 @@
                     </span>
                 </a>
 
-                <a class="feature feature-2" href="projects/museum-npc.html" data-depth="0.8">
-                    <!--
-                      MEDIA SLOT. Add assets/museum-npc/card.webp, then replace
-                      this entire comment with the block below.
-
-                      <span class="feature-media">
-                          <img src="assets/museum-npc/card.webp"
-                               alt="Describe what the screenshot shows"
-                               width="1200" height="900" loading="lazy" decoding="async">
-                      </span>
-                    -->
+                <a class="feature feature-2" href="projects/museum-npc.html" data-project="museum-npc" data-depth="0.8">
                     <span class="feature-body">
                         <span class="feature-top">
                             <span class="feature-index" aria-hidden="true">02</span>
                             <span class="feature-descriptor">Interactive Systems</span>
-                            <!-- TODO: add year, then add: <span class="feature-year">{{YEAR}}</span> -->
                         </span>
                         <span class="feature-title">LLM-Powered Museum</span>
                         <span class="feature-tools">Unity · Ollama · Local LLMs</span>
                     </span>
                 </a>
 
-                <a class="feature feature-3" href="projects/suzume-cnc-stool.html" data-depth="1.1">
-                    <!--
-                      MEDIA SLOT. Add assets/suzume-cnc-stool/card.webp, then
-                      replace this entire comment with the block below.
-
-                      <span class="feature-media">
-                          <img src="assets/suzume-cnc-stool/card.webp"
-                               alt="Describe what the photograph shows"
-                               width="1200" height="900" loading="lazy" decoding="async">
-                      </span>
-                    -->
+                <a class="feature feature-3" href="projects/suzume-cnc-stool.html" data-project="suzume-cnc-stool"
+                    data-depth="1.1">
                     <span class="feature-body">
                         <span class="feature-top">
                             <span class="feature-index" aria-hidden="true">03</span>
                             <span class="feature-descriptor">Product &amp; Fabrication</span>
-                            <!-- TODO: add year, then add: <span class="feature-year">{{YEAR}}</span> -->
                         </span>
                         <span class="feature-title">Suzume-Inspired CNC Stool</span>
                         <span class="feature-tools">Rhino · Carbide Create · CNC Machining</span>
                     </span>
                 </a>
 
-                <a class="feature feature-4" href="projects/butterfly-pavilion.html" data-depth="0.9">
-                    <!--
-                      MEDIA SLOT. Add assets/butterfly-pavilion/card.webp, then
-                      replace this entire comment with the block below.
-
-                      <span class="feature-media">
-                          <img src="assets/butterfly-pavilion/card.webp"
-                               alt="Describe what the photograph shows"
-                               width="1200" height="900" loading="lazy" decoding="async">
-                      </span>
-                    -->
+                <a class="feature feature-4" href="projects/butterfly-pavilion.html" data-project="butterfly-pavilion"
+                    data-depth="0.9">
                     <span class="feature-body">
                         <span class="feature-top">
                             <span class="feature-index" aria-hidden="true">04</span>
                             <span class="feature-descriptor">Parametric Design</span>
-                            <!-- TODO: add year, then add: <span class="feature-year">{{YEAR}}</span> -->
                         </span>
                         <span class="feature-title">Parametric Butterfly Pavilion</span>
                         <span class="feature-tools">Rhino · Grasshopper · Laser Cutting</span>
@@ -197,25 +161,16 @@
             <div class="about-grid">
 
                 <div class="about-intro">
-                    <!--
-                      TODO: revise this introduction.
-                      This is your existing About copy, kept word for word. It
-                      currently opens with the degree; consider opening with what
-                      you build, so this section starts the way the hero does.
-                    -->
                     <p class="about-lead">
-                        I am a student at NYU Shanghai pursuing a B.S. in Interactive Media Business.
-                        I enjoy exploring both new and traditional technology to solve business problems.
+                        I&rsquo;m an Interactive Media Business student at NYU Shanghai who builds
+                        physical products, interactive systems, and digital experiences through
+                        fabrication, creative coding, and prototyping.
                     </p>
                 </div>
 
                 <div class="about-side">
                     <h3 class="about-subhead">Capabilities</h3>
 
-                    <!--
-                      TODO: trim or reorder this list so it matches how you want to
-                      be read. Add or remove items freely; the layout reflows.
-                    -->
                     <ul class="capability-list">
                         <li>Digital fabrication</li>
                         <li>Physical computing</li>
@@ -228,11 +183,15 @@
                     <dl class="about-meta">
                         <div class="about-meta-row">
                             <dt>Education</dt>
-                            <dd>B.S. Interactive Media Business, NYU Shanghai</dd>
+                            <dd>
+                                <a class="meta-link"
+                                    href="https://shanghai.nyu.edu/content/interactive-media-and-business"
+                                    target="_blank" rel="noopener noreferrer">B.S. Interactive Media Business</a>
+                            </dd>
                         </div>
                         <div class="about-meta-row">
                             <dt>Based in</dt>
-                            <dd>Shanghai</dd>
+                            <dd>Boston • Shanghai • New York</dd>
                         </div>
                     </dl>
                 </div>
@@ -275,6 +234,8 @@
         <p>Portfolio</p>
     </footer>
 
+    <!-- media paths live in media.js; it must load first -->
+    <script src="media.js"></script>
     <script src="script.js"></script>
 </body>
 

@@ -18,9 +18,13 @@
 
     --gutter: 7vw;
     --ease: cubic-bezier(0.22, 1, 0.36, 1);
-    /* fallback for the instant before script.js measures the real, sticky
-       navbar height — overwritten immediately once it runs */
-    --navbar-height: 93px;
+    /*
+     * Fallback for the instant before script.js measures the real sticky
+     * navbar, and the value that stands permanently if JavaScript is off.
+     * Set to the measured desktop height so anchor jumps land correctly
+     * without scripting rather than leaving a 21px gap, as the old 93px did.
+     */
+    --navbar-height: 72px;
     /* easeOutBack — a slight overshoot, used where something should feel
        physically nudged (the magnetic letters) rather than just eased in */
     --ease-spring: cubic-bezier(0.34, 1.56, 0.64, 1);
@@ -261,6 +265,34 @@ body > main {
     opacity: 1;
 }
 
+/* ---------- hero comets ---------- */
+
+/*
+ * Canvas for the comet background, created by script.js only when the hero
+ * carries `has-comets`. Remove that class from index.html and no canvas is
+ * ever inserted, so these rules simply stop applying.
+ *
+ * pointer-events:none is the important one: the canvas covers the whole hero,
+ * including both buttons, and without it every click in the hero would land
+ * on the canvas instead of the link underneath.
+ */
+.hero-comet-canvas {
+    inset: 0;
+    pointer-events: none;
+    position: absolute;
+    z-index: 0;
+}
+
+/*
+ * Everything the hero actually says sits above the comets. Written as
+ * "every hero child except the canvas" so adding another element to the hero
+ * later cannot accidentally end up behind the effect.
+ */
+.hero > *:not(.hero-comet-canvas) {
+    position: relative;
+    z-index: 1;
+}
+
 /* ---------- section shell ---------- */
 
 .section {
@@ -376,6 +408,15 @@ main [id] {
     flex: 1;
     flex-direction: column;
     padding: clamp(22px, 2.6vw, 34px);
+}
+
+/*
+ * With a picture above it the type no longer has to carry the card on its
+ * own, so it can sit closer to the image than the empty card's generous
+ * top padding allows.
+ */
+.feature.has-media .feature-body {
+    padding-top: clamp(18px, 2vw, 24px);
 }
 
 .feature-top {
@@ -610,6 +651,30 @@ main [id] {
 .about-meta-row dd {
     color: var(--muted);
     font-size: 15px;
+}
+
+/*
+ * An outbound link inside the metadata list. Underlined rather than
+ * colour-shifted so it is identifiable as a link without a second accent
+ * colour entering the palette; the underline is a hairline until hover.
+ */
+.meta-link {
+    color: var(--muted);
+    text-decoration: underline;
+    text-decoration-color: var(--border-strong);
+    text-underline-offset: 4px;
+    transition: color 0.25s ease, text-decoration-color 0.25s ease;
+}
+
+.meta-link:hover {
+    color: var(--text);
+    text-decoration-color: var(--text);
+}
+
+.meta-link:focus-visible {
+    color: var(--text);
+    outline: 2px solid var(--text);
+    outline-offset: 3px;
 }
 
 /* ---------- contact ---------- */

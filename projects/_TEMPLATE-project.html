@@ -16,8 +16,8 @@
     3. Point .project-nav at whichever project should come next, and point
        the previous project's .project-nav here, so the loop stays closed
     4. Add a .feature card to #featured in index.html so it is reachable
-    5. Put images in assets/<project-slug>/ and delete any media block you
-       have not filled
+    5. Put images in assets/<project-slug>/ and add the paths to media.js
+       under the same slug; the page renders them automatically
 
   DELETE WHAT YOU DO NOT USE. A project does not owe anyone the full case-study
   arc. Some are better as a title, a sentence and four photographs. Keep only
@@ -81,7 +81,7 @@
             class="nav-resume" target="_blank" rel="noopener noreferrer">Resume</a>
     </header>
 
-    <main class="project-page">
+    <main class="project-page" data-project="{{PROJECT SLUG}}">
 
         <a href="../index.html#work" class="back-link">← Back</a>
 
@@ -92,7 +92,10 @@
 
         <p class="project-summary">{{ONE SENTENCE SUMMARY}}</p>
 
-        <!-- Delete any row you cannot fill. An absent row is honest; a blank one is not. -->
+        <!--
+          PROJECT METADATA. Delete any row you cannot fill. An absent row is
+          honest; a blank one is not. Role, Year and Context are all optional.
+        -->
         <dl class="project-meta">
             <div class="project-meta-row">
                 <dt>Role</dt>
@@ -101,71 +104,54 @@
 
             <div class="project-meta-row">
                 <dt>Tools</dt>
-                <dd>{{TOOL · TOOL · TOOL}}</dd>
+                <dd>{{TOOL &middot; TOOL &middot; TOOL}}</dd>
             </div>
 
             <div class="project-meta-row">
                 <dt>Year</dt>
                 <dd>{{YEAR}}</dd>
             </div>
+
+            <div class="project-meta-row">
+                <dt>Context</dt>
+                <dd>{{COURSE, BRIEF OR CLIENT}}</dd>
+            </div>
         </dl>
 
-        <!--
-          HERO MEDIA. Delete this whole figure if the project has no hero image.
-          Note there is no loading="lazy" here on purpose: this one is above
-          the fold. The <source> line lets a modern browser take the smaller
-          .webp while older ones fall back to the .jpg in the <img>.
-        -->
-        <figure class="project-media">
-            <picture>
-                <source srcset="../assets/{{PROJECT SLUG}}/hero.webp" type="image/webp">
-                <img src="../assets/{{PROJECT SLUG}}/hero.jpg" alt="{{DESCRIBE WHAT THE IMAGE SHOWS}}" width="1600"
-                    height="900" decoding="async">
-            </picture>
-            <figcaption class="project-caption">{{OPTIONAL CAPTION}}</figcaption>
-        </figure>
+        <!-- Optional. Delete if there is nothing running to link to. -->
+        <p class="project-links">
+            <a class="project-link" href="{{LIVE URL}}" target="_blank" rel="noopener noreferrer">
+                View live project <span aria-hidden="true">&#8599;</span>
+            </a>
+        </p>
 
         <!--
-          MEDIA GALLERY. Add as many figures as the project needs, in any order.
-          Two sit side by side, one with class="span-full" runs the full width,
-          and the grid collapses to a single column on a phone by itself.
+          MEDIA.
+          Do not paste image or video markup here. Add an entry for this
+          project's slug in media.js instead:
+
+              '{{PROJECT SLUG}}': {
+                  hero: { type: 'image', src: 'assets/{{PROJECT SLUG}}/hero.webp',
+                          alt: 'What the picture shows', width: 1600, height: 900 },
+                  gallery: [
+                      { type: 'image', src: 'assets/{{PROJECT SLUG}}/process-01.webp',
+                        alt: '...', width: 1200, height: 900, caption: 'Short caption' },
+                      { type: 'video', span: 'full',
+                        poster: 'assets/{{PROJECT SLUG}}/demo-poster.webp',
+                        width: 1600, height: 900, caption: 'Short caption',
+                        sources: [
+                            { src: 'assets/{{PROJECT SLUG}}/demo.webm', type: 'video/webm' },
+                            { src: 'assets/{{PROJECT SLUG}}/demo.mp4',  type: 'video/mp4'  }
+                        ] }
+                  ]
+              }
+
+          media.js documents every field. The hero loads eagerly, gallery
+          images lazy load, videos play muted and looped only while on screen,
+          and everything falls back to a still under prefers-reduced-motion.
+          While the entry is empty this slot renders nothing at all.
         -->
-        <div class="project-gallery">
-
-            <figure>
-                <img src="../assets/{{PROJECT SLUG}}/process-01.webp" alt="{{DESCRIBE WHAT THIS STEP SHOWS}}"
-                    width="1200" height="900" loading="lazy" decoding="async">
-                <figcaption>{{SHORT CAPTION}}</figcaption>
-            </figure>
-
-            <figure>
-                <img src="../assets/{{PROJECT SLUG}}/process-02.webp" alt="{{DESCRIBE WHAT THIS STEP SHOWS}}"
-                    width="1200" height="900" loading="lazy" decoding="async">
-                <figcaption>{{SHORT CAPTION}}</figcaption>
-            </figure>
-
-            <figure class="span-full">
-                <img src="../assets/{{PROJECT SLUG}}/outcome-01.webp" alt="{{DESCRIBE THE FINISHED RESULT}}"
-                    width="1600" height="900" loading="lazy" decoding="async">
-                <figcaption>{{SHORT CAPTION}}</figcaption>
-            </figure>
-
-            <!--
-              VIDEO. preload="none" so the file is only fetched if the visitor
-              presses play. A poster frame stands in until then, so the slot
-              still looks composed. muted and playsinline keep it well behaved
-              on phones. Drop the .webm source line if you only export .mp4.
-            -->
-            <figure class="span-full">
-                <video poster="../assets/{{PROJECT SLUG}}/demo-poster.webp" width="1600" height="900" controls muted
-                    playsinline preload="none">
-                    <source src="../assets/{{PROJECT SLUG}}/demo.webm" type="video/webm">
-                    <source src="../assets/{{PROJECT SLUG}}/demo.mp4" type="video/mp4">
-                </video>
-                <figcaption>{{SHORT CAPTION}}</figcaption>
-            </figure>
-
-        </div>
+        <div data-media-slot></div>
 
         <!--
           OPTIONAL TEXT SECTIONS. Add only what the project needs; see the
@@ -194,6 +180,8 @@
         <p>Shanghai</p>
     </footer>
 
+    <!-- media paths live in media.js; it must load first -->
+    <script src="../media.js"></script>
     <script src="../script.js"></script>
 </body>
 
