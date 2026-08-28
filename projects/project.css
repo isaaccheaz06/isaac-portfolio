@@ -1,16 +1,19 @@
 /*
  * Shared stylesheet for every page under /projects.
  *
- * Replaces the three byte-identical files (analytics-project.css,
- * creative-projects.css, others.css) that previously duplicated the
+ * Consolidates what were three byte-identical stylesheets duplicating the
  * project-detail rules verbatim.
  *
  * Design tokens (--bg, --text, --muted, --font-display, …) come from
  * ../style.css, which every project page loads first.
  *
- * Two page shapes live here:
- *   .category-page — a discipline landing page holding a grid of projects
- *   .project-page  — a single case study, constrained to a reading measure
+ * .project-page is the one page shape left: a single case study,
+ * constrained to a reading measure.
+ *
+ * The .category-page / .project-grid / .experiment-list / .empty-state rules
+ * below belonged to the three discipline pages, which were removed. They are
+ * kept because they cost nothing and are the starting point if a landing page
+ * is ever wanted again; git history has the markup that used them.
  */
 
 
@@ -113,37 +116,26 @@
 }
 
 /*
- * Placeholder artwork. Real photography replaces the whole
- * .project-thumb span — see the note in each category page.
+ * Card artwork, present only once a real image exists.
+ *
+ * This used to be an empty 16:9 box holding a dashed "16 : 9 image" label,
+ * which every visitor could read. An advertised gap is worse than no gap:
+ * the card now carries no image area at all until one is added, and the type
+ * is spaced to read as finished on its own. The commented markup in each
+ * category page shows exactly what to paste in.
  */
 .project-thumb {
-    align-items: center;
+    display: block;
+    line-height: 0;
+    overflow: hidden;
+}
+
+.project-thumb img {
     aspect-ratio: 16 / 9;
-    display: flex;
-    justify-content: center;
-    position: relative;
-}
-
-.project-thumb-note {
-    border: 1px dashed var(--border-strong);
-    color: var(--faint-on-surface);
-    font-size: 11px;
-    letter-spacing: 0.14em;
-    padding: 6px 12px;
-    text-transform: uppercase;
-}
-
-/*
- * Was three linear-gradients faking photography. Now a flat surface with a
- * hairline — it reads honestly as "image goes here" rather than pretending
- * to be artwork. The three class names are kept so the category pages need
- * no edits; they are deliberately identical until real images land.
- */
-.project-thumb-amber,
-.project-thumb-blue,
-.project-thumb-green {
-    background-color: var(--surface);
-    box-shadow: inset 0 0 0 1px var(--border);
+    display: block;
+    height: auto;
+    object-fit: cover;
+    width: 100%;
 }
 
 .project-card-body {
@@ -273,7 +265,6 @@
 .project-page {
     margin: 0 auto;
     max-width: 820px;
-    min-height: 80vh;
     padding: 90px var(--gutter);
 }
 
@@ -298,7 +289,10 @@
     color: var(--muted);
     font-size: clamp(17px, 1.6vw, 21px);
     line-height: 1.65;
-    margin-bottom: 80px;
+    /* the metadata block sits directly under this now, so the old 80px gap
+       would have split the header apart; .project-meta carries the larger
+       margin below itself instead */
+    margin-bottom: 44px;
     max-width: 46ch;
     text-wrap: pretty;
 }
@@ -324,6 +318,145 @@
 
 .project-summary a:focus-visible,
 .project-section p a:focus-visible {
+    outline: 2px solid var(--text);
+    outline-offset: 3px;
+}
+
+
+/* ---------- compact project metadata ---------- */
+
+/*
+ * Role / Tools / Year, sitting directly under the summary. Rows are added
+ * one at a time as facts become known — an unknown year is simply an absent
+ * row rather than a visible blank or a guess, so the block is always
+ * truthful at whatever level of completeness it happens to be at.
+ */
+.project-meta {
+    border-top: 1px solid var(--border);
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0 clamp(32px, 5vw, 72px);
+    margin-bottom: 64px;
+    padding-top: 20px;
+}
+
+.project-meta-row {
+    padding: 4px 0;
+}
+
+.project-meta-row dt {
+    color: var(--faint);
+    font-size: 11px;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+}
+
+.project-meta-row dd {
+    color: var(--muted);
+    font-size: 15px;
+    line-height: 1.55;
+    margin-top: 6px;
+    max-width: 42ch;
+}
+
+
+/* ---------- media ---------- */
+
+/*
+ * A project page is media-led: the pictures carry the argument and the prose
+ * is optional. None of these rules reserve space on their own, so a page
+ * with no media yet simply has no media area rather than a row of empty
+ * boxes.
+ *
+ * Every image wants explicit width and height attributes. The browser uses
+ * their ratio to reserve the right box before the file arrives, which is
+ * what stops the page jumping as images load.
+ */
+.project-media {
+    display: block;
+    margin: 0 0 clamp(48px, 6vw, 80px);
+}
+
+.project-media img,
+.project-media video,
+.project-gallery img,
+.project-gallery video {
+    border-radius: 4px;
+    display: block;
+    height: auto;
+    max-width: 100%;
+}
+
+/*
+ * Gallery. auto-fit means one wide image sits full width on its own, two sit
+ * side by side, and the whole thing collapses to a single column on a phone
+ * without a separate breakpoint.
+ */
+.project-gallery {
+    display: grid;
+    gap: clamp(16px, 2.4vw, 28px);
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    margin-bottom: clamp(48px, 6vw, 80px);
+}
+
+/* Opt out for an image that should always run the full measure. */
+.project-gallery .span-full {
+    grid-column: 1 / -1;
+}
+
+.project-gallery figure {
+    margin: 0;
+}
+
+.project-caption,
+.project-gallery figcaption {
+    color: var(--faint);
+    font-size: 13px;
+    line-height: 1.6;
+    margin-top: 10px;
+    max-width: 52ch;
+    text-wrap: pretty;
+}
+
+
+/* ---------- next project ---------- */
+
+.project-nav {
+    border-top: 1px solid var(--border);
+    margin-top: clamp(64px, 8vw, 112px);
+}
+
+.project-nav-link {
+    align-items: baseline;
+    color: var(--text);
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px 24px;
+    justify-content: space-between;
+    padding: 26px 0;
+    text-decoration: none;
+    transition: padding 0.35s var(--ease), color 0.25s ease;
+}
+
+.project-nav-link:hover {
+    padding-left: 14px;
+}
+
+.project-nav-label {
+    color: var(--faint);
+    font-size: 11px;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+}
+
+.project-nav-title {
+    font-family: var(--font-display);
+    font-size: clamp(19px, 2vw, 26px);
+    font-weight: 500;
+    letter-spacing: -0.015em;
+}
+
+.project-nav-link:focus-visible {
     outline: 2px solid var(--text);
     outline-offset: 3px;
 }
@@ -377,23 +510,6 @@
     padding: 22px 24px;
 }
 
-/* Image slot inside a case study — swap for a real <img> when available. */
-.project-figure {
-    align-items: center;
-    aspect-ratio: 16 / 9;
-    border: 1px dashed var(--border-strong);
-    border-radius: 4px;
-    display: flex;
-    justify-content: center;
-    margin-top: 24px;
-}
-
-.project-figure span {
-    color: var(--faint);
-    font-size: 11px;
-    letter-spacing: 0.14em;
-    text-transform: uppercase;
-}
 
 
 /* ---------- responsive ---------- */

@@ -2,22 +2,52 @@
 <html lang="en">
 
 <!--
-  ============================================================
-  CASE STUDY TEMPLATE — not linked from anywhere, safe to copy.
+  ============================================================================
+  CASE STUDY TEMPLATE
 
-  To add a new project:
+  Not linked from anywhere, and not published: GitHub Pages runs Jekyll, which
+  excludes any file whose name starts with an underscore. That is why this file
+  can hold real <img> and <video> markup pointing at files that do not exist
+  yet, while the live pages keep theirs inside comments.
+
+  TO ADD A NEW PROJECT
     1. Copy this file to projects/<project-slug>.html
-    2. Replace every {{PLACEHOLDER}} below
-    3. Point .back-link at the category page this belongs to:
-         product-fabrication.html | ux-product.html | creative-technology.html
-    4. Add a matching <a class="project-card"> to that category page's
-       .project-grid (copy an existing card and edit it)
-    5. Drop images in assets/<project-slug>/ and swap each
-       .project-figure div for a real <img>
+    2. Replace every {{PLACEHOLDER}}
+    3. Point .project-nav at whichever project should come next, and point
+       the previous project's .project-nav here, so the loop stays closed
+    4. Add a .feature card to #featured in index.html so it is reachable
+    5. Put images in assets/<project-slug>/ and delete any media block you
+       have not filled
 
-  Delete any .project-section you do not need — and delete each
-  <p class="section-placeholder"> once real copy replaces it.
-  ============================================================
+  DELETE WHAT YOU DO NOT USE. A project does not owe anyone the full case-study
+  arc. Some are better as a title, a sentence and four photographs. Keep only
+  the sections that earn their place.
+
+  IMAGE RULES
+    - Always set width and height. The browser reserves the right box from
+      their ratio before the file arrives; without them the page jumps as
+      images load.
+    - loading="lazy" on every image EXCEPT the hero. The hero is above the
+      fold, so lazy loading it delays the thing the visitor came to see.
+    - Write alt text that says what the image shows. If an image is purely
+      decorative, use alt="" so a screen reader skips it.
+
+  SECTION PROMPT LIBRARY
+  These were the visible grey placeholders on the published case studies. They
+  were removed from those pages because every visitor could read them, but they
+  are useful writing prompts, so they live here now.
+
+    Overview               A short framing of the project.
+    Problem / Concept      The question, brief or idea behind the work.
+    Research & Inspiration References, precedents, material and form studies.
+    Process                How it was made, step by step.
+    Iterations             What changed between versions, and why.
+    Fabrication            Materials, machines, settings, assembly.
+    Development            Architecture, models used, how state is handled.
+                           (Use instead of Fabrication for software work.)
+    Final Outcome          The finished result and what it demonstrates.
+    Reflection             What you would do differently next time.
+  ============================================================================
 -->
 
 <head>
@@ -53,63 +83,109 @@
 
     <main class="project-page">
 
-        <a href="{{CATEGORY PAGE}}.html" class="back-link">← {{CATEGORY NAME}}</a>
+        <a href="../index.html#work" class="back-link">← Back</a>
 
-        <!-- Featured Case Study | Case Study | Experiment | Featured Project -->
-        <p class="project-label">{{PROJECT TYPE}}</p>
+        <!-- Short discipline descriptor, e.g. Digital Fabrication, Interactive Systems -->
+        <p class="project-label">{{DESCRIPTOR}}</p>
 
         <h1>{{PROJECT TITLE}}</h1>
 
-        <p class="project-summary">{{TWO OR THREE SENTENCE SUMMARY}}</p>
+        <p class="project-summary">{{ONE SENTENCE SUMMARY}}</p>
 
-        <div class="project-figure"><span>Hero image</span></div>
+        <!-- Delete any row you cannot fill. An absent row is honest; a blank one is not. -->
+        <dl class="project-meta">
+            <div class="project-meta-row">
+                <dt>Role</dt>
+                <dd>{{YOUR ROLE}}</dd>
+            </div>
 
+            <div class="project-meta-row">
+                <dt>Tools</dt>
+                <dd>{{TOOL · TOOL · TOOL}}</dd>
+            </div>
+
+            <div class="project-meta-row">
+                <dt>Year</dt>
+                <dd>{{YEAR}}</dd>
+            </div>
+        </dl>
+
+        <!--
+          HERO MEDIA. Delete this whole figure if the project has no hero image.
+          Note there is no loading="lazy" here on purpose: this one is above
+          the fold. The <source> line lets a modern browser take the smaller
+          .webp while older ones fall back to the .jpg in the <img>.
+        -->
+        <figure class="project-media">
+            <picture>
+                <source srcset="../assets/{{PROJECT SLUG}}/hero.webp" type="image/webp">
+                <img src="../assets/{{PROJECT SLUG}}/hero.jpg" alt="{{DESCRIBE WHAT THE IMAGE SHOWS}}" width="1600"
+                    height="900" decoding="async">
+            </picture>
+            <figcaption class="project-caption">{{OPTIONAL CAPTION}}</figcaption>
+        </figure>
+
+        <!--
+          MEDIA GALLERY. Add as many figures as the project needs, in any order.
+          Two sit side by side, one with class="span-full" runs the full width,
+          and the grid collapses to a single column on a phone by itself.
+        -->
+        <div class="project-gallery">
+
+            <figure>
+                <img src="../assets/{{PROJECT SLUG}}/process-01.webp" alt="{{DESCRIBE WHAT THIS STEP SHOWS}}"
+                    width="1200" height="900" loading="lazy" decoding="async">
+                <figcaption>{{SHORT CAPTION}}</figcaption>
+            </figure>
+
+            <figure>
+                <img src="../assets/{{PROJECT SLUG}}/process-02.webp" alt="{{DESCRIBE WHAT THIS STEP SHOWS}}"
+                    width="1200" height="900" loading="lazy" decoding="async">
+                <figcaption>{{SHORT CAPTION}}</figcaption>
+            </figure>
+
+            <figure class="span-full">
+                <img src="../assets/{{PROJECT SLUG}}/outcome-01.webp" alt="{{DESCRIBE THE FINISHED RESULT}}"
+                    width="1600" height="900" loading="lazy" decoding="async">
+                <figcaption>{{SHORT CAPTION}}</figcaption>
+            </figure>
+
+            <!--
+              VIDEO. preload="none" so the file is only fetched if the visitor
+              presses play. A poster frame stands in until then, so the slot
+              still looks composed. muted and playsinline keep it well behaved
+              on phones. Drop the .webm source line if you only export .mp4.
+            -->
+            <figure class="span-full">
+                <video poster="../assets/{{PROJECT SLUG}}/demo-poster.webp" width="1600" height="900" controls muted
+                    playsinline preload="none">
+                    <source src="../assets/{{PROJECT SLUG}}/demo.webm" type="video/webm">
+                    <source src="../assets/{{PROJECT SLUG}}/demo.mp4" type="video/mp4">
+                </video>
+                <figcaption>{{SHORT CAPTION}}</figcaption>
+            </figure>
+
+        </div>
+
+        <!--
+          OPTIONAL TEXT SECTIONS. Add only what the project needs; see the
+          prompt library at the top of this file for suggested headings.
+
+          .section-placeholder marks a section still awaiting real copy. Delete
+          the placeholder paragraph once you have written it, and delete the
+          whole section if it turns out not to be needed.
+        -->
         <section class="project-section">
-            <h2>Overview</h2>
-            <p class="section-placeholder">Add a short framing of the project here.</p>
+            <h2>{{SECTION HEADING}}</h2>
+            <p class="section-placeholder">{{WHAT THIS SECTION SHOULD COVER}}</p>
         </section>
 
-        <section class="project-section">
-            <h2>Problem / Concept</h2>
-            <p class="section-placeholder">The question or brief behind the work.</p>
-        </section>
-
-        <section class="project-section">
-            <h2>Research &amp; Inspiration</h2>
-            <p class="section-placeholder">References, precedents, studies.</p>
-        </section>
-
-        <section class="project-section">
-            <h2>Process</h2>
-            <p class="section-placeholder">How it was made, step by step.</p>
-        </section>
-
-        <section class="project-section">
-            <h2>Iterations</h2>
-            <p class="section-placeholder">What changed between versions, and why.</p>
-        </section>
-
-        <section class="project-section">
-            <h2>Tools</h2>
-            <p>{{TOOL · TOOL · TOOL}}</p>
-        </section>
-
-        <!-- Rename to "Development" for software work. -->
-        <section class="project-section">
-            <h2>Fabrication</h2>
-            <p class="section-placeholder">Materials, machines, settings, assembly.</p>
-        </section>
-
-        <section class="project-section">
-            <h2>Final Outcome</h2>
-            <p class="section-placeholder">The finished result and what it demonstrates.</p>
-            <div class="project-figure"><span>Result image</span></div>
-        </section>
-
-        <section class="project-section">
-            <h2>Reflection</h2>
-            <p class="section-placeholder">What you would do differently next time.</p>
-        </section>
+        <nav class="project-nav" aria-label="More work">
+            <a class="project-nav-link" href="{{NEXT PROJECT}}.html">
+                <span class="project-nav-label">Next project</span>
+                <span class="project-nav-title">{{NEXT PROJECT TITLE}}</span>
+            </a>
+        </nav>
 
     </main>
 

@@ -7,7 +7,7 @@
 
     <title>Isaac Cheaz | Portfolio</title>
     <meta name="description"
-        content="Isaac Cheaz — connecting business, technology and design. Interactive media, web development and data analytics.">
+        content="Isaac Cheaz — creative technologist and design engineer building interactive digital and physical products.">
 
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -36,11 +36,10 @@
 
         <section class="hero">
             <p class="eyebrow">hello, welcome to my portfolio...</p>
-
             <h1 class="hero-title magnetic-text">
                 <span class="line-mask"><span class="line-inner">I want to design</span></span>
                 <span class="line-mask"><span class="line-inner">and build digital and</span></span>
-                <span class="line-mask"><span class="line-inner">physical products using technology</span></span>
+                <span class="line-mask"><span class="line-inner">physical products</span></span>
             </h1>
 
             <div class="hero-actions">
@@ -51,45 +50,132 @@
 
         <section id="work" class="section section-work">
             <div class="section-head">
-                <h2 class="section-title">Works</h2>
-                <p class="section-note">Selected disciplines</p>
+                <h2 class="section-title">Selected Work</h2>
+                <p class="section-note">Featured projects</p>
             </div>
 
-            <div class="collage" id="collage">
+            <!--
+              FEATURED PROJECTS.
+              Four project cards, each linking straight to its case study. The
+              whole card is the anchor, so title, descriptor and tools are spans
+              rather than block elements.
 
-                <a href="projects/product-fabrication.html" class="tile tile-project tile-1" data-depth="1.4">
-                    <span class="tile-art tile-art-2" aria-hidden="true"></span>
-                    <span class="tile-body">
-                        <span class="tile-label">Physical Design</span>
-                        <span class="tile-title">Product &amp; Fabrication</span>
-                        <span class="tile-tools">Rhino · Grasshopper · CNC · 3D Printing</span>
+              The order here also drives the "next project" link at the foot of
+              each case study. If you reorder these, update those to match.
+
+              Every card carries a commented MEDIA SLOT. Nothing renders until a
+              real file exists, and the card is built to look finished without
+              one, so there is no hollow image box in the meantime.
+            -->
+            <div class="featured" id="featured">
+
+                <a class="feature feature-1" href="projects/digital-kintsugi.html" data-depth="1.2">
+                    <!--
+                      MEDIA SLOT. Add assets/digital-kintsugi/card.webp, then
+                      replace this entire comment with the block below.
+                      Keep width and height so the card cannot shift as it loads.
+
+                      <span class="feature-media">
+                          <img src="assets/digital-kintsugi/card.webp"
+                               alt="Describe what the photograph shows"
+                               width="1200" height="900" loading="lazy" decoding="async">
+                      </span>
+                    -->
+                    <span class="feature-body">
+                        <span class="feature-top">
+                            <span class="feature-index" aria-hidden="true">01</span>
+                            <span class="feature-descriptor">Digital Fabrication</span>
+                            <!-- TODO: add year, then add: <span class="feature-year">{{YEAR}}</span> -->
+                        </span>
+                        <span class="feature-title">Digital Kintsugi</span>
+                        <span class="feature-tools">Rhino · 3D Scanning · Ceramic 3D Printing · FDM 3D
+                            Printing</span>
                     </span>
                 </a>
 
-                <a href="projects/ux-product.html" class="tile tile-project tile-2" data-depth="0.8">
-                    <span class="tile-art tile-art-1" aria-hidden="true"></span>
-                    <span class="tile-body">
-                        <span class="tile-label">UX / Product</span>
-                        <span class="tile-title">UX &amp; Product Experience</span>
-                        <span class="tile-tools">Research · Figma · Prototyping</span>
+                <a class="feature feature-2" href="projects/museum-npc.html" data-depth="0.8">
+                    <!--
+                      MEDIA SLOT. Add assets/museum-npc/card.webp, then replace
+                      this entire comment with the block below.
+
+                      <span class="feature-media">
+                          <img src="assets/museum-npc/card.webp"
+                               alt="Describe what the screenshot shows"
+                               width="1200" height="900" loading="lazy" decoding="async">
+                      </span>
+                    -->
+                    <span class="feature-body">
+                        <span class="feature-top">
+                            <span class="feature-index" aria-hidden="true">02</span>
+                            <span class="feature-descriptor">Interactive Systems</span>
+                            <!-- TODO: add year, then add: <span class="feature-year">{{YEAR}}</span> -->
+                        </span>
+                        <span class="feature-title">LLM-Powered Museum</span>
+                        <span class="feature-tools">Unity · Ollama · Local LLMs</span>
                     </span>
                 </a>
 
-                <a href="projects/creative-technology.html" class="tile tile-project tile-3" data-depth="1.1">
-                    <span class="tile-art tile-art-3" aria-hidden="true"></span>
-                    <span class="tile-body">
-                        <span class="tile-label">Interactive Systems</span>
-                        <span class="tile-title">Creative Technology</span>
-                        <span class="tile-tools">Unity · Arduino · Creative Coding</span>
+                <a class="feature feature-3" href="projects/suzume-cnc-stool.html" data-depth="1.1">
+                    <!--
+                      MEDIA SLOT. Add assets/suzume-cnc-stool/card.webp, then
+                      replace this entire comment with the block below.
+
+                      <span class="feature-media">
+                          <img src="assets/suzume-cnc-stool/card.webp"
+                               alt="Describe what the photograph shows"
+                               width="1200" height="900" loading="lazy" decoding="async">
+                      </span>
+                    -->
+                    <span class="feature-body">
+                        <span class="feature-top">
+                            <span class="feature-index" aria-hidden="true">03</span>
+                            <span class="feature-descriptor">Product &amp; Fabrication</span>
+                            <!-- TODO: add year, then add: <span class="feature-year">{{YEAR}}</span> -->
+                        </span>
+                        <span class="feature-title">Suzume-Inspired CNC Stool</span>
+                        <span class="feature-tools">Rhino · Carbide Create · CNC Machining</span>
                     </span>
                 </a>
 
-                <span class="tile tile-note tile-4" data-depth="2.2" aria-hidden="true">Rhino + Grasshopper</span>
-                <span class="tile tile-note tile-5" data-depth="1.8" aria-hidden="true">3D Fabrication</span>
-                <span class="tile tile-note tile-6" data-depth="2.6" aria-hidden="true">Physical Computing</span>
-                <span class="tile tile-note tile-7" data-depth="2.0" aria-hidden="true">Interaction Design</span>
+                <a class="feature feature-4" href="projects/butterfly-pavilion.html" data-depth="0.9">
+                    <!--
+                      MEDIA SLOT. Add assets/butterfly-pavilion/card.webp, then
+                      replace this entire comment with the block below.
+
+                      <span class="feature-media">
+                          <img src="assets/butterfly-pavilion/card.webp"
+                               alt="Describe what the photograph shows"
+                               width="1200" height="900" loading="lazy" decoding="async">
+                      </span>
+                    -->
+                    <span class="feature-body">
+                        <span class="feature-top">
+                            <span class="feature-index" aria-hidden="true">04</span>
+                            <span class="feature-descriptor">Parametric Design</span>
+                            <!-- TODO: add year, then add: <span class="feature-year">{{YEAR}}</span> -->
+                        </span>
+                        <span class="feature-title">Parametric Butterfly Pavilion</span>
+                        <span class="feature-tools">Rhino · Grasshopper · Laser Cutting</span>
+                    </span>
+                </a>
 
             </div>
+
+            <!--
+              EXPLORE BY DISCIPLINE.
+              Restrained text links rather than cards: these pages are secondary
+              to the four featured projects above. Each is currently a stub whose
+              former content is preserved in a comment on the page itself.
+            -->
+            <nav class="disciplines" aria-labelledby="disciplines-title">
+                <h3 class="disciplines-title" id="disciplines-title">Explore by discipline</h3>
+                <ul class="disciplines-list">
+                    <li><a href="projects/product-fabrication.html">Product &amp; Fabrication</a></li>
+                    <li><a href="projects/creative-technology.html">Creative Technology</a></li>
+                    <li><a href="projects/ux-product.html">UX &amp; Product Experience</a></li>
+                </ul>
+            </nav>
+
         </section>
 
         <section id="about" class="section section-about">
@@ -97,26 +183,60 @@
                 <h2 class="section-title">About</h2>
             </div>
 
-            <div class="about-grid">
-                <p class="about-lead">
-                    I am a student at NYU Shanghai pursuing a B.S. in Interactive Media Business.
-                    I enjoy exploring both new and traditional technology to solve business problems.
-                </p>
+            <!--
+              The previous Focus / Tools / Also definition list is preserved here
+              word for word so none of its wording is lost:
 
-                <dl class="about-facts">
-                    <div class="fact">
-                        <dt>Focus</dt>
-                        <dd>Interactive media, web development, data analytics</dd>
-                    </div>
-                    <div class="fact">
-                        <dt>Tools</dt>
-                        <dd>Excel, SQL, Tableau, Unity, Arduino, HTML/CSS/JS</dd>
-                    </div>
-                    <div class="fact">
-                        <dt>Also</dt>
-                        <dd>Content design and student leadership</dd>
-                    </div>
-                </dl>
+                Focus   Interactive media, web development, data analytics
+                Tools   Excel, SQL, Tableau, Unity, Arduino, HTML/CSS/JS
+                Also    Content design and student leadership
+
+              Those three fragments are replaced below by one introduction, one
+              capability list, and education / location metadata.
+            -->
+            <div class="about-grid">
+
+                <div class="about-intro">
+                    <!--
+                      TODO: revise this introduction.
+                      This is your existing About copy, kept word for word. It
+                      currently opens with the degree; consider opening with what
+                      you build, so this section starts the way the hero does.
+                    -->
+                    <p class="about-lead">
+                        I am a student at NYU Shanghai pursuing a B.S. in Interactive Media Business.
+                        I enjoy exploring both new and traditional technology to solve business problems.
+                    </p>
+                </div>
+
+                <div class="about-side">
+                    <h3 class="about-subhead">Capabilities</h3>
+
+                    <!--
+                      TODO: trim or reorder this list so it matches how you want to
+                      be read. Add or remove items freely; the layout reflows.
+                    -->
+                    <ul class="capability-list">
+                        <li>Digital fabrication</li>
+                        <li>Physical computing</li>
+                        <li>Creative coding</li>
+                        <li>Interaction design</li>
+                        <li>Product prototyping</li>
+                        <li>Unity / web development</li>
+                    </ul>
+
+                    <dl class="about-meta">
+                        <div class="about-meta-row">
+                            <dt>Education</dt>
+                            <dd>B.S. Interactive Media Business, NYU Shanghai</dd>
+                        </div>
+                        <div class="about-meta-row">
+                            <dt>Based in</dt>
+                            <dd>Shanghai</dd>
+                        </div>
+                    </dl>
+                </div>
+
             </div>
         </section>
 
@@ -126,8 +246,7 @@
             </div>
 
             <p class="contact-lead">
-                Currently exploring internship opportunities in business, analytics,
-                product and technology.
+                Currently exploring internship opportunities...
             </p>
 
             <div class="contact-links">

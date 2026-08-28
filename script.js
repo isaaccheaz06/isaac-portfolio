@@ -124,29 +124,38 @@ if (navbar) {
     });
 }
 
-const collage = document.getElementById('collage');
+/* ---------- featured cards: pointer parallax ---------- */
+
+/*
+ * Each card drifts against the cursor by an amount set by its data-depth,
+ * on top of the static rotation it already carries in CSS. Decorative only:
+ * the cards are ordinary links and behave identically without this.
+ */
+const featured = document.getElementById('featured');
 const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
 const coarsePointer = window.matchMedia('(pointer: coarse)');
 
-if (collage && !reduceMotion.matches && !coarsePointer.matches) {
-    const tiles = [...collage.querySelectorAll('.tile')].map((tile) => ({
-        el: tile,
-        depth: Number(tile.dataset.depth) || 1,
-        rotation: getComputedStyle(tile).transform,
+if (featured && !reduceMotion.matches && !coarsePointer.matches) {
+    const cards = [...featured.querySelectorAll('.feature')].map((card) => ({
+        el: card,
+        depth: Number(card.dataset.depth) || 1,
+        // captured once: the rotation set by .feature-N, which the drift
+        // below has to re-apply or writing to style.transform would drop it
+        rotation: getComputedStyle(card).transform,
     }));
 
     let frame = null;
 
-    collage.addEventListener('mousemove', (event) => {
+    featured.addEventListener('mousemove', (event) => {
         if (frame) return;
 
         frame = requestAnimationFrame(() => {
             frame = null;
-            const bounds = collage.getBoundingClientRect();
+            const bounds = featured.getBoundingClientRect();
             const offsetX = (event.clientX - bounds.left) / bounds.width - 0.5;
             const offsetY = (event.clientY - bounds.top) / bounds.height - 0.5;
 
-            for (const { el, depth, rotation } of tiles) {
+            for (const { el, depth, rotation } of cards) {
                 const x = -offsetX * depth * 16;
                 const y = -offsetY * depth * 16;
                 el.style.transform = `translate(${x}px, ${y}px) ${rotation}`;
@@ -154,8 +163,8 @@ if (collage && !reduceMotion.matches && !coarsePointer.matches) {
         });
     });
 
-    collage.addEventListener('mouseleave', () => {
-        for (const { el } of tiles) {
+    featured.addEventListener('mouseleave', () => {
+        for (const { el } of cards) {
             el.style.transform = '';
         }
     });

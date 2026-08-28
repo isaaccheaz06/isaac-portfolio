@@ -35,9 +35,9 @@
 
     <main class="project-page">
 
-        <a href="product-fabrication.html" class="back-link">← Product &amp; Fabrication</a>
+        <a href="../index.html#work" class="back-link">← Back</a>
 
-        <p class="project-label">Featured Case Study</p>
+        <p class="project-label">Digital Fabrication</p>
 
         <h1>Digital Kintsugi</h1>
 
@@ -47,54 +47,137 @@
             repair component.
         </p>
 
-        <!-- Replace with: <img src="../assets/digital-kintsugi/hero.jpg" alt="..."> -->
-        <div class="project-figure"><span>Hero image</span></div>
+        <dl class="project-meta">
+            <!--
+              TODO: add Role and Year for this project.
 
-        <section class="project-section">
-            <h2>Overview</h2>
-            <p class="section-placeholder">Add a short framing of the project here.</p>
-        </section>
+              Rows are absent rather than blank on purpose: nothing here states
+              a fact that has not been supplied. To add one, copy the Tools row
+              below and change the dt and dd:
 
-        <section class="project-section">
-            <h2>Problem / Concept</h2>
-            <p class="section-placeholder">What question or idea drove the piece?</p>
-        </section>
+                  <div class="project-meta-row">
+                      <dt>Role</dt>
+                      <dd>YOUR ROLE</dd>
+                  </div>
 
-        <section class="project-section">
-            <h2>Research &amp; Inspiration</h2>
-            <p class="section-placeholder">Kintsugi references, material studies, precedents.</p>
-        </section>
+                  <div class="project-meta-row">
+                      <dt>Year</dt>
+                      <dd>YEAR</dd>
+                  </div>
+            -->
+            <div class="project-meta-row">
+                <dt>Tools</dt>
+                <dd>Rhino · 3D Scanning · Ceramic 3D Printing · FDM 3D Printing</dd>
+            </div>
+        </dl>
 
-        <section class="project-section">
-            <h2>Process</h2>
-            <p class="section-placeholder">Printing, fracturing, scanning, reconstruction.</p>
-        </section>
+        <!--
+          HERO MEDIA. Nothing is rendered until you add a file, so this page
+          currently shows no image area at all rather than an empty box.
 
-        <section class="project-section">
-            <h2>Iterations</h2>
-            <p class="section-placeholder">What changed between attempts, and why.</p>
-        </section>
+          Put the file at:  assets/digital-kintsugi/hero.webp
+          (from this page the path is ../assets/digital-kintsugi/hero.webp)
 
-        <section class="project-section">
-            <h2>Tools</h2>
-            <p>Rhino · 3D Scanning · Ceramic 3D Printing · FDM 3D Printing</p>
-        </section>
+          Then replace this entire comment with:
 
-        <section class="project-section">
-            <h2>Fabrication</h2>
-            <p class="section-placeholder">Print settings, materials, the PLA repair component.</p>
-        </section>
+              <figure class="project-media">
+                  <picture>
+                      <source srcset="../assets/digital-kintsugi/hero.webp" type="image/webp">
+                      <img src="../assets/digital-kintsugi/hero.jpg"
+                           alt="Describe what the photograph shows"
+                           width="1600" height="900" decoding="async">
+                  </picture>
+                  <figcaption class="project-caption">Optional caption.</figcaption>
+              </figure>
 
-        <section class="project-section">
-            <h2>Final Outcome</h2>
-            <p class="section-placeholder">Finished piece and what it demonstrates.</p>
-            <div class="project-figure"><span>Result image</span></div>
-        </section>
+          The hero is the one image that should NOT be lazy loaded: it is
+          above the fold, so leave loading="lazy" off it. Keep the width and
+          height attributes on every image; the browser reserves the correct
+          box from their ratio before the file arrives, which is what stops
+          the page jumping as it loads.
+        -->
 
-        <section class="project-section">
-            <h2>Reflection</h2>
-            <p class="section-placeholder">What you would do differently next time.</p>
-        </section>
+        <!--
+          MEDIA GALLERY. Process and outcome images, in any number.
+
+          Suggested files under assets/digital-kintsugi/ :
+              process-01.webp, process-02.webp, ...
+              outcome-01.webp, outcome-02.webp, ...
+
+          Replace this entire comment with:
+
+              <div class="project-gallery">
+                  <figure>
+                      <img src="../assets/digital-kintsugi/process-01.webp"
+                           alt="Describe what this step shows"
+                           width="1200" height="900" loading="lazy" decoding="async">
+                      <figcaption>Short caption.</figcaption>
+                  </figure>
+
+                  <figure>
+                      <img src="../assets/digital-kintsugi/process-02.webp"
+                           alt="Describe what this step shows"
+                           width="1200" height="900" loading="lazy" decoding="async">
+                      <figcaption>Short caption.</figcaption>
+                  </figure>
+
+                  <figure class="span-full">
+                      <img src="../assets/digital-kintsugi/outcome-01.webp"
+                           alt="Describe the finished result"
+                           width="1600" height="900" loading="lazy" decoding="async">
+                      <figcaption>Add class="span-full" to run one image the full width.</figcaption>
+                  </figure>
+              </div>
+
+          Two images sit side by side, one sits full width, and the grid
+          collapses to a single column on a phone with no extra work.
+
+          For a video, use the same figure but swap the img for:
+
+              <video src="../assets/digital-kintsugi/demo.mp4"
+                     poster="../assets/digital-kintsugi/demo-poster.webp"
+                     width="1600" height="900"
+                     controls muted playsinline preload="none"></video>
+
+          Supply .webm alongside .mp4 if you want the smaller file to win:
+
+              <video poster="..." width="1600" height="900" controls muted playsinline preload="none">
+                  <source src="../assets/digital-kintsugi/demo.webm" type="video/webm">
+                  <source src="../assets/digital-kintsugi/demo.mp4" type="video/mp4">
+              </video>
+        -->
+
+        <!--
+          OPTIONAL TEXT SECTIONS.
+
+          This page no longer forces the full case-study arc. Add only the
+          sections this project actually needs, in any order, like this:
+
+              <section class="project-section">
+                  <h2>Process</h2>
+                  <p>Your copy here.</p>
+              </section>
+
+          These were the section prompts this page carried before, kept so the
+          guidance is not lost. They were removed from the visible page because
+          they published as grey instruction text to every visitor.
+
+              Overview               Add a short framing of the project here.
+              Problem / Concept      What question or idea drove the piece?
+              Research & Inspiration Kintsugi references, material studies, precedents.
+              Process                Printing, fracturing, scanning, reconstruction.
+              Iterations             What changed between attempts, and why.
+              Fabrication            Print settings, materials, the PLA repair component.
+              Final Outcome          Finished piece and what it demonstrates.
+              Reflection             What you would do differently next time.
+        -->
+
+        <nav class="project-nav" aria-label="More work">
+            <a class="project-nav-link" href="museum-npc.html">
+                <span class="project-nav-label">Next project</span>
+                <span class="project-nav-title">LLM-Powered Museum NPC</span>
+            </a>
+        </nav>
 
     </main>
 
