@@ -604,6 +604,28 @@ if (siteMedia) {
 
         const pad = (n) => String(n).padStart(2, '0');
 
+        /*
+         * Optional prose.
+         *
+         * Returns null unless the field holds real text, and every caller
+         * checks before appending — so an unfilled string in media.js leaves
+         * no element, no margin and no gap behind. That is the whole
+         * difference between an optional field and an empty box on the page.
+         *
+         * A blank line in the source starts a new paragraph, which is the one
+         * piece of formatting these fields need and the only one they get:
+         * the text is set with textContent, so nothing written in media.js
+         * can inject markup into the page.
+         */
+        const buildProse = (text, cls) => {
+            if (!hasText(text)) return null;
+            const wrap = el('div', cls);
+            for (const para of String(text).split(/\n\s*\n/)) {
+                if (hasText(para)) wrap.appendChild(el('p', null, para.trim()));
+            }
+            return wrap.children.length ? wrap : null;
+        };
+
         /* =================================================================
          * SECTIONED LAYOUT
          *
@@ -621,7 +643,141 @@ if (siteMedia) {
             return head;
         };
 
-        /* --- 1. asymmetric hero: one dominant frame, one counterweight --- */
+        /* --- 1. one frame: the finished object, motion on request --- */
+
+        /*
+         * The photograph and the loop used to stand side by side. They show
+         * the same object from the same angle, so the widest row on the page
+         * spent itself saying one thing twice, and because the two files are
+         * different shapes the stagger that separated them read as an
+         * accident rather than a composition.
+         *
+         * One frame instead: the still at rest, the clip layered over it and
+         * faded in only when asked. The <img> is ordinary markup with nothing
+         * between it and the screen \u2014 no script, no play() promise, no decode
+         * to wait on \u2014 so every way this can fail (video unsupported, file
+         * missing, playback refused, JavaScript off) lands on the photograph
+         * instead of on an empty box.
+         */
+        const buildHero = (section) => {
+            if (!isValidMedia(section.image)) return null;
+
+            const wrap = el('div', 'pm-hero');
+            const frame = el('div', 'pm-hero-frame');
+
+            /*
+             * The ratio belongs to the frame, not to either file. The still
+             * and the clip then swap inside a box that was already the right
+             * size, so nothing on the page moves when they do.
+             */
+            if (hasText(section.ratio)) frame.style.aspectRatio = section.ratio;
+
+            const still = buildImage(section.image, { eager: true });
+            still.classList.add('pm-hero-still');
+            frame.appendChild(still);
+            wrap.appendChild(frame);
+
+            if (!isValidMedia(section.video)) return wrap;
+
+            const clip = buildPreviewVideo(section.video);
+            clip.classList.add('pm-hero-clip');
+
+            /*
+             * The page-wide "play whatever is on screen" observer must not
+             * have this one. Scrolling past a frame is not a request for
+             * motion; here the only things that start it are a pointer over
+             * the frame, or the button.
+             */
+            delete clip.dataset.autoplayInView;
+            frame.appendChild(clip);
+
+            const PLAY = section.playLabel || 'Play motion preview';
+            const PAUSE = section.pauseLabel || 'Pause motion preview';
+
+            const btn = el('button', 'pm-btn pm-hero-toggle');
+            btn.type = 'button';
+
+            let playing = false;
+            /*
+             * Whether this run was asked for or merely hovered into. A run the
+             * visitor started on purpose must survive the pointer wandering
+             * off the frame; a hover run must not.
+             */
+            let deliberate = false;
+
+            const setLabel = () => {
+                const label = playing ? PAUSE : PLAY;
+                btn.setAttribute('aria-label', label);
+                btn.replaceChildren(
+                    icon(playing ? ICON.pause : ICON.play),
+                    el('span', 'pm-hero-toggle-text', label)
+                );
+            };
+
+            const stop = () => {
+                playing = false;
+                deliberate = false;
+                frame.classList.remove('is-playing');
+                clip.pause();
+                try { clip.currentTime = 0; } catch (e) { /* not seekable yet */ }
+                setLabel();
+            };
+
+            const start = (onPurpose) => {
+                if (playing) {
+                    // a hover during a deliberate run must not downgrade it
+                    deliberate = deliberate || !!onPurpose;
+                    return;
+                }
+                playing = true;
+                deliberate = !!onPurpose;
+                frame.classList.add('is-playing');
+                // always from the top, so the clip is a preview rather than
+                // wherever it happened to be left
+                try { clip.currentTime = 0; } catch (e) { /* not seekable yet */ }
+                const p = clip.play();
+                // a refused play() must not leave the frame claiming to run
+                if (p && p.catch) p.catch(() => stop());
+                setLabel();
+            };
+
+            setLabel();
+
+            btn.addEventListener('click', () => {
+                if (playing) stop();
+                else start(true);
+            });
+
+            /*
+             * Hover is an extra, never the only way in. It is skipped for a
+             * touch pointer (where "enter" only ever means "tap"), on devices
+             * that cannot really hover, and under reduced motion \u2014 where the
+             * button still works, because asking for motion is different from
+             * having it happen at you.
+             */
+            const hoverCapable = window.matchMedia('(hover: hover)');
+
+            frame.addEventListener('pointerenter', (e) => {
+                if (e.pointerType === 'touch') return;
+                if (reduceMotion.matches || !hoverCapable.matches) return;
+                start(false);
+            });
+
+            frame.addEventListener('pointerleave', (e) => {
+                if (e.pointerType === 'touch') return;
+                if (playing && !deliberate) stop();
+            });
+
+            // nothing should be decoding behind a hidden tab
+            document.addEventListener('visibilitychange', () => {
+                if (document.hidden && playing) stop();
+            });
+
+            wrap.appendChild(btn);
+            return wrap;
+        };
+
+        /* --- asymmetric split: one dominant frame, one counterweight --- */
         const buildSplit = (section) => {
             const wrap = el('div', 'pm-split');
             if (isValidMedia(section.lead)) {
@@ -689,8 +845,6 @@ if (siteMedia) {
         };
 
         const ICON = {
-            prev: 'M15.5 3.2 6.7 12l8.8 8.8 1.5-1.6L9.8 12l7.2-7.2z',
-            next: 'M8.5 3.2 7 4.8 14.2 12 7 19.2l1.5 1.6L17.3 12z',
             play: 'M6 3.5v17l14-8.5z',
             pause: 'M6 4h4.2v16H6zM13.8 4H18v16h-4.2z'
         };
@@ -740,14 +894,37 @@ if (siteMedia) {
 
                 holder.appendChild(media);
                 stage.appendChild(holder);
-                return { holder, media, title: slide.title || '' };
+                return {
+                    holder, media,
+                    title: slide.title || '',
+                    description: slide.description || ''
+                };
             });
 
             const bar = el('div', 'pm-bar');
             const step = el('div', 'pm-step');
-            const count = el('span', 'pm-count');
+
+            /*
+             * The count is spoken, not shown. On screen the lit segment in the
+             * rail below already says which stage this is, so printing "01 / 04"
+             * beside the title said it twice. A screen reader has no rail to
+             * look at, and "Scan result" on its own gives no sense of position
+             * — so the number survives here, read out and clipped away.
+             *
+             * position:absolute takes it out of the flex flow entirely, so it
+             * contributes no gap and leaves no space where it used to sit.
+             */
+            const count = el('span', 'visually-hidden');
             const title = el('span', 'pm-title');
-            step.append(count, title);
+            /*
+             * Inside .pm-step rather than beside it, so the description is
+             * carried by the live region that already announces the stage
+             * change \u2014 one announcement per slide, not two. It is emptied
+             * for a slide that has none, and :empty takes it out of the flex
+             * flow entirely so an undescribed stage leaves no gap.
+             */
+            const desc = el('p', 'pm-desc');
+            step.append(count, title, desc);
             // announced politely so a screen reader hears the stage change
             step.setAttribute('aria-live', 'polite');
             step.setAttribute('aria-atomic', 'true');
@@ -761,9 +938,17 @@ if (siteMedia) {
                 controls.appendChild(b);
                 return b;
             };
-            const prevBtn = mkBtn('prev', 'Previous stage');
+
+            /*
+             * One control, not three. The arrows duplicated what the numbered
+             * rail does and did it worse — a rail entry names its stage and
+             * goes straight there, an arrow only steps. Rotation is the one
+             * thing the rail cannot express, so it is the one thing left here.
+             *
+             * Nothing is lost by removing them: the arrow keys and the swipe
+             * below are bound to the viewer itself, never to these buttons.
+             */
             const toggleBtn = mkBtn('pause', 'Pause automatic rotation');
-            const nextBtn = mkBtn('next', 'Next stage');
             bar.append(step, controls);
 
             const rail = el('ul', 'pm-thumbs');
@@ -772,9 +957,15 @@ if (siteMedia) {
                 const li = el('li');
                 const b = el('button', 'pm-thumb');
                 b.type = 'button';
+                /*
+                 * The number is the whole visible button. The stage name was
+                 * printed here too and again in the status row above, so the
+                 * active stage was named twice on screen; the aria-label is
+                 * where the name belongs for anyone who needs it read out,
+                 * and it still carries it in full.
+                 */
                 b.setAttribute('aria-label', 'Stage ' + (i + 1) + ': ' + n.title);
                 b.appendChild(el('span', 'pm-thumb-num', pad(i + 1)));
-                b.appendChild(document.createTextNode(n.title));
                 li.appendChild(b);
                 rail.appendChild(li);
                 return b;
@@ -838,8 +1029,14 @@ if (siteMedia) {
                     }
                 });
 
-                count.textContent = pad(index + 1) + ' / ' + pad(nodes.length);
+                // spoken form, not the printed one: "Stage 2 of 4" reads as a
+                // sentence where "02 / 04" is read as punctuation
+                count.textContent = 'Stage ' + (index + 1) + ' of ' + nodes.length + '.';
                 title.textContent = nodes[index].title;
+                // '' rather than a space: :empty is what hides the element
+                desc.textContent = hasText(nodes[index].description)
+                    ? nodes[index].description.trim()
+                    : '';
                 thumbs.forEach((b, i) => b.setAttribute('aria-current', i === index ? 'true' : 'false'));
 
                 if (viaUser) surrender();
@@ -899,8 +1096,6 @@ if (siteMedia) {
                 });
             });
 
-            prevBtn.addEventListener('click', () => show(index - 1, true));
-            nextBtn.addEventListener('click', () => show(index + 1, true));
             thumbs.forEach((b, i) => b.addEventListener('click', () => show(i, true)));
 
             toggleBtn.addEventListener('click', () => {
@@ -928,7 +1123,9 @@ if (siteMedia) {
             let startX = null;
             let startY = null;
             stage.addEventListener('pointerdown', (e) => {
-                if (e.pointerType === 'mouse') return;   // mouse has the buttons
+                // a mouse drag across a picture is a selection or a stray
+                // gesture, not a swipe; a mouse navigates by the rail below
+                if (e.pointerType === 'mouse') return;
                 startX = e.clientX; startY = e.clientY;
             });
             stage.addEventListener('pointerup', (e) => {
@@ -983,6 +1180,21 @@ if (siteMedia) {
             if (hasText(section.title)) text.appendChild(el('h2', null, section.title));
             if (hasText(section.text)) text.appendChild(el('p', null, section.text));
 
+            /*
+             * Between the overview and the link, deliberately: the reflection
+             * is the last thing read and the Drive link stays the last thing
+             * done. Absent unless the field holds text.
+             */
+            const reflection = buildProse(section.reflection, 'pm-film-reflection');
+            if (reflection) {
+                if (hasText(section.reflectionLabel)) {
+                    reflection.insertBefore(
+                        el('p', 'pm-film-reflection-label', section.reflectionLabel),
+                        reflection.firstChild);
+                }
+                text.appendChild(reflection);
+            }
+
             if (hasText(section.href)) {
                 const note = el('p', 'pm-film-note');
                 const a = el('a', 'project-link');
@@ -1035,6 +1247,7 @@ if (siteMedia) {
         };
 
         const LAYOUTS = {
+            hero: buildHero,
             split: buildSplit,
             editorial: buildEditorial,
             carousel: buildViewer,
@@ -1055,7 +1268,20 @@ if (siteMedia) {
                 const head = sectionHead(section, ++n);
                 if (head) wrap.appendChild(head);
                 else n--;                    // unlabelled sections are not numbered
+
+                /*
+                 * Optional commentary, either side of the media. Both are
+                 * null unless their field in media.js holds real text, so a
+                 * section that has not been written about renders exactly as
+                 * it did before these existed.
+                 */
+                const intro = buildProse(section.intro, 'pm-prose pm-prose-intro');
+                if (intro) wrap.appendChild(intro);
+
                 wrap.appendChild(body);
+
+                const outro = buildProse(section.outro, 'pm-prose pm-prose-outro');
+                if (outro) wrap.appendChild(outro);
                 slot.appendChild(wrap);
             }
         } else if (slot) {

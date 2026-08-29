@@ -13,6 +13,24 @@
     --border: rgba(255, 255, 255, 0.11);
     --border-strong: rgba(255, 255, 255, 0.22);
 
+    /*
+     * The veil over a card that has a picture. Measured rather than picked:
+     * against the brightest place text lands in the one real card image
+     * (p98 rgb(202,196,187) — it is a bright photograph, not a dark one)
+     * 0.55 puts --text at 5.78:1 and 0.64 at 7.52:1. Hover darkens rather
+     * than lightens, so contrast can only ever improve under the pointer.
+     */
+    --card-veil: rgba(10, 10, 10, 0.55);
+    --card-veil-hover: rgba(10, 10, 10, 0.64);
+
+    /*
+     * The card greys do not survive a photograph. Over the veiled image
+     * --faint-on-surface measures 1.87:1 and --muted 2.50:1, and no honest
+     * overlay rescues either. This is the dimmest grey that still clears AA
+     * there, at 4.72:1.
+     */
+    --on-card-media: #dcdcdc;
+
     --font-display: "Poppins", "Segoe UI", Arial, sans-serif;
     --font-body: "Inter", "Segoe UI", Arial, sans-serif;
 
@@ -402,22 +420,108 @@ main [id] {
 /*
  * Optional media. Absent by default — the card is typographic and reads as
  * finished with no image, so nothing here reserves empty space until a real
- * file is dropped in. aspect-ratio plus the width/height on the <img> keep
- * the card from shifting once one is.
+ * file is dropped in.
+ *
+ * When one IS dropped in, script.js adds .has-media and the card changes
+ * character rather than gaining a band: the picture becomes the whole
+ * surface and the type sits on it. Nothing below is keyed to a project name,
+ * so a card gets this the moment its media.js entry stops being null — there
+ * is no second edit to remember.
  */
 .feature-media {
     display: block;
+    inset: 0;
     line-height: 0;
     overflow: hidden;
+    position: absolute;
 }
 
 .feature-media img,
 .feature-media video {
-    aspect-ratio: 4 / 3;
     display: block;
-    height: auto;
+    height: 100%;
     object-fit: cover;
+    /*
+     * Deliberate, not inherited. cover crops whichever axis is long, and
+     * centre is only the right answer when the subject is centred — see the
+     * per-project overrides further down.
+     */
+    object-position: center;
+    transition: transform 0.45s var(--ease);
     width: 100%;
+}
+
+/*
+ * One flat wash, never a gradient. A gradient would be doing the same job at
+ * the bottom while quietly restyling the top of every photograph; a uniform
+ * veil treats the picture as one surface and leaves its composition alone.
+ */
+.feature-media::after {
+    background-color: var(--card-veil);
+    content: "";
+    inset: 0;
+    position: absolute;
+    transition: background-color 0.35s ease;
+}
+
+/*
+ * A fixed 4:3, so cards keep a common shape however long their titles run.
+ *
+ * max-width, not min-height. A floor on the height fed back through the
+ * aspect-ratio into the WIDTH — a 260px minimum asked for a 347px box in a
+ * 343px column, and the picture card sat 4px proud of the three beside it on
+ * a phone. The ratio alone is enough: even at the narrowest column this grid
+ * allows, the card is taller than the two lines of type it has to hold.
+ */
+.feature.has-media {
+    aspect-ratio: 4 / 3;
+    max-width: 100%;
+}
+
+/*
+ * The type drops to the foot of the picture. z-index puts it over the veil,
+ * which lives inside .feature-media — hence the stacking context here.
+ */
+.feature.has-media .feature-body {
+    justify-content: flex-end;
+    position: relative;
+    z-index: 1;
+}
+
+.feature.has-media .feature-top {
+    color: var(--on-card-media);
+}
+
+.feature.has-media .feature-index::after {
+    color: rgba(242, 242, 242, 0.5);
+}
+
+.feature.has-media .feature-title {
+    color: var(--text);
+}
+
+/*
+ * The tools line comes off a picture card. At 13px in --muted it measures
+ * 2.5:1 over the veiled image and there is no weight it can take that would
+ * both pass and stay secondary to the title — and a wall of tool names is
+ * the "competing interface element" this treatment is meant to remove. It
+ * still appears on the project page, in the Tools row of the metadata.
+ */
+.feature.has-media .feature-tools {
+    display: none;
+}
+
+/*
+ * Per-image framing. The default above is centre and a project only needs a
+ * line here when its subject is not — but state it either way, so a later
+ * re-crop cannot silently move the object out of frame.
+ *
+ * digital-kintsugi: the card file is 1200x900, exactly the card's own 4:3,
+ * so cover has nothing to crop and centre is exact. Add one of these beside
+ * it when another project gets a picture.
+ */
+.feature[data-project="digital-kintsugi"] .feature-media img {
+    object-position: 50% 50%;
 }
 
 /*
@@ -540,6 +644,28 @@ main [id] {
     outline: 2px solid var(--text);
     outline-offset: 3px;
     z-index: 10;
+}
+
+/*
+ * Restrained on purpose: a 1.04 push on the picture and one step of veil.
+ * Two things already move on this grid — the pointer parallax and the
+ * sibling dimming — so a third, larger motion would be noise. The card is
+ * still one link and nothing here is information: the title, the category
+ * and the destination are all readable without a pointer ever arriving.
+ *
+ * Focus-visible gets the identical treatment, so a keyboard lands on a card
+ * that reads exactly as a hovered one does, plus the outline above.
+ */
+.featured .feature.has-media:hover .feature-media img,
+.featured .feature.has-media:hover .feature-media video,
+.featured .feature.has-media:focus-visible .feature-media img,
+.featured .feature.has-media:focus-visible .feature-media video {
+    transform: scale(1.04);
+}
+
+.featured .feature.has-media:hover .feature-media::after,
+.featured .feature.has-media:focus-visible .feature-media::after {
+    background-color: var(--card-veil-hover);
 }
 
 /* ---------- explore by discipline ---------- */
@@ -1106,6 +1232,19 @@ main [id] {
     .contact-link:focus-visible .contact-icon,
     .contact-link:hover .contact-arrow,
     .contact-link:focus-visible .contact-arrow {
+        transform: none;
+    }
+
+    /*
+     * Same again for the card picture: collapsing the duration still delivers
+     * the scale, just instantly, which is a jump rather than a motion. The
+     * veil step stays — it is a colour change, it moves nothing, and it is
+     * the part that carries the state.
+     */
+    .featured .feature.has-media:hover .feature-media img,
+    .featured .feature.has-media:hover .feature-media video,
+    .featured .feature.has-media:focus-visible .feature-media img,
+    .featured .feature.has-media:focus-visible .feature-media video {
         transform: none;
     }
 }

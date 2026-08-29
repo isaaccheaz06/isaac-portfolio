@@ -268,7 +268,7 @@
     padding: 90px var(--gutter);
 }
 
-.project-page > .project-label {
+.project-page>.project-label {
     color: var(--faint);
     font-size: 13px;
     letter-spacing: 0.14em;
@@ -276,7 +276,7 @@
     text-transform: uppercase;
 }
 
-.project-page > h1 {
+.project-page>h1 {
     font-family: var(--font-display);
     font-size: clamp(38px, 6vw, 72px);
     font-weight: 600;
@@ -786,7 +786,15 @@
     max-width: 100%;
 }
 
-.pm-caption {
+/*
+ * Selected on the element as well as the class. The class was the only
+ * selector here and nothing ever carried it — buildFigure appends a plain
+ * <figcaption> — so captions were inheriting 16px body type at full text
+ * colour with no gap above, which made them compete with their pictures
+ * instead of sitting under them.
+ */
+.pm-caption,
+.pm-section figcaption {
     color: var(--faint);
     font-size: 13px;
     line-height: 1.6;
@@ -795,7 +803,95 @@
     text-wrap: pretty;
 }
 
-/* ---------- 1. hero split ---------- */
+/* ---------- 1. hero frame ---------- */
+
+/*
+ * One box, two layers, a fixed ratio.
+ *
+ * The ratio arrives as an inline style from media.js, so the frame is the
+ * right size before either file has loaded — which is the whole reason
+ * swapping the still for the clip costs no layout. Both layers fill it with
+ * `cover`, and cover crops nothing here: the photograph is 1200x1600 and the
+ * clip 720x960, both exactly 3:4. That match is why the derivative was cut.
+ */
+.pm-hero {
+    /*
+     * The cap is a height cap expressed as a width. A max-height on a box
+     * with an aspect-ratio does not scale the box — it squashes it and lets
+     * object-fit crop the difference — so the limit has to be applied on the
+     * axis the ratio is derived from. 78vh matches the cap every other
+     * upright frame on this page uses.
+     */
+    margin-inline: auto;
+    max-width: min(100%, calc(78vh * 3 / 4));
+}
+
+/*
+ * No breakpoint override for the above, deliberately. The min() already picks
+ * the right constraint at every width: on a phone the column is narrower than
+ * the cap and wins, on a tablet the cap is narrower and wins. Releasing it at
+ * <=900px — which looked reasonable — gave a 661px column a 881px-tall frame,
+ * a full screen of one photograph.
+ */
+
+.pm-hero-frame {
+    background-color: var(--surface);
+    border-radius: 2px;
+    overflow: hidden;
+    position: relative;
+    width: 100%;
+}
+
+.pm-hero-still,
+.pm-hero-clip {
+    display: block;
+    height: 100%;
+    inset: 0;
+    object-fit: cover;
+    object-position: center;
+    position: absolute;
+    width: 100%;
+}
+
+/*
+ * The clip is the layer that arrives, so it is the one that moves. Opacity
+ * only — no scale, no slide. The two layers are the same object at the same
+ * size and the same scale; anything more would be motion for its own sake,
+ * and it would show as a shudder because the frames do not line up exactly.
+ */
+.pm-hero-clip {
+    opacity: 0;
+    transition: opacity 0.4s ease;
+}
+
+.pm-hero-frame.is-playing .pm-hero-clip {
+    opacity: 1;
+}
+
+/*
+ * The carousel's own control, reused, and placed under the frame rather than
+ * floating on the photograph: over the image it would need its own contrast
+ * treatment and at some widths it would sit on the vase.
+ */
+/* .pm-hero prefix so this outranks .pm-btn's own width/padding, which are
+   declared later in the file and would otherwise win on source order */
+.pm-hero .pm-hero-toggle {
+    gap: 10px;
+    justify-content: flex-start;
+    margin-top: 12px;
+    padding: 0 12px 0 10px;
+    width: auto;
+}
+
+.pm-hero-toggle-text {
+    font-family: var(--font-display);
+    font-size: 12px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+}
+
+
+/* ---------- hero split (unused: kept for any project that wants one) ---------- */
 
 /*
  * Asymmetric on purpose: the lead photograph takes roughly two thirds and the
@@ -832,8 +928,27 @@
  * the feature's height rather than setting their own, which is what keeps the
  * row square at the bottom.
  */
-.pm-editorial + .pm-editorial {
+.pm-editorial+.pm-editorial {
     margin-top: clamp(28px, 4vw, 56px);
+}
+
+/*
+ * Space between one row and the next. The blocks were plain siblings with no
+ * gap of any kind, so the bottom of one row's supports sat flush against the
+ * top of the next row's feature and the two read as a single four-image
+ * grid rather than two compositions.
+ *
+ * One rule on the join rather than a margin on every block: nothing is added
+ * above the first row or below the last, where the section's own margin is
+ * already doing the work.
+ *
+ * It has to beat the gap INSIDE a block (16-28px) to read as a boundary, and
+ * the clamp does that at every width — 24px against 16px on a phone, 43px
+ * against 28px at 1440. Tighter on a phone on purpose: stacked, the rows are
+ * already separated by the full width of the screen.
+ */
+.pm-block+.pm-block {
+    margin-top: clamp(24px, 3vw, 48px);
 }
 
 .pm-block {
@@ -881,7 +996,7 @@
  * The feature carries a caption and the supports usually do not, so the
  * feature column needs the picture to flex and the text to sit under it.
  */
-.pm-feature figure > :is(img, video) {
+.pm-feature figure> :is(img, video) {
     flex: 1;
     min-height: 0;
 }
@@ -951,13 +1066,25 @@
     width: 100%;
 }
 
+/*
+ * flex-start, not baseline. The step can be two lines now — title, then an
+ * optional description — and a wrapped flex container reports its LAST
+ * baseline, so the control slid 89px down the row to sit level with the
+ * description instead of the title it belongs to.
+ */
 .pm-bar {
-    align-items: baseline;
+    align-items: start;
     border-top: 1px solid var(--border);
-    display: flex;
-    flex-wrap: wrap;
+    display: grid;
     gap: 10px 20px;
-    justify-content: space-between;
+    /*
+     * Two columns, not a wrapping flex row. The step holds an optional
+     * description that spans its own full width, which as a flex item made
+     * the step claim the whole bar and pushed the control onto a second line
+     * under it. A named column keeps the control top-right however many
+     * lines the text beside it runs to.
+     */
+    grid-template-columns: minmax(0, 1fr) auto;
     margin-top: 14px;
     padding-top: 14px;
 }
@@ -968,14 +1095,6 @@
     gap: 14px;
 }
 
-.pm-count {
-    color: var(--faint);
-    font-family: var(--font-display);
-    font-size: 13px;
-    font-variant-numeric: tabular-nums;
-    letter-spacing: 0.1em;
-}
-
 .pm-title {
     color: var(--text);
     font-family: var(--font-display);
@@ -984,10 +1103,29 @@
     letter-spacing: -0.01em;
 }
 
+/*
+ * Pulled up by half the difference between the 44px target and the 24px line
+ * it sits beside, so the icon centres on the title rather than hanging below
+ * it. The bar's own 14px of top padding absorbs the overhang.
+ */
 .pm-controls {
     align-items: center;
     display: flex;
     gap: 4px;
+    margin-top: -10px;
+}
+
+/*
+ * The rotation toggle is the only control left in the row, so it has to be a
+ * comfortable target on its own rather than one of a cluster of three. 44px
+ * square, which is the floor for a thumb.
+ *
+ * Scoped to .pm-controls so the hero's own toggle, which is a wide button
+ * with a text label beside its icon, keeps its own proportions.
+ */
+.pm-controls .pm-btn {
+    height: 44px;
+    width: 44px;
 }
 
 /*
@@ -1026,15 +1164,26 @@
 }
 
 /* Thumbnail rail — the direct route to any stage. */
+/*
+ * A rule of numbered segments under a thin line each — no dots, no pills, no
+ * running bar. Pulled a little closer to the status row now that it is one
+ * line of digits rather than a row of stage names.
+ */
 .pm-thumbs {
     display: grid;
     gap: 8px;
     grid-template-columns: repeat(var(--pm-thumbs, 5), minmax(0, 1fr));
     list-style: none;
-    margin-top: 12px;
+    margin-top: 10px;
     padding: 0;
 }
 
+/*
+ * The padding is the touch target. A number on its own is 16px tall, which is
+ * not something to ask a thumb to hit, so the block padding brings the button
+ * to 44px — at every width, not just on a phone, since the button holds the
+ * same thing everywhere now.
+ */
 .pm-thumb {
     background: none;
     border: 0;
@@ -1046,7 +1195,7 @@
     font-size: 12px;
     letter-spacing: 0.02em;
     line-height: 1.35;
-    padding: 10px 0 0;
+    padding: 14px 0 12px;
     text-align: left;
     transition: color 0.25s ease, border-color 0.25s ease;
     width: 100%;
@@ -1071,8 +1220,14 @@
 .pm-thumb-num {
     display: block;
     font-variant-numeric: tabular-nums;
-    margin-bottom: 3px;
+    margin: 0;
     opacity: 0.7;
+}
+
+/* the active segment brightens twice over: its line takes --text from the
+   rule above, and its number drops the dimming the others keep */
+.pm-thumb[aria-current="true"] .pm-thumb-num {
+    opacity: 1;
 }
 
 /* ---------- 5. full film ---------- */
@@ -1387,6 +1542,106 @@
 }
 
 
+/* ---------- optional commentary ---------- */
+
+/*
+ * There is no empty state to design here. script.js builds nothing at all for
+ * a blank field, so these rules only ever describe prose that exists, and a
+ * section nobody has written about keeps exactly the spacing it had before
+ * the fields were added.
+ *
+ * A measure rather than a width: 58ch is around eleven words a line, which is
+ * past the point where a note reads as a caption and short of where it starts
+ * needing to be a column.
+ */
+.pm-prose {
+    color: var(--muted);
+    font-size: 15px;
+    line-height: 1.7;
+    max-width: 58ch;
+    text-wrap: pretty;
+}
+
+.pm-prose p {
+    margin: 0;
+}
+
+.pm-prose p+p {
+    margin-top: 0.9em;
+}
+
+/* the heading already leaves a gap beneath itself, so the intro only needs
+   room under it; the outro needs room above and none below */
+.pm-prose-intro {
+    margin-bottom: clamp(28px, 3.4vw, 48px);
+}
+
+.pm-prose-outro {
+    margin-top: clamp(28px, 3.4vw, 48px);
+}
+
+/*
+ * The stage description, on its own line under the stage name and inside the
+ * same live region, so a slide change is announced once rather than twice.
+ *
+ * :empty is doing real work: an undescribed stage still has the element, and
+ * taking it out of the flex flow is what stops it reserving a row of gap
+ * under the stages that do have one.
+ */
+.pm-step {
+    flex-wrap: wrap;
+}
+
+.pm-desc {
+    color: var(--muted);
+    flex: 1 1 100%;
+    font-size: 13px;
+    line-height: 1.6;
+    margin: 0;
+    max-width: 56ch;
+    text-wrap: pretty;
+}
+
+.pm-desc:empty {
+    display: none;
+}
+
+/*
+ * The film reflection: a quiet note, not a pull quote. No box, no card, no
+ * quotation marks. One hairline separates it from the overview it follows,
+ * and the Drive link keeps its own weight underneath, which is the order the
+ * block is meant to be read in.
+ */
+.pm-film-reflection {
+    border-top: 1px solid var(--border);
+    color: var(--muted);
+    font-size: 14px;
+    line-height: 1.7;
+    margin-top: clamp(20px, 2.4vw, 30px);
+    max-width: 46ch;
+    padding-top: clamp(16px, 2vw, 22px);
+    text-wrap: pretty;
+}
+
+.pm-film-reflection p {
+    margin: 0;
+}
+
+.pm-film-reflection p+p {
+    margin-top: 0.9em;
+}
+
+/* p. so it outranks the margin reset above it on the same elements */
+p.pm-film-reflection-label {
+    color: var(--faint);
+    font-family: var(--font-display);
+    font-size: 11px;
+    letter-spacing: 0.14em;
+    margin-bottom: 10px;
+    text-transform: uppercase;
+}
+
+
 /* ==========================================================================
  * PM RESPONSIVE + REDUCED MOTION
  *
@@ -1431,9 +1686,29 @@
         grid-template-columns: repeat(2, minmax(0, 1fr));
     }
 
-    /* one column: each frame is its own shape again, so no fixed band */
+    /*
+     * One column: each frame is its own shape again, so no fixed band — and
+     * no fixed ROWS either. Releasing only the height left grid-template-rows
+     * at `1fr 1fr`, so the two stacked support images sized a row that the
+     * feature then spanned and stretched to fill: a 540x960 clip rendered
+     * 892px tall inside a 390px column, the extra height showing as black
+     * because object-fit is `contain` here.
+     *
+     * The figure and its media have to be released with it. `height: 100%`
+     * on the figure and `flex: 1` on the media were what carried the row's
+     * height down into the video in the first place.
+     */
     .pm-block {
+        grid-template-rows: auto;
         height: auto;
+    }
+
+    .pm-feature figure {
+        height: auto;
+    }
+
+    .pm-feature figure > :is(img, video) {
+        flex: none;
     }
 
     .pm-feature,
@@ -1467,24 +1742,13 @@
     }
 
     /*
-     * Five thumbnail labels cannot be read across a phone, so the rail keeps
-     * the numbers and drops the words. The accessible name is unaffected —
-     * it comes from the button's aria-label, not this text.
+     * Nothing here for the rail any more. It used to hide the stage names
+     * with font-size:0 and pad the button back up to a thumb-sized target;
+     * the names are gone from the markup and the padding is in the base rule,
+     * so both applied at every width now.
      */
-    /*
-     * Numbers only — five labels cannot be read across a phone — but padded
-     * back up to a 44px target. Dropping the words took the button down to
-     * 25px, which is a hard thing to hit with a thumb. The accessible name is
-     * unaffected either way: it comes from aria-label, not this text.
-     */
-    .pm-thumb {
-        font-size: 0;
-        padding-block: 15px 13px;
-    }
-
     .pm-thumb-num {
         font-size: 11px;
-        margin: 0;
     }
 }
 

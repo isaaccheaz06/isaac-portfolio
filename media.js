@@ -310,29 +310,86 @@ window.SITE_MEDIA = {
         'digital-kintsugi': {
             sections: [
 
-                /* --- the finished object, and it turning --- */
+                /*
+                 * THE FINISHED OBJECT — one frame, motion on request.
+                 *
+                 * This was two elements side by side: the photograph and the
+                 * loop, which show the same vase from the same angle. The row
+                 * said one thing twice, and because the two files are
+                 * different shapes the stagger between them read as an
+                 * accident rather than a composition.
+                 *
+                 * Now the still is the resting state and the clip is layered
+                 * over it, faded in on hover or by the button beneath. The
+                 * photograph is what loads, what prints, and what stays on
+                 * screen if the video cannot play.
+                 */
                 {
-                    layout: 'split',
-                    lead: {
+                    layout: 'hero',
+
+                    /*
+                     * Both files are 3:4, so the frame crops neither and
+                     * swapping between them moves nothing on the page.
+                     *
+                     * final-loop-3x4.mp4 is a derivative made for exactly
+                     * this. The camera pulls back through the original shot,
+                     * and across all 172 frames the vase never rises above
+                     * row 352 of 1280 — so the 320 rows removed from the top
+                     * are bare wall in every frame, with 30px to spare at the
+                     * tightest. The 9:16 original is untouched beside it.
+                     */
+                    ratio: '3 / 4',
+
+                    image: {
                         type: 'image',
                         src: 'assets/digital-kintsugi/digital-kintsugi-final-hero.webp',
                         alt: 'Completed blue ceramic Digital Kintsugi vase with gold repair '
                             + 'seams and a custom fabricated replacement component.',
                         width: 1200, height: 1600
                     },
-                    aside: {
+
+                    video: {
                         type: 'video', mode: 'preview',
-                        src: 'assets/digital-kintsugi/final-loop.mp4',
-                        poster: 'assets/digital-kintsugi/final-loop-poster.webp',
+                        src: 'assets/digital-kintsugi/final-loop-3x4.mp4',
                         alt: 'The completed vase turning slowly, gold seams catching the light',
-                        width: 720, height: 1280
-                    }
+                        width: 720, height: 960
+                    },
+
+                    playLabel: 'Play motion preview',
+                    pauseLabel: 'Pause motion preview'
                 },
 
                 /* --- printing the form, and the things that broke --- */
                 {
                     layout: 'editorial',
                     label: 'Prototype',
+
+                    /* ------------------------------------------------------
+                     * OPTIONAL WRITING.
+                     *
+                     * Both fields below are empty strings, and nothing renders
+                     * for an empty string — no element, no margin, no gap.
+                     * Replace the '' with a sentence and it appears; leave it
+                     * and the page is exactly as it is now.
+                     *
+                     * PARAGRAPH BREAK: put \n\n inside the quotes.
+                     *     intro: 'First paragraph.\n\nSecond paragraph.'
+                     *
+                     * Prompts to write against (never shown on the page):
+                     *   - What was this prototype testing?
+                     *   - What failed or behaved unexpectedly?
+                     *   - What changed in the next iteration?
+                     *   - Why was ceramic 3D printing right for the concept?
+                     *   - What did the physical tests reveal that the CAD
+                     *     model did not?
+                     * ---------------------------------------------------- */
+
+                    // under the section heading, above the media
+                    intro: '',
+
+                    // after the media, for a closing observation
+                    outro: '',
+
                     blocks: [
                         {
                             feature: {
@@ -342,6 +399,7 @@ window.SITE_MEDIA = {
                                 alt: 'A clay extruder mounted on a gantry printing a small '
                                     + 'vessel on a fab lab workbench',
                                 width: 540, height: 960,
+                                caption: '',
                                 // caption: 'Ceramic printing and material testing'
                             },
                             support: [
@@ -349,13 +407,24 @@ window.SITE_MEDIA = {
                                     type: 'image', src: 'assets/digital-kintsugi/process-02.webp',
                                     alt: 'The extruder nozzle laying a coil of clay onto a small '
                                         + 'cylindrical test print',
-                                    width: 900, height: 1200
+                                    width: 900, height: 1200,
+                                    /*
+                                     * caption: '' prints one line under
+                                     * THIS frame only. Deliberately not
+                                     * on every image — explain the ones
+                                     * that need it and leave the rest,
+                                     * or the section becomes a wall of
+                                     * text. Prompt: what changed, failed
+                                     * or was learned here?
+                                     */
+                                    caption: ''
                                 },
                                 {
                                     type: 'image', src: 'assets/digital-kintsugi/process-03.webp',
                                     alt: 'The same test print after failure, one extrusion '
                                         + 'slumped away from the wall',
-                                    width: 900, height: 1200
+                                    width: 900, height: 1200,
+                                    caption: ''
                                 }
                             ]
                         },
@@ -366,6 +435,7 @@ window.SITE_MEDIA = {
                                 alt: 'A hand holding a broken fragment above a painted prototype '
                                     + 'vessel missing a piece of its wall, shards on the cutting mat',
                                 width: 900, height: 1200,
+                                caption: '',
                                 // caption: 'Early prototype and fit testing'
                             },
                             support: [
@@ -373,7 +443,8 @@ window.SITE_MEDIA = {
                                     type: 'image', src: 'assets/digital-kintsugi/process-01.webp',
                                     alt: 'An unfired printed clay vase on a plywood board, its '
                                         + 'coil layers visible',
-                                    width: 900, height: 1200
+                                    width: 900, height: 1200,
+                                    caption: ''
                                 }
                             ]
                         }
@@ -396,9 +467,16 @@ window.SITE_MEDIA = {
                 {
                     layout: 'carousel',
                     label: 'Final Design',
+
+                    /*
+                     * Every stage may carry a `description` beside its title.
+                     * An empty one prints nothing and leaves no gap; the line
+                     * swaps as the stage changes. Keep them to a sentence.
+                     */
                     slides: [
                         {
                             title: 'Physical 3D scanning',
+                            description: '', // Why did the physical fracture need to become digital geometry?
                             media: {
                                 type: 'video', mode: 'preview',
                                 src: 'assets/digital-kintsugi/scanning-loop.mp4',
@@ -411,6 +489,7 @@ window.SITE_MEDIA = {
 
                         {
                             title: 'Scan result',
+                            description: '', // What needed to be cleaned, isolated, or interpreted?
                             media: {
                                 type: 'video', mode: 'preview',
                                 src: 'assets/digital-kintsugi/scan-result-loop.mp4',
@@ -423,6 +502,7 @@ window.SITE_MEDIA = {
 
                         {
                             title: 'Rhino replacement fitting',
+                            description: '', // How was the replacement geometry tested against the scan?
                             media: {
                                 type: 'video', mode: 'preview',
                                 src: 'assets/digital-kintsugi/rhino-fit-loop.mp4',
@@ -435,6 +515,7 @@ window.SITE_MEDIA = {
 
                         {
                             title: 'Gold repair',
+                            description: '', // How did the fabricated component connect to the repair concept?
                             media: {
                                 type: 'video', mode: 'preview',
                                 src: 'assets/digital-kintsugi/gold-repair.mp4',
@@ -462,6 +543,22 @@ window.SITE_MEDIA = {
                         + 'and final assembly.',
                     src: 'https://drive.google.com/file/d/1j3IB8NMIRCQF6sBq-4mrryxqNUZlOXpF/preview',
                     href: 'https://drive.google.com/file/d/1j3IB8NMIRCQF6sBq-4mrryxqNUZlOXpF/view',
+                    /* ------------------------------------------------------
+                     * OPTIONAL REFLECTION.
+                     *
+                     * Renders between the overview above and the Drive link
+                     * below, so the link stays the last thing in the block.
+                     * Empty string renders nothing at all. \n\n for a
+                     * paragraph break, same as the fields above.
+                     *
+                     * Prompts (never shown on the page):
+                     *   - What does the film communicate better than stills?
+                     *   - Which part of the process best represents this?
+                     *   - What would you approach differently next time?
+                     * ---------------------------------------------------- */
+                    reflection: '',
+                    reflectionLabel: 'Project note',
+
                     iframeTitle: 'Digital Kintsugi full project film',
                     playLabel: 'Play full project film',
                     linkLabel: 'Open film in Google Drive',
