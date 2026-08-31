@@ -356,7 +356,7 @@ window.SITE_MEDIA = {
                     },
 
                     playLabel: 'Play',
-                    pauseLabel: 'Pause'
+                    pauseLabel: 'Revert'
                 },
 
                 /* --- printing the form, and the things that broke --- */
@@ -476,7 +476,7 @@ window.SITE_MEDIA = {
                     slides: [
                         {
                             title: 'Physical 3D scanning',
-                            description: "I need to scan the physical fracture in order to have a reference on how the 3D printed piece should rougly look like. It didn't need to be perfect since I could fill in the gaps with the kintsugi technique later on.", // Why did the physical fracture need to become digital geometry?
+                            description: "I need to scan the physical fracture in order to have a reference on how the 3D printed piece should roughly look like. It didn't need to be perfect since I could fill in the gaps with the kintsugi technique later on. The process took a bit of back and forth so that I got every detail of the vase.", // Why did the physical fracture need to become digital geometry?
                             media: {
                                 type: 'video', mode: 'preview',
                                 src: 'assets/digital-kintsugi/scanning-loop.mp4',
@@ -489,7 +489,7 @@ window.SITE_MEDIA = {
 
                         {
                             title: 'Scan result',
-                            description: "The result showed the fractured vase and also some residual geometry from the table that needed to be cleaned up. Conveniently, the vase was detached from the scanned table, so it was a matter of selecting and deleting the table's geometry in Rhino", // What needed to be cleaned, isolated, or interpreted?
+                            description: "The result showed the fractured vase and also some residual geometry from the table that needed to be cleaned up. Conveniently, the vase was detached from the scanned table, so it was a matter of selecting and deleting the table's geometry in Rhino.", // What needed to be cleaned, isolated, or interpreted?
                             media: {
                                 type: 'video', mode: 'preview',
                                 src: 'assets/digital-kintsugi/scan-result-loop.mp4',
