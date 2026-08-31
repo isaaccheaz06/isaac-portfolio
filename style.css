@@ -1039,17 +1039,84 @@ main [id] {
 
 /* ---------- footer ---------- */
 
+/*
+ * Two variants, one rule set. The difference is which children are present,
+ * not a second block of CSS.
+ *
+ *   homepage        .footer-bar [ copyright | back to top ]
+ *   everywhere else .footer-bar [ email · linkedin · github | back to top ]
+ *                   .footer-copy
+ *
+ * The homepage has a full Contact section directly above, so repeating the
+ * three links under it would be saying the same thing twice; every other page
+ * has no Contact section, so the footer is where those links live. The URLs
+ * are the homepage's own, copied rather than invented.
+ *
+ * A column, so .footer-bar is one row of it and the copyright can be another
+ * on the pages that carry links above it.
+ */
 .footer {
     border-top: 1px solid var(--border);
     color: var(--faint);
     display: flex;
-    flex-wrap: wrap;
-    gap: 12px;
-    justify-content: space-between;
+    flex-direction: column;
+    gap: 18px;
     padding: 32px var(--gutter);
+}
+
+/*
+ * One row, whatever is on it: left item first, back-to-top last. Wrapping is
+ * the mobile behaviour — below about 380px the two simply stack, each at the
+ * start of its own line, with the row gap between them.
+ */
+.footer-bar {
+    align-items: baseline;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px 24px;
+    justify-content: space-between;
+}
+
+.footer-links {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0 10px;
+}
+
+/* separators drawn rather than typed, so the markup stays three plain links */
+.footer-links a::after {
+    color: var(--border-strong);
+    content: "\00b7";
+    margin-left: 10px;
+}
+
+.footer-links a:last-child::after {
+    content: none;
+}
+
+.footer-copy,
+.footer-links,
+.footer-top {
     font-size: 13px;
     letter-spacing: 0.06em;
     text-transform: uppercase;
+}
+
+.footer a {
+    color: var(--faint);
+    text-decoration: none;
+    transition: color 0.25s ease;
+}
+
+.footer a:hover {
+    color: var(--text);
+}
+
+/* the same outline the discipline links, meta links and contact rows use */
+.footer a:focus-visible {
+    color: var(--text);
+    outline: 2px solid var(--text);
+    outline-offset: 3px;
 }
 
 /* ---------- responsive ---------- */

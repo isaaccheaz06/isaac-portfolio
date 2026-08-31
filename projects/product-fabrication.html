@@ -33,7 +33,7 @@
             class="nav-resume" target="_blank" rel="noopener noreferrer">Resume</a>
     </header>
 
-    <main class="category-page">
+    <main id="top" class="category-page">
 
         <a href="../index.html#work" class="back-link">← Works</a>
 
@@ -89,8 +89,25 @@
     </main>
 
     <footer class="footer">
-        <p>Designed and built by Isaac Cheaz</p>
-        <p>Portfolio</p>
+        <!--
+          These pages have no Contact section, so the footer is where the
+          three destinations live. Same URLs, same target and rel as the
+          homepage's Contact rows.
+        -->
+        <div class="footer-bar">
+            <nav class="footer-links" aria-label="Contact">
+                <a href="https://mail.google.com/mail/?view=cm&fs=1&to=icheaz06@gmail.com&su=Portfolio%20Inquiry"
+                    target="_blank" rel="noopener noreferrer">Email</a>
+                <a href="https://www.linkedin.com/in/isaac-cheaz-235302365/" target="_blank"
+                    rel="noopener noreferrer">LinkedIn</a>
+                <a href="https://github.com/isaaccheaz06" target="_blank"
+                    rel="noopener noreferrer">GitHub</a>
+            </nav>
+
+            <a class="footer-top" href="#top">Back to top <span aria-hidden="true">&uarr;</span></a>
+        </div>
+
+        <p class="footer-copy">&copy; 2026 Isaac Cheaz</p>
     </footer>
 
     <script src="../script.js"></script>
