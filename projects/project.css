@@ -287,13 +287,14 @@
 
 .project-summary {
     color: var(--muted);
-    font-size: clamp(17px, 1.6vw, 21px);
-    line-height: 1.65;
+    font-size: clamp(10px, 1.65vw, 15px);
+    /* font-size: 15px; */
+    line-height: 1.5;
     /* the metadata block sits directly under this now, so the old 80px gap
        would have split the header apart; .project-meta carries the larger
        margin below itself instead */
-    margin-bottom: 44px;
-    max-width: 46ch;
+    margin-bottom: 25px;
+    max-width: 60ch;
     text-wrap: pretty;
 }
 
@@ -977,7 +978,7 @@
 
 .pm-support {
     display: grid;
-    gap: clamp(16px, 2vw, 28px);
+    gap: clamp(16px, 2vw, 20px);
     grid-auto-rows: 1fr;
 }
 
@@ -1022,13 +1023,13 @@
  * chrome is a hairline or a number instead.
  */
 .pm-viewer {
-    --pm-stage: min(62vh, 560px);
+    --pm-stage: min(44vh, 340px);
 }
 
 .pm-stage {
     align-items: center;
-    background-color: var(--surface);
-    border: 1px solid var(--border);
+    background-color: transparent;
+    border: 0;
     border-radius: 2px;
     display: flex;
     height: var(--pm-stage);
@@ -1061,29 +1062,28 @@
  */
 .pm-slide img,
 .pm-slide video {
+    background-color: transparent;
     height: 100%;
     object-fit: contain;
     width: 100%;
 }
 
 /*
- * flex-start, not baseline. The step can be two lines now — title, then an
- * optional description — and a wrapped flex container reports its LAST
- * baseline, so the control slid 89px down the row to sit level with the
- * description instead of the title it belongs to.
+ * Two columns, not a wrapping flex row. The step holds a description that
+ * spans its own full width, which as a flex item made the step claim the
+ * whole bar and drop the control onto a second line beneath it — measured
+ * at 110px below the title on desktop, 131px on a phone. A named column
+ * keeps the control top-right however many lines the text beside it runs to.
+ *
+ * `start`, not `baseline`, for the same reason: a wrapped flex container
+ * reports its LAST baseline, so the control aligned itself to the
+ * description rather than to the title it belongs to.
  */
 .pm-bar {
     align-items: start;
     border-top: 1px solid var(--border);
     display: grid;
     gap: 10px 20px;
-    /*
-     * Two columns, not a wrapping flex row. The step holds an optional
-     * description that spans its own full width, which as a flex item made
-     * the step claim the whole bar and pushed the control onto a second line
-     * under it. A named column keeps the control top-right however many
-     * lines the text beside it runs to.
-     */
     grid-template-columns: minmax(0, 1fr) auto;
     margin-top: 14px;
     padding-top: 14px;
@@ -1240,8 +1240,10 @@
 .pm-film {
     align-items: start;
     display: grid;
-    gap: clamp(24px, 4vw, 64px);
+    gap: clamp(24px, 2vw, 32px);
     grid-template-columns: minmax(0, 1fr) minmax(0, 0.95fr);
+    margin-inline: auto;
+    width: calc(100% - 150px);
 }
 
 .pm-film-text h2 {
@@ -1536,7 +1538,7 @@
  * one 3:4 slide among the clips shows whole and simply sits wider.
  */
 .pm-viewer {
-    --pm-stage: min(74vh, 620px);
+    --pm-stage: min(50vh, 400px);
     margin-inline: auto;
     max-width: 100%;
 }
@@ -1656,8 +1658,15 @@ p.pm-film-reflection-label {
     /* every multi-column composition folds to one column, in source order */
     .pm-split,
     .pm-block,
+    /*
+     * The 150px inset is a desktop gesture. Stacked in one column it was
+     * still being subtracted from the whole column, leaving the film 193px
+     * wide inside a 343px page — 44% of the width gone to margin. Full
+     * width here; the section's own padding is the only inset that scales.
+     */
     .pm-film {
         grid-template-columns: minmax(0, 1fr);
+        width: 100%;
     }
 
     /* the offset that made the asymmetry has nothing left to offset against */
@@ -1707,7 +1716,7 @@ p.pm-film-reflection-label {
         height: auto;
     }
 
-    .pm-feature figure > :is(img, video) {
+    .pm-feature figure> :is(img, video) {
         flex: none;
     }
 

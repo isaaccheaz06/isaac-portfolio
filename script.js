@@ -691,8 +691,8 @@ if (siteMedia) {
             delete clip.dataset.autoplayInView;
             frame.appendChild(clip);
 
-            const PLAY = section.playLabel || 'Play motion preview';
-            const PAUSE = section.pauseLabel || 'Pause motion preview';
+            const PLAY = section.playLabel || '';
+            const PAUSE = section.pauseLabel || '';
 
             const btn = el('button', 'pm-btn pm-hero-toggle');
             btn.type = 'button';
@@ -1069,7 +1069,7 @@ if (siteMedia) {
                 if (current.tagName === 'VIDEO') {
                     if (canPlay()) {
                         const p = current.play();
-                        if (p && p.catch) p.catch(() => {});
+                        if (p && p.catch) p.catch(() => { });
                     } else {
                         current.pause();
                     }
@@ -1091,7 +1091,7 @@ if (siteMedia) {
                     try { n.media.currentTime = 0; } catch (e) { /* ignore */ }
                     if (canPlay()) {
                         const p = n.media.play();
-                        if (p && p.catch) p.catch(() => {});
+                        if (p && p.catch) p.catch(() => { });
                     }
                 });
             });
@@ -1329,7 +1329,7 @@ if (siteMedia) {
                     // play() rejects if the browser blocks it; nothing to do
                     // but carry on, the poster simply stays put
                     const played = clip.play();
-                    if (played && played.catch) played.catch(() => {});
+                    if (played && played.catch) played.catch(() => { });
                 } else if (!clip.paused) {
                     clip.pause();
                 }

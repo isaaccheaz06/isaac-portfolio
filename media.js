@@ -355,8 +355,8 @@ window.SITE_MEDIA = {
                         width: 720, height: 960
                     },
 
-                    playLabel: 'Play motion preview',
-                    pauseLabel: 'Pause motion preview'
+                    playLabel: 'Play',
+                    pauseLabel: 'Pause'
                 },
 
                 /* --- printing the form, and the things that broke --- */
@@ -476,20 +476,20 @@ window.SITE_MEDIA = {
                     slides: [
                         {
                             title: 'Physical 3D scanning',
-                            description: '', // Why did the physical fracture need to become digital geometry?
+                            description: "I need to scan the physical fracture in order to have a reference on how the 3D printed piece should rougly look like. It didn't need to be perfect since I could fill in the gaps with the kintsugi technique later on.", // Why did the physical fracture need to become digital geometry?
                             media: {
                                 type: 'video', mode: 'preview',
                                 src: 'assets/digital-kintsugi/scanning-loop.mp4',
                                 poster: 'assets/digital-kintsugi/scanning-loop-poster.webp',
                                 alt: 'A handheld 3D scanner passing over the fractured vessel, '
                                     + 'projected light on the table and the capture building on screen',
-                                width: 540, height: 960
+                                width: 600, height: 960
                             }
                         },
 
                         {
                             title: 'Scan result',
-                            description: '', // What needed to be cleaned, isolated, or interpreted?
+                            description: "The result showed the fractured vase and also some residual geometry from the table that needed to be cleaned up. Conveniently, the vase was detached from the scanned table, so it was a matter of selecting and deleting the table's geometry in Rhino", // What needed to be cleaned, isolated, or interpreted?
                             media: {
                                 type: 'video', mode: 'preview',
                                 src: 'assets/digital-kintsugi/scan-result-loop.mp4',
@@ -502,7 +502,7 @@ window.SITE_MEDIA = {
 
                         {
                             title: 'Rhino replacement fitting',
-                            description: '', // How was the replacement geometry tested against the scan?
+                            description: 'The replacement geometry was made using a set of points manually placed on the fractured surface and then extruded and hollowed out using various techniques. It was then tested against the scan by overlaying it and checking for alignment and fit.', // How was the replacement geometry tested against the scan?
                             media: {
                                 type: 'video', mode: 'preview',
                                 src: 'assets/digital-kintsugi/rhino-fit-loop.mp4',
@@ -515,7 +515,7 @@ window.SITE_MEDIA = {
 
                         {
                             title: 'Gold repair',
-                            description: '', // How did the fabricated component connect to the repair concept?
+                            description: 'The final step was to mix gold pigment into epoxy and work it into the breaks of the vase. Instead of fixing the original fractures with the original broken pieces, a "stronger" PLA component was used to repair the damage.', // How did the fabricated component connect to the repair concept?
                             media: {
                                 type: 'video', mode: 'preview',
                                 src: 'assets/digital-kintsugi/gold-repair.mp4',
@@ -556,11 +556,11 @@ window.SITE_MEDIA = {
                      *   - Which part of the process best represents this?
                      *   - What would you approach differently next time?
                      * ---------------------------------------------------- */
-                    reflection: '',
-                    reflectionLabel: 'Project note',
+                    reflection: 'The Project Film was completed edited in Davinci Resolve and exported as a 1080p MP4. In terms of credits, the initial clip used at the start of the film was borrowed from BuzzFeed Nifty\'s "The Art of Kintsugi". The background music used in the film was "Notion" by The Rare Occasions ‧ 2016. As for the film\'s content itself, it includes various timelapses and images taken during the prototyping stage all the way to the final assembly that then condensed the work of multiple weeks into a 3-minute long video.',
+                    reflectionLabel: 'Film note',
 
                     iframeTitle: 'Digital Kintsugi full project film',
-                    playLabel: 'Play full project film',
+                    playLabel: 'Watch Now',
                     linkLabel: 'Open film in Google Drive',
                     ratio: '9 / 16',
                     poster: {
