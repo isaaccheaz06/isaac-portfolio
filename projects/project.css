@@ -740,6 +740,29 @@
 .pm-film-section {
     --pm-half: min(590px, 50vw - var(--gutter));
     margin-inline: calc(50% - var(--pm-half));
+
+    /*
+     * A wider gap than the section rhythm gives, to separate the film from
+     * the viewer above it.
+     *
+     * Every other section announces itself with .pm-head — a hairline, a
+     * number and a label. The film has no label in media.js, so it gets no
+     * head, and the carousel ran straight into it with nothing but the
+     * ordinary margin between them. Space is what stands in for that head.
+     *
+     * padding rather than margin, because adjacent section margins collapse
+     * to the larger of the two: a margin-top here would have to beat the
+     * carousel's margin-bottom outright to change anything, which means
+     * restating the rhythm instead of adding to it. Padding is additive, so
+     * this reads as "the usual gap, plus a bit more" and stays correct if
+     * that rhythm is ever retuned. The section has no background or border,
+     * so the padding is purely space.
+     *
+     * The amount is .pm-head's own internal spacing — its 18px padding-top
+     * plus its clamp(28px, 3vw, 44px) margin-bottom — so the film sits as
+     * far below the carousel as section content sits below its own heading.
+     */
+    padding-top: clamp(46px, calc(18px + 3vw), 62px);
 }
 
 /* A hairline and a number, which is all the labelling these need. */
@@ -1069,50 +1092,87 @@
 }
 
 /*
- * Two columns, not a wrapping flex row. The step holds a description that
- * spans its own full width, which as a flex item made the step claim the
- * whole bar and drop the control onto a second line beneath it — measured
- * at 110px below the title on desktop, 131px on a phone. A named column
- * keeps the control top-right however many lines the text beside it runs to.
+ * The bar is the positioning context for the rotation control, which is
+ * taken out of the flow entirely (see .pm-controls). Two reasons:
  *
- * `start`, not `baseline`, for the same reason: a wrapped flex container
- * reports its LAST baseline, so the control aligned itself to the
- * description rather than to the title it belongs to.
+ * 1. Out of flow, the control CANNOT be pushed down by a description, at any
+ *    length or width. A grid column got the same result, but only as an
+ *    outcome of the track sizing; this is structural.
+ * 2. It gives the description the full width of the bar. As a grid column
+ *    the text had to share the row with the control's 44px + 20px gutter,
+ *    and at 320px that left the description 218px of a 282px bar — 27
+ *    characters a line, with a mostly empty gutter beside ten of them.
+ *    Now: 282px, the whole bar.
+ *
+ * min-height so the pinned control cannot spill past the bottom border on a
+ * stage that has a title and no description: 1px border + 4px offset + 44px
+ * control.
  */
 .pm-bar {
-    align-items: start;
     border-top: 1px solid var(--border);
-    display: grid;
-    gap: 10px 20px;
-    grid-template-columns: minmax(0, 1fr) auto;
     margin-top: 14px;
+    min-height: 49px;
     padding-top: 14px;
+    position: relative;
 }
 
+/*
+ * Two rows, not a wrapping flex line.
+ *
+ * As flex, .pm-desc carried `flex: 1 1 100%` but was capped by
+ * `max-width: 56ch` (459px), so its hypothetical main size was 459px rather
+ * than the whole line — and flex then kept it BESIDE the title whenever
+ * titleWidth + 14px gap + 459px happened to fit the step.
+ *
+ * The title widths differ per stage (157 / 83 / 188 / 83px), so every stage
+ * had its own threshold: 630 / 556 / 661 / 556px. Anywhere between 556 and
+ * 630 the two short-titled stages sat beside their description while the two
+ * long-titled ones stacked. Measured on a step swept from 554px to 680px:
+ * at 560-620px stages 2 and 4 went beside, 1 and 3 did not.
+ *
+ * Rows cannot do that. Title is row 1 and description row 2 at every stage
+ * and every width, whatever length either one runs to.
+ *
+ * min-width so a long unbroken word shrinks the text rather than widening
+ * the whole bar — the parent track is minmax(0, 1fr) and would otherwise be
+ * pushed out by this item's min-content size.
+ */
 .pm-step {
-    align-items: baseline;
-    display: flex;
-    gap: 14px;
+    display: grid;
+    min-width: 0;
+    row-gap: 14px;
 }
 
+/*
+ * The title is the one line the control sits beside, so it is the only line
+ * that reserves room for it: 44px of control plus a 12px gutter. The
+ * description below starts past the control's bottom edge and takes the
+ * full width.
+ */
 .pm-title {
     color: var(--text);
     font-family: var(--font-display);
     font-size: 15px;
     font-weight: 500;
     letter-spacing: -0.01em;
+    padding-right: 56px;
 }
 
 /*
- * Pulled up by half the difference between the 44px target and the 24px line
- * it sits beside, so the icon centres on the title rather than hanging below
- * it. The bar's own 14px of top padding absorbs the overhang.
+ * Pinned to the bar's top-right corner.
+ *
+ * top:4px centres the 44px control on the title's line rather than hanging
+ * it below: the title sits 14px down (the bar's padding) and is 24px tall,
+ * so its centre is at 26px — and 4 + 22 is 26. Measured centre-to-centre
+ * offset is 0 at every width and on every stage.
  */
 .pm-controls {
     align-items: center;
     display: flex;
     gap: 4px;
-    margin-top: -10px;
+    position: absolute;
+    right: 0;
+    top: 4px;
 }
 
 /*
@@ -1583,20 +1643,18 @@
 }
 
 /*
- * The stage description, on its own line under the stage name and inside the
+ * The stage description, on its own row under the stage name and inside the
  * same live region, so a slide change is announced once rather than twice.
  *
+ * No flex sizing any more: as a grid row it fills the column by default and
+ * the measure below is the only thing that limits it.
+ *
  * :empty is doing real work: an undescribed stage still has the element, and
- * taking it out of the flex flow is what stops it reserving a row of gap
- * under the stages that do have one.
+ * display:none is what drops both the row and its gap, so a stage with no
+ * description keeps exactly the bar it had before descriptions existed.
  */
-.pm-step {
-    flex-wrap: wrap;
-}
-
 .pm-desc {
     color: var(--muted);
-    flex: 1 1 100%;
     font-size: 13px;
     line-height: 1.6;
     margin: 0;
@@ -1690,9 +1748,26 @@ p.pm-film-reflection-label {
         object-fit: contain;
     }
 
+    /*
+     * As many columns as there are images, not always two.
+     *
+     * `repeat(2, ...)` was right for the first block, which has two supports,
+     * and wrong for the second, which has one: the lone image took column one
+     * and column two stayed empty, so at 900px it rendered 347px wide inside
+     * a 712px row with a 347px dead strip beside it — half the width of
+     * every other frame in the sequence, and reading as detached from it.
+     *
+     * auto-fit collapses the tracks nothing occupies, so one image fills the
+     * row and two still sit side by side. General, and keyed to the content
+     * rather than to which block it is, so a support group of any size lands
+     * correctly without an nth-child exception.
+     *
+     * min() so the track can never demand more than the column has; below
+     * 560px the single-column rule takes over regardless.
+     */
     .pm-support {
         grid-auto-rows: auto;
-        grid-template-columns: repeat(2, minmax(0, 1fr));
+        grid-template-columns: repeat(auto-fit, minmax(min(220px, 100%), 1fr));
     }
 
     /*
@@ -1724,6 +1799,22 @@ p.pm-film-reflection-label {
     .pm-support {
         grid-column: auto;
         grid-row: auto;
+    }
+
+    /*
+     * The columns themselves, which the reset above never reached.
+     *
+     * `.pm-block` is (0,1,0) and `.pm-block.is-flipped` is (0,2,0), so the
+     * flipped block's own two-column rule outranked the one-column rule in
+     * this breakpoint no matter which came later in the file — and kept its
+     * desktop proportions all the way down. Measured: at 390px the flipped
+     * block was still `139px 188px`, so its feature image rendered 139px
+     * wide beside a sibling block whose feature was the full 343px.
+     *
+     * Matched specificity, so it lands.
+     */
+    .pm-block.is-flipped {
+        grid-template-columns: minmax(0, 1fr);
     }
 
     .pm-block.is-flipped .pm-feature {
