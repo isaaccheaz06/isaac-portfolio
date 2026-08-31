@@ -977,31 +977,40 @@ if (siteMedia) {
 
             let index = 0;
             let timer = null;
-            // rotation is off entirely for reduced motion, and stays off once
-            // the visitor has taken control
-            let wanted = !reduceMotion.matches;
+            /*
+             * One flag, and the control is the only thing that sets it: the
+             * stage's clip runs and the stages advance, or neither happens.
+             * It starts off under reduced motion, so nothing autoplays for
+             * anyone who asked not to be moved.
+             */
+            let playing = !reduceMotion.matches;
             let onScreen = false;
-            let hovering = false;
 
             const clearTimer = () => {
                 if (timer) { clearTimeout(timer); timer = null; }
             };
 
             /*
-             * Playing and advancing are separate questions.
+             * Playing and advancing are now the same question asked twice.
              *
-             * A clip on the stage should run whenever the stage is actually
-             * being looked at — that is what the slide IS. Advancing past it
-             * is a different matter, and yields to hover, focus and to any
-             * deliberate navigation. Conflating the two meant that clicking
-             * "next" once froze every later slide on its first frame.
+             * A clip runs when the visitor has asked for playback and the
+             * stage is really in front of them — paused means paused, and a
+             * clip in a background tab or scrolled out of view is not being
+             * watched either. onScreen and document.hidden never touch
+             * `playing` itself, so scrolling away and back cannot overturn a
+             * deliberate pause; they only decide whether the chosen state is
+             * currently in effect.
              */
-            const canPlay = () => onScreen && !document.hidden;
+            const canPlay = () => playing && onScreen && !document.hidden;
 
-            const canAdvance = () => wanted && onScreen && !hovering
-                && !document.hidden && !reduceMotion.matches;
+            /*
+             * Advancing needs all of that and one thing more. Reduced motion
+             * can still watch a clip on request — that is a deliberate press,
+             * not autoplay — but the stage never changes underneath them.
+             */
+            const canAdvance = () => canPlay() && !reduceMotion.matches;
 
-            const show = (next, viaUser) => {
+                const show = (next) => {
                 const from = index;
                 index = (next + nodes.length) % nodes.length;
 
@@ -1039,23 +1048,26 @@ if (siteMedia) {
                     : '';
                 thumbs.forEach((b, i) => b.setAttribute('aria-current', i === index ? 'true' : 'false'));
 
-                if (viaUser) surrender();
+                /*
+                 * Choosing a stage no longer stops playback. It used to: any
+                 * manual move surrendered rotation, on the reasoning that
+                 * nobody should have to race a carousel back to the slide
+                 * they were reading. With an explicit control that reasoning
+                 * is served better by the button — and the old rule would
+                 * now also silence the video, so picking stage 3 while
+                 * watching would freeze it on its first frame.
+                 *
+                 * So a stage change inherits the current state: paused shows
+                 * the new stage stopped on its poster, playing starts it.
+                 */
                 schedule();
             };
 
-            /* One deliberate interaction ends automatic rotation for good.
-               Nobody should have to race a carousel back to the slide they
-               were reading. */
-            const surrender = () => {
-                if (!wanted) return;
-                wanted = false;
-                setToggle();
-            };
-
             const setToggle = () => {
-                toggleBtn.replaceChildren(icon(wanted ? ICON.pause : ICON.play));
+                toggleBtn.replaceChildren(icon(playing ? ICON.pause : ICON.play));
+                // the label names what the press will DO, not the current state
                 toggleBtn.setAttribute('aria-label',
-                    wanted ? 'Pause automatic rotation' : 'Play stages automatically');
+                    playing ? 'Pause process video' : 'Play process video');
             };
 
             /*
@@ -1068,7 +1080,21 @@ if (siteMedia) {
 
                 if (current.tagName === 'VIDEO') {
                     if (canPlay()) {
+                        /*
+                         * play() and nothing else. currentTime is deliberately
+                         * untouched here, which is what makes resuming resume:
+                         * the only place it is rewound is show(), and only for
+                         * a slide that is actually changing. A clip paused at
+                         * 4.2s comes back at 4.2s.
+                         *
+                         * One exception handled by the browser rather than by
+                         * us: play() on a clip that reached its end starts it
+                         * over, which is the right answer for "genuinely
+                         * finished" without a flag to track it.
+                         */
                         const p = current.play();
+                        // a refused autoplay is not an error to recover from;
+                        // the poster stays and nothing advances behind it
                         if (p && p.catch) p.catch(() => { });
                     } else {
                         current.pause();
@@ -1096,28 +1122,34 @@ if (siteMedia) {
                 });
             });
 
-            thumbs.forEach((b, i) => b.addEventListener('click', () => show(i, true)));
+            thumbs.forEach((b, i) => b.addEventListener('click', () => show(i)));
 
+            /*
+             * The whole of the behaviour: flip the intent, redraw the button,
+             * and let schedule() work out what that means for the clip on the
+             * stage. Pausing pauses it where it stands; playing resumes it
+             * there. Keyboard activation arrives here too — it is a <button>,
+             * so Enter and Space fire this same click.
+             */
             toggleBtn.addEventListener('click', () => {
-                wanted = !wanted && !reduceMotion.matches;
+                playing = !playing;
                 setToggle();
                 schedule();
             });
 
             wrap.addEventListener('keydown', (e) => {
-                if (e.key === 'ArrowLeft') { e.preventDefault(); show(index - 1, true); }
-                else if (e.key === 'ArrowRight') { e.preventDefault(); show(index + 1, true); }
+                if (e.key === 'ArrowLeft') { e.preventDefault(); show(index - 1); }
+                else if (e.key === 'ArrowRight') { e.preventDefault(); show(index + 1); }
             });
 
-            // hover and keyboard focus both hold rotation; leaving resumes it
-            // only if the visitor never took over
-            const hold = (on) => { hovering = on; schedule(); };
-            wrap.addEventListener('pointerenter', () => hold(true));
-            wrap.addEventListener('pointerleave', () => hold(false));
-            wrap.addEventListener('focusin', () => hold(true));
-            wrap.addEventListener('focusout', (e) => {
-                if (!wrap.contains(e.relatedTarget)) hold(false);
-            });
+            /*
+             * Hover and focus used to hold rotation. They cannot now: pressing
+             * Play leaves focus on the button, which is inside the viewer, so
+             * the hold would stop the clip the press just started from ever
+             * advancing — and a visitor watching with the pointer resting on
+             * the stage would see the same. An explicit control makes the
+             * implicit one both redundant and wrong.
+             */
 
             /* swipe: a horizontal drag past a threshold moves one stage */
             let startX = null;
@@ -1135,14 +1167,16 @@ if (siteMedia) {
                 startX = startY = null;
                 // must be clearly horizontal, or it was a scroll
                 if (Math.abs(dx) > 45 && Math.abs(dx) > Math.abs(dy) * 1.4) {
-                    show(index + (dx < 0 ? 1 : -1), true);
+                    show(index + (dx < 0 ? 1 : -1));
                 }
             });
             stage.addEventListener('pointercancel', () => { startX = startY = null; });
 
             document.addEventListener('visibilitychange', schedule);
             reduceMotion.addEventListener('change', () => {
-                if (reduceMotion.matches) { wanted = false; setToggle(); }
+                // switching it on mid-session stops playback outright, the
+                // same as it would have prevented autoplay on load
+                if (reduceMotion.matches) { playing = false; setToggle(); }
                 schedule();
             });
 
