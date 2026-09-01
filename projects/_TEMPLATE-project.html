@@ -77,8 +77,9 @@
             <a href="../index.html#contact">Contact</a>
         </nav>
 
-        <a href="https://docs.google.com/document/d/11qATXeMCFB1Io2WauJywyM81skCrmu7SGtFiiL8NM3w/export?format=pdf"
-            class="nav-resume" target="_blank" rel="noopener noreferrer">Resume</a>
+        <a href="https://docs.google.com/document/d/11qATXeMCFB1Io2WauJywyM81skCrmu7SGtFiiL8NM3w/view"
+            class="nav-resume" target="_blank" rel="noopener noreferrer"
+            aria-label="Resume preview, opens in a new tab">Resume</a>
     </header>
 
     <main id="top" class="project-page" data-project="{{PROJECT SLUG}}">
@@ -86,17 +87,17 @@
         <a href="../index.html#work" class="back-link">← Back</a>
 
         <!-- Short discipline descriptor, e.g. Digital Fabrication, Interactive Systems -->
-        <p class="project-label">{{DESCRIPTOR}}</p>
+        <p class="project-label" data-reveal>{{DESCRIPTOR}}</p>
 
-        <h1>{{PROJECT TITLE}}</h1>
+        <h1 data-reveal>{{PROJECT TITLE}}</h1>
 
-        <p class="project-summary">{{ONE SENTENCE SUMMARY}}</p>
+        <p class="project-summary" data-reveal>{{ONE SENTENCE SUMMARY}}</p>
 
         <!--
           PROJECT METADATA. Delete any row you cannot fill. An absent row is
           honest; a blank one is not. Role, Year and Context are all optional.
         -->
-        <dl class="project-meta">
+        <dl class="project-meta" data-reveal>
             <div class="project-meta-row">
                 <dt>Role</dt>
                 <dd>{{YOUR ROLE}}</dd>
