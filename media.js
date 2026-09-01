@@ -355,8 +355,8 @@ window.SITE_MEDIA = {
                         width: 720, height: 960
                     },
 
-                    playLabel: 'Play',
-                    pauseLabel: 'Revert'
+                    playLabel: 'Play preview',
+                    pauseLabel: 'Show still'
                 },
 
                 /* --- printing the form, and the things that broke --- */
@@ -483,7 +483,7 @@ window.SITE_MEDIA = {
                                 poster: 'assets/digital-kintsugi/scanning-loop-poster.webp',
                                 alt: 'A handheld 3D scanner passing over the fractured vessel, '
                                     + 'projected light on the table and the capture building on screen',
-                                width: 600, height: 960
+                                width: 540, height: 960
                             }
                         },
 
@@ -556,7 +556,11 @@ window.SITE_MEDIA = {
                      *   - Which part of the process best represents this?
                      *   - What would you approach differently next time?
                      * ---------------------------------------------------- */
-                    reflection: 'The Project Film was completed edited in Davinci Resolve and exported as a 1080p MP4. In terms of credits, the initial clip used at the start of the film was borrowed from BuzzFeed Nifty\'s "The Art of Kintsugi". The background music used in the film was "Notion" by The Rare Occasions ‧ 2016. As for the film\'s content itself, it includes various timelapses and images taken during the prototyping stage all the way to the final assembly that then condensed the work of multiple weeks into a 3-minute long video.',
+                    reflection: 'Edited in DaVinci Resolve and exported at 1080p, the three-minute '
+                        + 'film condenses several weeks of prototyping, fabrication, scanning, '
+                        + 'and final assembly into one process record.\n\n'
+                        + 'Opening footage: BuzzFeed Nifty, \u201cThe Art of Kintsugi.\u201d '
+                        + 'Music: \u201cNotion\u201d by The Rare Occasions (2016).',
                     reflectionLabel: 'Film note',
 
                     iframeTitle: 'Digital Kintsugi full project film',
