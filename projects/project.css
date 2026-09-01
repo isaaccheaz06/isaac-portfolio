@@ -287,9 +287,19 @@
 
 .project-summary {
     color: var(--muted);
-    font-size: clamp(10px, 1.65vw, 15px);
-    /* font-size: 15px; */
-    line-height: 1.5;
+    /*
+     * The floor was 10px, and 1.65vw does not reach 15px until a 909px
+     * viewport — so every phone got the floor exactly: 10px type on a 15px
+     * line, measured at both 390px and 320px. This is the opening paragraph
+     * of the page and it was the smallest text on it.
+     *
+     * 14px is the floor now and the ramp is unchanged, so the size on
+     * desktop is the same 15px it always was; only the narrow end moves.
+     * Leading goes to 1.55 with it — at 14px that is 21.7px, which keeps
+     * the same open feel the 15px setting had.
+     */
+    font-size: clamp(14px, 1.65vw, 15px);
+    line-height: 1.55;
     /* the metadata block sits directly under this now, so the old 80px gap
        would have split the header apart; .project-meta carries the larger
        margin below itself instead */
@@ -1865,5 +1875,51 @@ p.pm-film-reflection-label {
 
     .pm-film-play:hover .pm-film-play-icon {
         transform: none;
+    }
+}
+
+
+/* ==========================================================================
+ * PROCESS VIEWER — DESKTOP PROPORTIONS
+ *
+ * min-width only, and last in the file, so it overrides the desktop sizing
+ * above without reaching the phone: at 900px and below not one of these
+ * declarations applies and the stacked viewer stands exactly as it was.
+ * ========================================================================== */
+
+@media (min-width: 901px) {
+
+    /*
+     * A column the shape of the film, rather than a portrait clip parked in
+     * the middle of a landscape panel.
+     *
+     * All four clips are 9:16 — 540x960, 540x960, 540x960 and 720x1280 — so
+     * with `contain` the picture is exactly `height * 0.5625` wide and the
+     * rest of the stage is empty. At the old 618px stage and 400px height
+     * that was 225px of video inside 618px of box: the video occupied 36% of
+     * its own stage and the other 64% was nothing.
+     *
+     * Both numbers move. The stage grows to 520-560px, which paints 293-315px
+     * of picture, and the box comes in to 520px — so the picture now holds
+     * 58% of the stage and the whole viewer reads as one upright column.
+     *
+     * 520px is also a real measure for what sits underneath: .pm-desc is
+     * capped at 56ch, which is 459px at its 13px size, so the description
+     * fills the bar rather than trailing off across it. The bar and the rail
+     * are siblings inside this box, so both inherit the width — stage,
+     * status row and numbers all end on the same two edges.
+     *
+     * Height as a clamp, not a fixed value: the vh term lets the stage use a
+     * tall window, and the 520px floor keeps the picture at 293px on a short
+     * one (1024x768 resolves to the floor) rather than collapsing with it.
+     * `contain` is untouched, so a slide of some other ratio would still show
+     * whole and simply sit narrower — nothing here can crop or stretch one.
+     *
+     * margin-inline: auto is already on .pm-viewer, so capping the width
+     * centres it.
+     */
+    .pm-viewer {
+        --pm-stage: clamp(520px, 60vh, 560px);
+        max-width: 520px;
     }
 }
