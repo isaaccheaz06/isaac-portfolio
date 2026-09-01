@@ -138,10 +138,7 @@ const coarsePointer = window.matchMedia('(pointer: coarse)');
 if (featured && !reduceMotion.matches && !coarsePointer.matches) {
     const cards = [...featured.querySelectorAll('.feature')].map((card) => ({
         el: card,
-        depth: Number(card.dataset.depth) || 1,
-        // captured once: the rotation set by .feature-N, which the drift
-        // below has to re-apply or writing to style.transform would drop it
-        rotation: getComputedStyle(card).transform,
+        depth: Number(card.dataset.depth) || 1
     }));
 
     let frame = null;
@@ -155,20 +152,48 @@ if (featured && !reduceMotion.matches && !coarsePointer.matches) {
             const offsetX = (event.clientX - bounds.left) / bounds.width - 0.5;
             const offsetY = (event.clientY - bounds.top) / bounds.height - 0.5;
 
-            for (const { el, depth, rotation } of cards) {
-                const x = -offsetX * depth * 16;
-                const y = -offsetY * depth * 16;
-                el.style.transform = `translate(${x}px, ${y}px) ${rotation}`;
+            for (const { el, depth } of cards) {
+                /*
+                 * Two variables, not a transform. .feature composes these
+                 * with the card's tilt and with the scroll reveal, so the
+                 * drift no longer has to carry the tilt along with it — and
+                 * cannot flatten a reveal that is still in flight.
+                 */
+                el.style.setProperty('--drift-x', `${-offsetX * depth * 16}px`);
+                el.style.setProperty('--drift-y', `${-offsetY * depth * 16}px`);
             }
         });
     });
 
     featured.addEventListener('mouseleave', () => {
         for (const { el } of cards) {
-            el.style.transform = '';
+            el.style.removeProperty('--drift-x');
+            el.style.removeProperty('--drift-y');
         }
     });
 }
+
+/* ==========================================================================
+ * THE HERO STAGE
+ *
+ * Three things move in the hero and none of them may move at the same time
+ * as another: the line that types itself, the wave that crosses the title,
+ * and the small bob under View Work. Left to their own timers they were
+ * three animations competing for one pair of eyes — the wave arriving
+ * halfway through a word being deleted, the button nodding under both.
+ *
+ * So none of them owns a schedule any more. Each registers what it can DO
+ * on this object, and the director at the bottom of the file decides when.
+ * That is also what makes the whole hero idempotent in one place: there is a
+ * single token to bump and a single timer to clear, however many effects are
+ * eventually hung off it.
+ */
+const heroStage = {
+    wave: null,     // { run(alive), stop() }
+    type: null,     // { typeIn(alive), deleteOut(alive), advance(), setStill(), stop() }
+    bob: null       // { arm(), disarm() }
+};
+
 
 /* ---------- magnetic letters ---------- */
 
@@ -184,24 +209,123 @@ const magneticRoots = document.querySelectorAll('.magnetic-text');
 if (magneticRoots.length && !reduceMotion.matches && !coarsePointer.matches) {
     const RADIUS = 84;
     const MAX_LIFT = 15;
-    const letters = [];
 
+    /*
+     * The wave.
+     *
+     * STEP is the gap between one letter starting and the next; WORD_GAP is
+     * added again at every space. Without it the wave crosses a space at the
+     * same rate it crosses a letter, which reads as a machine sweeping a
+     * string rather than as something travelling through a sentence — the
+     * pause at a word boundary is what makes it feel like reading.
+     *
+     * 46 gaps at 58ms plus 9 word boundaries at 100ms puts the last letter
+     * 3.57s behind the first, and its own 0.7s of travel closes the wave at
+     * about 4.3s — slow enough that the pulse reads as one thing crossing
+     * the sentence rather than as a shimmer over all of it at once.
+     *
+     * The sweep is comfortably shorter than EVERY, so a wave has always
+     * finished and cleared before the next is armed; runWave() takes the
+     * class off at waveSpan and does not put it back until 15s.
+     *
+     * EVERY is measured start-to-start, so the title is still for roughly
+     * twelve of the fifteen seconds.
+     */
+    const WAVE_STEP = 58;
+    const WAVE_WORD_GAP = 100;
+    const WAVE_DURATION = 700;
+    const WAVE_FIRST = 1500;
+    const WAVE_EVERY = 15000;
+
+    /*
+     * Two coordinate systems used to be one, and that was the bug.
+     *
+     * `points` caches a centre per letter so the pointer handler is not
+     * calling getBoundingClientRect 47 times a frame. It used to cache
+     * getBoundingClientRect's own output, which is VIEWPORT-relative, and
+     * refresh it on resize and on fonts.ready only — never on scroll. So the
+     * hot zone stayed wherever the page happened to be scrolled the last
+     * time measure() ran, and every scroll moved the letters out from under
+     * it. Measured: with the page scrolled 1574px, hovering a letter did
+     * nothing and hovering 1574px below it lifted six.
+     *
+     * That is what made Back navigation look like the trigger. Coming back,
+     * the browser restores the previous scroll offset, and measure() runs
+     * 0.7s later off the reveal animation — by then at the restored offset.
+     * The centres are cached against that, so scrolling up to the title
+     * leaves the hot zone a screen and a half below it, and the effect is
+     * dead for the life of the page: nothing re-measures except a resize,
+     * which is exactly why resizing the window "fixed" it.
+     *
+     * Document coordinates instead. A letter's document position does not
+     * change when the page scrolls, so the cache stays true and there is no
+     * scroll listener to throttle — the pointer is converted on the way in
+     * rather than 47 centres being converted on the way out.
+     */
+    const letters = [];
     let points = [];
 
-    const measure = () => {
-        points = letters.map((el) => {
-            const rect = el.getBoundingClientRect();
-            return { el, cx: rect.left + rect.width / 2, cy: rect.top + rect.height / 2 };
-        });
+    let ready = false;
+    let frame = null;
+    let pending = null;          // newest pointer position, document coords
+    let measureQueued = false;
+
+    /*
+     * The letters own --letter-lift, and nothing else writes to it.
+     *
+     * The lift used to be written straight to el.style.transform, which made
+     * `transform` on .letter a shared resource: anything else that wanted to
+     * transform a letter — a scroll reveal, most obviously — would silently
+     * erase the lift, or be erased by it, depending on which wrote last.
+     * A custom property cannot collide that way. The CSS composes it into
+     * transform, and the transition on .letter still runs because the
+     * computed transform changes when the variable does.
+     */
+    const rest = () => {
+        for (const el of letters) el.style.removeProperty('--letter-lift');
     };
 
-    // Letters are still mid-reveal (translateY(100%)) at the moment this
-    // script runs, so measuring now would cache positions offset by a full
-    // line-height. Wait for each line's own reveal to finish before trusting
-    // its letters' rects; a line with no reveal animation (animation-name:
-    // none) counts as already settled so the generic .magnetic-text path
-    // still works without the line-mask pattern.
-    let ready = false;
+    /*
+     * Read the resting layout, not wherever the cursor has pushed a letter.
+     * .is-measuring drops both the displacement and its transition for the
+     * length of the read, so a measure taken mid-interaction lands on the
+     * same numbers as one taken at rest.
+     */
+    const measure = () => {
+        measureQueued = false;
+        const sx = window.scrollX;
+        const sy = window.scrollY;
+
+        for (const root of magneticRoots) root.classList.add('is-measuring');
+
+        points = letters.map((el) => {
+            const rect = el.getBoundingClientRect();
+            return {
+                el,
+                cx: rect.left + sx + rect.width / 2,
+                cy: rect.top + sy + rect.height / 2
+            };
+        });
+
+        for (const root of magneticRoots) root.classList.remove('is-measuring');
+    };
+
+    // resize fires in bursts; one measure per frame is enough
+    const remeasure = () => {
+        if (measureQueued) return;
+        measureQueued = true;
+        requestAnimationFrame(measure);
+    };
+
+    /*
+     * animationend tells us the reveal has finished and the letters are
+     * where they will stay — but it is not a signal that always arrives. An
+     * animation that is interrupted fires animationcancel instead, and one
+     * that never starts fires nothing, and in either case `ready` would
+     * stick at false and the effect would be dead with no way back. So:
+     * whichever of the three arrives first settles the line, and the timeout
+     * guarantees there is a third.
+     */
     let pendingLines = 0;
     let settledLines = 0;
 
@@ -210,6 +334,14 @@ if (magneticRoots.length && !reduceMotion.matches && !coarsePointer.matches) {
         measure();
         if (settledLines >= pendingLines) ready = true;
     };
+
+    /*
+     * One running offset across every line of the title, so the wave crosses
+     * a line break as one continuous sweep instead of restarting three
+     * times. Set once here as an inline custom property and never touched
+     * again — the animation reads it as its delay.
+     */
+    let waveOffset = 0;
 
     for (const root of magneticRoots) {
         const lines = root.querySelectorAll('.line-inner');
@@ -226,10 +358,14 @@ if (magneticRoots.length && !reduceMotion.matches && !coarsePointer.matches) {
                 const wordSpan = document.createElement('span');
                 wordSpan.className = 'word';
 
+                if (wordIndex > 0 || waveOffset > 0) waveOffset += WAVE_WORD_GAP;
+
                 for (const char of word) {
                     const letterSpan = document.createElement('span');
                     letterSpan.className = 'letter';
                     letterSpan.textContent = char;
+                    letterSpan.style.setProperty('--wave-delay', `${waveOffset}ms`);
+                    waveOffset += WAVE_STEP;
                     wordSpan.appendChild(letterSpan);
                     letters.push(letterSpan);
                 }
@@ -244,65 +380,584 @@ if (magneticRoots.length && !reduceMotion.matches && !coarsePointer.matches) {
             // the reveal mask only needs to clip while the line is sliding
             // in — left on, it would also clip the letters' own displacement
             const mask = line.closest('.line-mask');
+            let settled = false;
+
+            const settle = () => {
+                if (settled) return;
+                settled = true;
+                if (mask) mask.style.overflow = 'visible';
+                onLineSettled();
+            };
 
             if (getComputedStyle(line).animationName === 'none') {
-                onLineSettled();
+                settle();
             } else {
-                line.addEventListener('animationend', () => {
-                    if (mask) mask.style.overflow = 'visible';
-                    onLineSettled();
-                }, { once: true });
+                line.addEventListener('animationend', settle, { once: true });
+                line.addEventListener('animationcancel', settle, { once: true });
+                // 0.7s of reveal plus 140ms of stagger; a second is past it
+                setTimeout(settle, 1000);
             }
         }
     }
 
-    window.addEventListener('resize', measure);
+    const apply = () => {
+        frame = null;
+        if (!pending) return;
+
+        const { x, y } = pending;
+
+        for (const { el, cx, cy } of points) {
+            const distance = Math.hypot(cx - x, cy - y);
+
+            if (distance >= RADIUS) {
+                el.style.removeProperty('--letter-lift');
+                continue;
+            }
+
+            /*
+             * Lift straight up rather than pushing radially away. A radial
+             * push scatters letters in every direction at once and reads as
+             * noise on a line of text; a vertical hop keeps the baseline
+             * legible and reads as the cursor sweeping letters up as it
+             * passes. Quadratic falloff so only letters genuinely near the
+             * cursor move much.
+             */
+            const strength = (1 - distance / RADIUS) ** 2;
+            el.style.setProperty('--letter-lift', `${-strength * MAX_LIFT}px`);
+        }
+    };
+
+    /*
+     * One frame in flight at a time, and it always renders the NEWEST pointer
+     * position rather than the one that happened to open the window — the
+     * old guard returned early and threw away every later move in the frame,
+     * so a fast sweep lagged the cursor by up to 16ms of stale input.
+     */
+    const schedule = () => {
+        if (frame !== null) return;
+        frame = requestAnimationFrame(apply);
+    };
+
+    document.addEventListener('pointermove', (event) => {
+        // a pen or a finger is not a cursor to steer away from, and someone
+        // who turned motion off mid-session should stop being followed
+        if (!ready || event.pointerType !== 'mouse' || reduceMotion.matches) return;
+        pending = { x: event.clientX + window.scrollX, y: event.clientY + window.scrollY };
+        schedule();
+    });
+
+    /*
+     * Letting go.
+     *
+     * Distance alone used to be the only way a letter came down, so a cursor
+     * that left the window mid-sweep left whatever it was touching held up
+     * until the pointer came back. pointerleave on the document fires when
+     * the cursor leaves the window entirely; blur covers the tab or window
+     * losing focus while the pointer is still inside it. The letters ease
+     * home on their own transition rather than snapping — removing the
+     * property animates to 0 the same way setting it animates away from it.
+     */
+    const release = () => {
+        pending = null;
+        if (frame !== null) {
+            cancelAnimationFrame(frame);
+            frame = null;
+        }
+        rest();
+    };
+
+    document.addEventListener('pointerleave', release);
+    window.addEventListener('blur', release);
+
+    /*
+     * THE WAVE, AS SOMETHING THE DIRECTOR CAN ASK FOR
+     *
+     * No cadence here and no timer of its own beyond the one that takes the
+     * class off at the end of a sweep. run() resolves when the last letter
+     * is home, which is what lets the director say "wave, then wait, then
+     * type" in a straight line instead of guessing durations.
+     */
+    let waveEnd = null;
+    // the whole sweep: the last letter's delay plus its own travel
+    const waveSpan = waveOffset - WAVE_STEP + WAVE_DURATION;
+
+    const stopWave = () => {
+        clearTimeout(waveEnd);
+        waveEnd = null;
+        for (const root of magneticRoots) root.classList.remove('is-waving');
+    };
+
+    heroStage.wave = {
+        span: waveSpan,
+        stop: stopWave,
+        run: (alive) => new Promise((resolve) => {
+            for (const root of magneticRoots) {
+                /*
+                 * Off, reflow, on. Re-adding a class the element already
+                 * has does not restart a CSS animation; taking it off and
+                 * forcing the style to be recomputed in between does.
+                 * offsetWidth is read for that flush and nothing else.
+                 */
+                root.classList.remove('is-waving');
+                void root.offsetWidth;
+                root.classList.add('is-waving');
+            }
+
+            waveEnd = setTimeout(() => {
+                waveEnd = null;
+                for (const root of magneticRoots) root.classList.remove('is-waving');
+                resolve(alive());
+            }, waveSpan + 120);
+        })
+    };
+
+    window.addEventListener('resize', remeasure);
 
     /*
      * The display face is loaded async with font-display: swap, so it can
      * land after the reveal finishes. When it does, every glyph advance
-     * changes and the cached centres are silently wrong — letters would
-     * then lift while the cursor is nowhere near them.
+     * changes and the cached centres are silently wrong — letters would then
+     * lift while the cursor is nowhere near them.
      */
     if (document.fonts && document.fonts.ready) {
-        document.fonts.ready.then(measure);
+        document.fonts.ready.then(remeasure);
     }
 
+    /*
+     * Coming back to the page.
+     *
+     * Restored from the back/forward cache, none of the code above runs
+     * again: the listeners, the split letters and the cached centres are all
+     * still in the heap exactly as they were left. What is NOT still true is
+     * the interaction state — the pointer is wherever it is now, not where
+     * it was when the page was navigated away from, and any letter left
+     * lifted is still lifted. And if the page was navigated away from during
+     * the reveal, `ready` never became true.
+     *
+     * So this resets rather than re-initialises. It attaches nothing, builds
+     * nothing and re-splits nothing, which is what keeps a second visit from
+     * ending up with two of every listener.
+     */
+    window.addEventListener('pageshow', (event) => {
+        if (event.persisted) ready = true;
+        release();
+        remeasure();
+    });
+
+    // returning to a background tab: layout may have changed under it, and
+    // a lift left mid-transition should not survive the trip
+    document.addEventListener('visibilitychange', () => {
+        if (document.hidden) return;
+        release();
+        remeasure();
+    });
+}
+
+
+/* ---------- the project-card cursor ---------- */
+
+/*
+ * One block, shared by all four cards, that stands in for the pointer while
+ * it is over one of them.
+ *
+ * Delegated to the grid rather than bound per card: three listeners in
+ * total, not twelve, and a card added to the markup later is picked up with
+ * no change here.
+ */
+const cardGrid = document.querySelector('.featured');
+const finePointer = window.matchMedia('(hover: hover) and (pointer: fine)');
+
+/*
+ * A block that follows the pointer is only meaningful where there IS a
+ * pointer to follow, and hiding the real cursor for someone who asked for
+ * less motion takes away a thing they rely on to give them a thing they did
+ * not ask for. Both cases keep the ordinary cursor and no block is ever
+ * built — which is also why the <html> class is set from in here rather
+ * than sitting in the markup.
+ */
+if (cardGrid && finePointer.matches && !reduceMotion.matches
+    && !document.querySelector('.card-cursor')) {
+
+    const cursor = document.createElement('div');
+    cursor.className = 'card-cursor';
+    // decorative: the card's own title and descriptor already say where this
+    // link goes, and a screen reader has no pointer for this to follow
+    cursor.setAttribute('aria-hidden', 'true');
+
+    const box = document.createElement('span');
+    box.className = 'card-cursor-box';
+    box.textContent = 'View';
+    cursor.appendChild(box);
+    document.body.appendChild(cursor);
+
+    /*
+     * Beside the pointer, not under it. The system cursor is left alone —
+     * it is the thing that says "this is clickable" and it says it in the
+     * shape the visitor's own OS taught them — so this sits down and to the
+     * right of the arrow's tip, clear of the roughly 12x19px the arrow
+     * itself occupies.
+     */
+    const OFFSET_X = 16;
+    const OFFSET_Y = 8;
+    const EDGE = 8;
+
+    let x = 0;
+    let y = 0;
     let frame = null;
+    let shown = false;
 
-    document.addEventListener('mousemove', (event) => {
-        if (!ready || frame) return;
+    const draw = () => {
+        frame = null;
 
-        frame = requestAnimationFrame(() => {
-            frame = null;
+        /*
+         * Flipped rather than squashed at an edge. Placing it to the left of
+         * the pointer keeps the whole label on screen and keeps the same gap
+         * between arrow and box, where clamping would slide the box under
+         * the arrow at exactly the moment it is hardest to read.
+         *
+         * Measured per frame because the box is a fixed 52x29 only until the
+         * text or the type size changes; offsetWidth on a fixed, composited
+         * element that has already been laid out is a cheap read.
+         */
+        const w = box.offsetWidth;
+        const h = box.offsetHeight;
+        const vw = document.documentElement.clientWidth;
+        const vh = document.documentElement.clientHeight;
 
-            for (const { el, cx, cy } of points) {
-                const distance = Math.hypot(cx - event.clientX, cy - event.clientY);
+        let left = x + OFFSET_X;
+        let top = y + OFFSET_Y;
 
-                if (distance >= RADIUS) {
-                    el.style.transform = '';
-                    continue;
-                }
+        if (left + w > vw - EDGE) left = x - OFFSET_X - w;
+        if (top + h > vh - EDGE) top = y - OFFSET_Y - h;
 
-                /*
-                 * Lift straight up rather than pushing radially away. A
-                 * radial push scatters letters in every direction at once
-                 * and reads as noise on a line of text; a vertical hop
-                 * keeps the baseline legible and reads as the cursor
-                 * sweeping letters up as it passes. Quadratic falloff so
-                 * only letters genuinely near the cursor move much.
-                 */
-                const strength = (1 - distance / RADIUS) ** 2;
-                el.style.transform = `translateY(${-strength * MAX_LIFT}px)`;
-            }
-        });
-    });
+        // and if flipping pushed it off the other side instead, sit still
+        // inside the edge rather than off it
+        left = Math.max(EDGE, Math.min(left, vw - EDGE - w));
+        top = Math.max(EDGE, Math.min(top, vh - EDGE - h));
 
-    document.addEventListener('mouseleave', () => {
-        for (const { el } of points) {
-            el.style.transform = '';
+        cursor.style.transform = `translate3d(${left}px, ${top}px, 0)`;
+    };
+
+    // one write per frame however many moves arrive in it, and the write is
+    // a transform on a fixed element, so it never touches layout
+    const schedule = () => {
+        if (frame === null) frame = requestAnimationFrame(draw);
+    };
+
+    const show = (event) => {
+        x = event.clientX;
+        y = event.clientY;
+
+        if (!shown) {
+            shown = true;
+            // place it before it fades in, or it would scale up from
+            // wherever the pointer happened to leave it last time
+            draw();
+            cursor.classList.add('is-visible');
         }
+
+        schedule();
+    };
+
+    const hide = () => {
+        if (!shown) return;
+        shown = false;
+        cursor.classList.remove('is-visible');
+        if (frame !== null) {
+            cancelAnimationFrame(frame);
+            frame = null;
+        }
+    };
+
+    const overCard = (node) => !!(node && node.closest && node.closest('.feature'));
+
+    cardGrid.addEventListener('pointermove', (event) => {
+        if (event.pointerType !== 'mouse') return;
+        if (overCard(event.target)) show(event);
+        else hide();
     });
+
+    // entering without moving again — the page scrolling under a still
+    // pointer, or the pointer arriving from outside the window
+    cardGrid.addEventListener('pointerover', (event) => {
+        if (event.pointerType === 'mouse' && overCard(event.target)) show(event);
+    });
+
+    cardGrid.addEventListener('pointerout', (event) => {
+        if (!overCard(event.relatedTarget)) hide();
+    });
+
+    /*
+     * Every way out of the grid that is not a pointer moving off a card.
+     * A block left visible after any of these is a block frozen on screen
+     * with no cursor near it, which is worse than never showing one.
+     */
+    cardGrid.addEventListener('pointerleave', hide);
+    document.addEventListener('pointerleave', hide);
+    window.addEventListener('blur', hide);
+    window.addEventListener('pagehide', hide);
+    document.addEventListener('visibilitychange', () => {
+        if (document.hidden) hide();
+    });
+
+    // restored from the back/forward cache the block is still in the DOM and
+    // may still be wearing .is-visible from before the navigation
+    window.addEventListener('pageshow', hide);
+}
+
+
+/* ---------- the typing line ---------- */
+
+/*
+ * Two phrases on the small line above the hero title. Scoped to
+ * [data-typewriter] so it can only ever touch the one element that opts in —
+ * .eyebrow is also the label on every category page and none of those should
+ * start typing.
+ *
+ * This no longer decides WHEN anything happens. It exposes two verbs, each
+ * resolving when its own run of characters is finished, and the director
+ * below places them around the title wave.
+ */
+const typewriter = document.querySelector('[data-typewriter]');
+
+if (typewriter) {
+    const out = typewriter.querySelector('.typewriter-text');
+    const caret = typewriter.querySelector('.typewriter-caret');
+
+    const PHRASES = ['hi, i\u2019m isaac', 'welcome to my portfolio...'];
+    // what the line says when it is not allowed to move: both phrases, at
+    // once, which is what the animation would have said over time
+    const STILL = 'hi, i\u2019m isaac welcome to my portfolio...';
+    const TYPE = 100;       // per character
+    const DELETE = 62;      // deleting reads as faster than writing
+
+    let phrase = 0;
+    let timer = null;
+
+    const stop = () => {
+        clearTimeout(timer);
+        timer = null;
+    };
+
+    /*
+     * Walk the visible text towards a target length, one character per
+     * tick, and resolve when it arrives. Reading the length off the DOM
+     * rather than from a counter is what makes this safe to interrupt:
+     * whatever is on screen when a run is cancelled is exactly where the
+     * next run starts from, with no separate index to fall out of step.
+     */
+    const walk = (target, per, alive) => new Promise((resolve) => {
+        const text = PHRASES[phrase];
+
+        const stepOnce = () => {
+            if (!alive()) {
+                resolve(false);
+                return;
+            }
+
+            const n = out.textContent.length;
+
+            if (n === target) {
+                resolve(true);
+                return;
+            }
+
+            out.textContent = text.slice(0, n + (n < target ? 1 : -1));
+            timer = setTimeout(stepOnce, per);
+        };
+
+        stepOnce();
+    });
+
+    heroStage.type = {
+        typeIn: (alive) => walk(PHRASES[phrase].length, TYPE, alive),
+        deleteOut: (alive) => walk(0, DELETE, alive),
+        advance: () => { phrase = (phrase + 1) % PHRASES.length; },
+        stop,
+
+        // the resting state for anyone who asked not to be moved
+        setStill: () => {
+            stop();
+            out.textContent = STILL;
+            if (caret) caret.style.display = 'none';
+        },
+
+        // start of a run: the line is emptied so the first phrase types in
+        // rather than appearing already finished. The markup ships holding
+        // that phrase, so with no JavaScript at all it simply stays there.
+        clear: () => {
+            stop();
+            phrase = 0;
+            out.textContent = '';
+            if (caret) caret.style.display = '';
+        }
+    };
+}
+
+
+/* ---------- the hero director ---------- */
+
+/*
+ * WHO MOVES, AND WHEN.
+ *
+ * The rule is that the hero says one thing at a time. Typing finishes, the
+ * page goes quiet, the title waves, the page goes quiet again, and only then
+ * does the line delete itself and write the next phrase. Nothing overlaps,
+ * and between any two effects there is at least QUIET of complete stillness —
+ * which is the part that makes it read as pacing rather than as activity.
+ *
+ * Written as one await-chain because that is what the requirement literally
+ * is: a sequence. A set of timers that each knew their own interval could
+ * express the same intent only as an arithmetic coincidence, and would drift
+ * out of it the moment a phrase changed length.
+ *
+ * Cancellation is a single integer. Every await checks whether the token it
+ * started with is still current, so a pageshow or a tab switch simply bumps
+ * it and every waiting step in the old run returns instead of resuming. That
+ * is the whole of the idempotence: there is no way to have two chains
+ * running, because the second one invalidates the first before it starts.
+ */
+const heroDirector = () => {
+    const hero = document.querySelector('.hero');
+    if (!hero || (!heroStage.type && !heroStage.wave)) return null;
+
+    const ARRIVE = 600;      // before the first character
+    const QUIET = 1350;      // stillness between any two effects
+    const HOLD = 5000;       // a finished phrase stays at least this long
+    const CADENCE = 15000;   // wave start to wave start, when it can be met
+
+    let token = 0;
+    let timer = null;
+
+    const wait = (ms, alive) => new Promise((resolve) => {
+        timer = setTimeout(() => {
+            timer = null;
+            resolve(alive());
+        }, ms);
+    });
+
+    const stop = () => {
+        token++;
+        clearTimeout(timer);
+        timer = null;
+        if (heroStage.type) heroStage.type.stop();
+        if (heroStage.wave) heroStage.wave.stop();
+        if (heroStage.bob) heroStage.bob.disarm();
+    };
+
+    const run = async () => {
+        stop();
+
+        if (reduceMotion.matches) {
+            // everything visible, nothing moving
+            if (heroStage.type) heroStage.type.setStill();
+            return;
+        }
+
+        if (document.hidden) return;
+
+        const mine = ++token;
+        const alive = () => mine === token;
+
+        if (heroStage.type) heroStage.type.clear();
+
+        if (!await wait(ARRIVE, alive)) return;
+
+        let lastWave = 0;
+        let first = true;
+
+        while (alive()) {
+            if (heroStage.type && !await heroStage.type.typeIn(alive)) return;
+
+            if (!await wait(QUIET, alive)) return;
+
+            if (heroStage.wave) {
+                /*
+                 * The wave aims for one start every fifteen seconds, but it
+                 * is a target rather than a deadline: it will never cut into
+                 * typing to hit it, and the extra stillness that waiting
+                 * produces is the point rather than a cost. The first wave
+                 * skips the wait entirely — arriving on the page is its own
+                 * starting gun.
+                 */
+                const due = lastWave + CADENCE - performance.now();
+                if (!first && due > 0 && !await wait(due, alive)) return;
+
+                lastWave = performance.now();
+                if (!await heroStage.wave.run(alive)) return;
+
+                if (!await wait(QUIET, alive)) return;
+            }
+
+            /*
+             * The buffers and the sweep have already held the finished
+             * phrase for QUIET + span + QUIET. This only waits if that came
+             * to less than the five seconds a phrase is owed — so the hold
+             * is a floor, not another delay stacked on top of one.
+             */
+            if (heroStage.wave) {
+                const held = QUIET * 2 + heroStage.wave.span;
+                if (held < HOLD && !await wait(HOLD - held, alive)) return;
+            } else if (!await wait(HOLD, alive)) {
+                return;
+            }
+
+            // the opening sequence has landed; the button may start nodding
+            if (first && heroStage.bob) heroStage.bob.arm();
+            first = false;
+
+            if (heroStage.type) {
+                if (!await heroStage.type.deleteOut(alive)) return;
+                heroStage.type.advance();
+                if (!await wait(400, alive)) return;
+            }
+        }
+    };
+
+    return { run, stop };
+};
+
+const heroShow = heroDirector();
+
+if (heroShow) {
+    heroShow.run();
+
+    // every genuine arrival restarts the sequence from the top, and stop()
+    // inside run() guarantees the previous one is already dead
+    window.addEventListener('pageshow', heroShow.run);
+    window.addEventListener('pagehide', heroShow.stop);
+
+    document.addEventListener('visibilitychange', () => {
+        if (document.hidden) heroShow.stop();
+        else heroShow.run();
+    });
+
+    reduceMotion.addEventListener('change', heroShow.run);
+}
+
+
+/* ---------- the View Work bob ---------- */
+
+/*
+ * The primary action nods, once every five and a half seconds, by three
+ * pixels. Get in touch does not, which is the whole point: two buttons that
+ * both moved would rank neither.
+ *
+ * The bob is a custom property rather than a transform, because .button
+ * already transforms on hover. Composed in CSS, the two add up; written to
+ * the same property they would take turns erasing each other, and a hover
+ * that landed mid-bob would drop the button 3px.
+ */
+const heroBob = document.querySelector('.hero-actions .button:not(.button-ghost)');
+
+if (heroBob) {
+    heroStage.bob = {
+        arm: () => {
+            if (reduceMotion.matches) return;
+            heroBob.classList.add('is-bobbing');
+        },
+        disarm: () => heroBob.classList.remove('is-bobbing')
+    };
 }
 
 
@@ -1010,7 +1665,7 @@ if (siteMedia) {
              */
             const canAdvance = () => canPlay() && !reduceMotion.matches;
 
-                const show = (next) => {
+            const show = (next) => {
                 const from = index;
                 index = (next + nodes.length) % nodes.length;
 
@@ -1316,6 +1971,44 @@ if (siteMedia) {
 
                 const outro = buildProse(section.outro, 'pm-prose pm-prose-outro');
                 if (outro) wrap.appendChild(outro);
+
+                /*
+                 * REVEAL HOOKS.
+                 *
+                 * Marked on the parts of a section, never on the section
+                 * itself: a reveal on the wrapper would move its children
+                 * too, and any child that also revealed would then be riding
+                 * two transforms at once.
+                 *
+                 * The heading, the commentary and the media each arrive on
+                 * their own, which is the order they are read in. Everything
+                 * inside the media block travels with it — so the process
+                 * viewer reveals once, as a viewer, and its slides are never
+                 * touched; changing stage is the carousel's own motion and
+                 * has nothing to do with the page scrolling.
+                 */
+                if (head) head.setAttribute('data-reveal', '');
+                if (intro) intro.setAttribute('data-reveal', '');
+                if (outro) outro.setAttribute('data-reveal', '');
+
+                /*
+                 * The prototype grid is the one place a section is a list of
+                 * comparable things rather than one composition, so its
+                 * blocks come in one after another. Everywhere else — the
+                 * viewer, the film, the closing frame — the media is a single
+                 * object and reveals as one.
+                 */
+                const blocks = body.classList && body.classList.contains('pm-editorial')
+                    ? body.querySelectorAll(':scope > .pm-block')
+                    : [];
+
+                if (blocks.length) {
+                    body.setAttribute('data-reveal-stagger', '90');
+                    for (const block of blocks) block.setAttribute('data-reveal', '');
+                } else {
+                    body.setAttribute('data-reveal', '');
+                }
+
                 slot.appendChild(wrap);
             }
         } else if (slot) {
@@ -1616,4 +2309,231 @@ if (heroWithComets && !reduceMotion.matches && window.innerWidth > COMETS.disabl
     }
 
     syncComets();
+}
+
+
+/* ==========================================================================
+ * SCROLL REVEAL
+ *
+ * Last in the file on purpose: the project pages build their sections from
+ * media.js above, and an observer that ran before that would find nothing to
+ * watch on exactly the pages with the most to reveal.
+ *
+ * TWO OBSERVERS, ONE HYSTERESIS BAND.
+ *
+ * The reveal and the reset deliberately do not share a boundary. If they
+ * did, an element resting exactly on it would reveal and reset and reveal
+ * again on every few pixels of trackpad drift — the classic flicker. So the
+ * line an element must cross to appear sits well inside the viewport, and
+ * the line it must cross to be put back sits well outside it, and the gap
+ * between them is dead space where nothing happens at all.
+ *
+ * At a 900px viewport that gap is 315px below the fold and 180px above it.
+ * Nothing short of a deliberate scroll can traverse it, which is what makes
+ * the effect repeatable without making it twitchy.
+ * ========================================================================== */
+
+{
+    const revealables = document.querySelectorAll('[data-reveal]');
+    const canReveal = revealables.length
+        && !reduceMotion.matches
+        && typeof IntersectionObserver === 'function';
+
+    /*
+     * The hidden state is added HERE and nowhere else. Until this class
+     * lands every [data-reveal] is an ordinary element, so a browser with no
+     * IntersectionObserver, a blocked script, or someone who asked for
+     * reduced motion all get the finished page rather than a blank one.
+     */
+    if (canReveal) {
+        document.documentElement.classList.add('js-reveal');
+
+        /*
+         * Stagger, assigned once. A container carrying data-reveal-stagger
+         * numbers its own revealable children, so the delay lives with the
+         * group that wants one instead of being repeated on every child.
+         *
+         * The index is capped rather than the step shortened: past a few
+         * items a stagger stops reading as sequence and starts reading as
+         * lag, and on a phone — where the whole group may be taller than the
+         * screen — a long tail means waiting for content that is already
+         * where it belongs.
+         */
+        const narrow = window.matchMedia('(max-width: 700px)').matches;
+        const cap = narrow ? 2 : 5;
+
+        for (const group of document.querySelectorAll('[data-reveal-stagger]')) {
+            const step = Number(group.dataset.revealStagger) || 80;
+            const items = group.querySelectorAll('[data-reveal]');
+            items.forEach((item, i) => {
+                item.style.setProperty('--reveal-delay', `${Math.min(i, cap) * step}ms`);
+            });
+        }
+
+        /*
+         * ONE direction, read by every element, written by one listener.
+         *
+         * Forty elements each watching the scroll position would be forty
+         * handlers computing the same number; this computes it once and the
+         * observers below just read it. Passive, because it never calls
+         * preventDefault and saying so keeps it off the scrolling critical
+         * path.
+         *
+         * The 4px deadband is the other half of the anti-flicker story: a
+         * trackpad resting under a hand emits a stream of one- and two-pixel
+         * deltas that alternate in sign, and without this the "direction"
+         * would invert several times a second while the page stood still.
+         */
+        let scrollDir = 'down';
+        let lastY = window.scrollY;
+
+        window.addEventListener('scroll', () => {
+            const y = window.scrollY;
+            if (Math.abs(y - lastY) < 4) return;
+            scrollDir = y > lastY ? 'down' : 'up';
+            lastY = y;
+        }, { passive: true });
+
+        // a restored page resumes at a scroll position this never saw
+        window.addEventListener('pageshow', () => { lastY = window.scrollY; });
+
+        /*
+         * Which edge an element is arriving over — and it is the scroll
+         * direction that answers this, not the element's geometry.
+         *
+         * Geometry looks like the better signal and is not. entry
+         * .boundingClientRect is sampled when the observation was TAKEN, and
+         * the browser coalesces observations: on a fast scroll an element
+         * can travel from below the fold to well above it between one
+         * delivery and the next, so by the time the rect is read it says
+         * "above" for something that arrived from below. Measured on this
+         * page — one flick down past the featured grid reported four of
+         * fourteen elements as arriving from above while the page had only
+         * ever moved down.
+         *
+         * The direction cannot be wrong in that way, because in a scrolling
+         * document it IS the answer: the viewport moving down is the only
+         * thing that brings content in over the bottom edge, and moving up
+         * the only thing that brings it back in over the top. An element
+         * revealed while off-screen entirely gets whichever offset the
+         * direction implies, and nobody sees the difference.
+         */
+        const arrivesFromAbove = () => scrollDir === 'up';
+
+        const revealObserver = new IntersectionObserver((entries) => {
+            const arriving = [];
+
+            for (const entry of entries) {
+                const el = entry.target;
+                // already shown: a second crossing is not a second arrival
+                if (!entry.isIntersecting || el.classList.contains('is-revealed')) continue;
+                el.classList.toggle('is-from-above', arrivesFromAbove());
+                arriving.push(el);
+            }
+
+            if (!arriving.length) return;
+
+            /*
+             * One forced layout for the whole batch, and it is load-bearing.
+             *
+             * Setting the direction and asking for the reveal in the same
+             * task means the browser only ever computes the final style, and
+             * the transition then runs from whatever the element's offset
+             * was BEFORE — so something arriving from above would rise
+             * through its resting place instead of falling into it. Reading
+             * a layout property in between forces the starting offset to be
+             * computed, which is what gives the transition its true origin.
+             *
+             * Free of charge visually: every element in this list is at
+             * opacity 0, so moving one from +24px to -20px is not something
+             * anyone can see. Read once for the batch rather than per
+             * element, so a screenful of arrivals costs one layout, not ten.
+             */
+            void document.documentElement.offsetHeight;
+
+            for (const el of arriving) el.classList.add('is-revealed');
+        }, {
+            /*
+             * threshold 0 with the bottom of the root pulled up: the reveal
+             * starts when an element is genuinely on its way in rather than
+             * when some fraction of it is showing — which for a section
+             * taller than the viewport would never be reached at all.
+             *
+             * Anything already past this line when the page loads fires on
+             * the observer's first callback, so a deep-linked anchor or a
+             * restored scroll position never leaves content invisible, and a
+             * fast scroll cannot outrun it.
+             */
+            rootMargin: '0px 0px -10% 0px',
+            threshold: 0
+        });
+
+        /*
+         * The far boundary. This observer only ever hears about an element
+         * that has left the viewport AND kept going for another fifth of a
+         * screen — so "no meaningful portion of it remains visible" is not a
+         * judgement call made in here, it is the shape of the root box.
+         */
+        const resetObserver = new IntersectionObserver((entries) => {
+            const leaving = [];
+
+            for (const entry of entries) {
+                const el = entry.target;
+                if (entry.isIntersecting || !el.classList.contains('is-revealed')) continue;
+                leaving.push(el);
+            }
+
+            if (!leaving.length) return;
+
+            for (const el of leaving) {
+                el.classList.add('is-resetting');
+                // is-settled goes too, so will-change is back on before the
+                // next arrival rather than being granted halfway through it
+                el.classList.remove('is-revealed', 'is-settled');
+            }
+
+            // land the hidden state with no transition, then hand the
+            // transition back for the next arrival
+            void document.documentElement.offsetHeight;
+
+            for (const el of leaving) el.classList.remove('is-resetting');
+        }, {
+            rootMargin: '20% 0px 20% 0px',
+            threshold: 0
+        });
+
+        for (const el of revealables) {
+            revealObserver.observe(el);
+            resetObserver.observe(el);
+        }
+
+        /*
+         * will-change is a promise to the compositor, and one that has been
+         * kept should be withdrawn. Capture phase because transitionend does
+         * bubble but the target is what matters, and one listener on the
+         * document is cheaper than one on each of forty elements.
+         */
+        document.addEventListener('transitionend', (event) => {
+            const el = event.target;
+            if (event.propertyName !== 'opacity') return;
+            if (!el.hasAttribute || !el.hasAttribute('data-reveal')) return;
+            if (el.classList.contains('is-revealed')) el.classList.add('is-settled');
+        }, true);
+
+        /*
+         * Turning the setting on mid-session stops the whole mechanism: the
+         * observers are dropped so nothing can be hidden again, and anything
+         * currently hidden is shown. The media query in style.css covers the
+         * paint; this covers the state, so a later scroll cannot undo it.
+         */
+        reduceMotion.addEventListener('change', () => {
+            if (!reduceMotion.matches) return;
+            revealObserver.disconnect();
+            resetObserver.disconnect();
+            for (const el of revealables) {
+                el.classList.remove('is-from-above', 'is-resetting');
+                el.classList.add('is-revealed', 'is-settled');
+            }
+        });
+    }
 }

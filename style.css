@@ -54,6 +54,170 @@
     padding: 0;
 }
 
+
+/* ==========================================================================
+ * SCROLL REVEAL
+ *
+ * Everything here hangs off .js-reveal on <html>, which script.js adds and
+ * only after it has an IntersectionObserver and permission to move things.
+ * That is the whole of the no-JavaScript story: without the class not one of
+ * these rules matches, so nothing is ever hidden by a script that failed to
+ * load, and the page reads exactly as it does now.
+ *
+ * opacity and transform only, so a reveal cannot move anything but itself —
+ * no heights animate, no space appears or disappears, and the scrollbar is
+ * the same length before the first reveal as after the last.
+ *
+ * will-change is on while an element is waiting and removed the moment its
+ * fade finishes. Left on, four cards and a dozen sections would each hold a
+ * compositor layer for the life of the page to pay for one 700ms transition.
+ * ========================================================================== */
+
+/*
+ * WHICH EDGE IT IS ARRIVING OVER.
+ *
+ * One signed length, and the only thing that varies between the two
+ * directions. Coming up the page from below the fold an element starts under
+ * its resting place and rises into it; coming back down to something already
+ * passed, it starts above and falls into it. Both are "it moves the short
+ * way towards where it belongs", which is why the same duration and easing
+ * suit both and only the sign changes.
+ *
+ * The fall is shorter than the rise on purpose. Downward motion reads as
+ * heavier than the same distance upward, and content re-entering from above
+ * is content being returned to rather than met for the first time — it
+ * should announce itself less.
+ *
+ * A variable rather than two transform declarations, so the card path (which
+ * composes rather than replaces its transform) reads the same number.
+ */
+.js-reveal [data-reveal] {
+    --reveal-offset: var(--reveal-rise, 24px);
+}
+
+.js-reveal [data-reveal].is-from-above {
+    --reveal-offset: calc(-1 * var(--reveal-drop, 20px));
+}
+
+.js-reveal [data-reveal]:not(.feature) {
+    opacity: 0;
+    /* the offsets are variables so a phone can be given shorter ones without
+       restating the rule */
+    transform: translateY(var(--reveal-offset)) scale(0.985);
+    transition:
+        opacity 700ms var(--ease),
+        transform 700ms var(--ease);
+    transition-delay: var(--reveal-delay, 0ms);
+    will-change: opacity, transform;
+}
+
+.js-reveal [data-reveal]:not(.feature).is-revealed {
+    opacity: 1;
+    transform: none;
+}
+
+.js-reveal [data-reveal].is-settled {
+    will-change: auto;
+}
+
+/*
+ * The cards are the one exception, because they already own their transform
+ * (see .feature). The generic rule would replace it and take the tilt with
+ * it — .is-revealed sets `transform: none`, which on a card means "and stop
+ * being rotated". So they get the same two offsets delivered as variables
+ * that .feature's own transform composes.
+ *
+ * 700ms while the reveal is in flight; .is-settled hands the card back its
+ * original 0.5s, which is the pointer drift's timing and should stay that.
+ */
+.js-reveal .feature[data-reveal] {
+    --reveal-scale: 0.985;
+    --reveal-y: var(--reveal-offset);
+    opacity: 0;
+    transition:
+        opacity 700ms var(--ease),
+        transform 700ms var(--ease),
+        border-color 0.3s ease;
+}
+
+.js-reveal .feature[data-reveal].is-revealed {
+    --reveal-scale: 1;
+    --reveal-y: 0px;
+    opacity: 1;
+}
+
+.js-reveal .feature[data-reveal].is-settled {
+    transition: transform 0.5s var(--ease), opacity 0.4s ease, border-color 0.3s ease;
+}
+
+/*
+ * GOING BACK TO HIDDEN IS NOT AN ANIMATION.
+ *
+ * An element is only ever reset once it is well clear of the viewport, so
+ * the return to opacity 0 is not something anyone is looking at — but left
+ * transitioned it would still be running, and scrolling back before it
+ * finished would catch it mid-fade and read as a flicker. This drops the
+ * transition and its stagger delay for the single frame the reset takes, so
+ * the hidden state is simply where the element is, never somewhere it is
+ * travelling to.
+ *
+ * Last of the reveal rules and at matching specificity, so it beats both the
+ * 700ms reveal transition and the card's restored 0.5s one.
+ */
+.js-reveal [data-reveal].is-resetting {
+    transition: none;
+}
+
+.js-reveal .feature[data-reveal].is-resetting {
+    transition: none;
+}
+
+/*
+ * Less travel on a phone, where the same 24px is a larger share of the
+ * screen and the whole page is scrolled faster.
+ */
+@media (max-width: 700px) {
+    .js-reveal [data-reveal] {
+        --reveal-drop: 12px;
+        --reveal-rise: 14px;
+    }
+}
+
+/*
+ * Reduced motion: everything present, nothing moving. script.js also
+ * declines to add .js-reveal in that case, so this is the backstop for
+ * someone who turns the setting on after the page has loaded — the elements
+ * already hidden must not stay hidden.
+ */
+@media (prefers-reduced-motion: reduce) {
+
+    .js-reveal [data-reveal],
+    .js-reveal [data-reveal].is-from-above {
+        --reveal-offset: 0px;
+    }
+
+    .js-reveal [data-reveal]:not(.feature),
+    .js-reveal [data-reveal]:not(.feature).is-revealed {
+        opacity: 1;
+        transform: none;
+        transition: none;
+    }
+
+    /*
+     * No `transform: none` for a card: that is not "stop being offset", it
+     * is "stop being rotated", and the tilt is the composition rather than
+     * an animation. Resting the two offsets leaves .feature's own transform
+     * holding the tilt alone, which is exactly the still state wanted here.
+     */
+    .js-reveal .feature[data-reveal],
+    .js-reveal .feature[data-reveal].is-revealed {
+        --reveal-scale: 1;
+        --reveal-y: 0px;
+        opacity: 1;
+        transition: none;
+    }
+}
+
 html {
     scroll-behavior: smooth;
 }
@@ -182,6 +346,93 @@ body > main {
     /* text-transform: uppercase; */
 }
 
+/*
+ * THE TYPING LINE
+ *
+ * A grid of one cell with two things in it. The sizer carries the longest
+ * phrase and is hidden with `visibility`, not `display: none` — it still
+ * takes part in layout, so the cell is permanently the width and height of
+ * the longest state and the line below never reflows as characters arrive.
+ * `visibility: hidden` also takes it out of the accessibility tree, so the
+ * phrase is not read twice.
+ *
+ * Everything else about this line — size, colour, tracking, the 28px below
+ * it — is .eyebrow's, unchanged.
+ */
+.typewriter {
+    /*
+     * The caret's own footprint, shared by the rule that draws it and the
+     * sizer that has to leave room for it. Stated once so the two cannot
+     * drift apart: measured, the line ran 3px past the sizer without this,
+     * because the sizer held the longest phrase and the line held the
+     * longest phrase AND a caret.
+     */
+    --caret-gap: 2px;
+    --caret-width: 1px;
+
+    display: inline-grid;
+}
+
+.typewriter-sizer,
+.typewriter-line {
+    grid-area: 1 / 1;
+}
+
+.typewriter-sizer {
+    padding-right: calc(var(--caret-gap) + var(--caret-width));
+    visibility: hidden;
+}
+
+/*
+ * pre-wrap, so a phrase that ends mid-word keeps the space it has just
+ * typed instead of having it collapsed away and the caret jumping back a
+ * character.
+ */
+.typewriter-line {
+    white-space: pre-wrap;
+}
+
+/*
+ * A rule, not a block. 1px at the line's own height, sitting on the text
+ * colour rather than the muted one so it stays legible against copy that is
+ * already faint. It keeps its width when it blinks — opacity only — so the
+ * line never shifts by the caret's own width.
+ */
+.typewriter-caret {
+    animation: typewriter-blink 1s steps(1, end) infinite;
+    background-color: var(--muted);
+    display: inline-block;
+    height: 1em;
+    margin-left: var(--caret-gap);
+    vertical-align: -0.15em;
+    width: var(--caret-width);
+}
+
+@keyframes typewriter-blink {
+
+    0%,
+    50% {
+        opacity: 1;
+    }
+
+    50.01%,
+    100% {
+        opacity: 0;
+    }
+}
+
+/*
+ * Reduced motion gets the whole sentence at once and a caret that does not
+ * blink. script.js writes the text; this stops the animation, and does it
+ * here rather than in JS so it holds even if the script never runs.
+ */
+@media (prefers-reduced-motion: reduce) {
+    .typewriter-caret {
+        animation: none;
+        opacity: 0;
+    }
+}
+
 .hero-title {
     font-family: var(--font-display);
     font-size: clamp(52px, 7.4vw, 74px);
@@ -262,10 +513,106 @@ body > main {
     white-space: nowrap;
 }
 
+/*
+ * TWO OFFSETS, ONE TRANSFORM.
+ *
+ * A letter is moved by two independent things: the pointer passing near it,
+ * and the wave that crosses the sentence on its own every fifteen seconds.
+ * Written as inline transforms they would overwrite each other — whichever
+ * ran last would win, so the wave would erase the lift mid-sweep and the
+ * pointer would flatten the wave.
+ *
+ * So neither writes `transform`. Each owns one registered custom property,
+ * and this rule is the only place the two are combined. They cannot collide
+ * because they are not the same property, and neither has to know the other
+ * exists.
+ *
+ * Registered with @property rather than left as plain variables for two
+ * reasons: an <length> that the browser understands as a length can be
+ * transitioned and keyframed (a plain custom property can only be swapped),
+ * and it gives each an initial value so the calc below is valid before
+ * either has ever been set.
+ *
+ * `max()` is the clamp, and it reads the way it does because both offsets
+ * are negative: -15px of lift under -12px of wave is -27px, which is a lunge
+ * rather than a nudge, and max() holds the pair at -18px however they stack.
+ * The cap is on the sum, so no combination of the two can exceed it.
+ *
+ * Only --letter-lift is transitioned. The wave is a keyframe animation with
+ * its own timing, and transitioning the composite as well would have the
+ * transition chasing the animation frame by frame and smearing both.
+ */
+@property --letter-lift {
+    inherits: false;
+    initial-value: 0px;
+    syntax: "<length>";
+}
+
+@property --letter-wave {
+    inherits: false;
+    initial-value: 0px;
+    syntax: "<length>";
+}
+
 .magnetic-text .letter {
     display: inline-block;
-    transition: transform 0.4s var(--ease-spring);
+    transform: translateY(max(-18px, calc(var(--letter-lift, 0px) + var(--letter-wave, 0px))));
+    transition: --letter-lift 0.4s var(--ease-spring);
     will-change: transform;
+}
+
+/*
+ * One pulse per letter: up briskly, home slowly. The 18% split puts the rise
+ * at about 125ms and the settle at about 575ms, so the letter leaves quickly
+ * enough to read as a jump and returns slowly enough to read as weight.
+ *
+ * --wave-delay is written once per letter when the title is split, and
+ * accumulates across all three lines, so the sweep crosses the line breaks
+ * as one continuous movement instead of restarting on each.
+ *
+ * The animation is named only under .is-waving. That is the whole trigger:
+ * with the class off there is no animation on these elements at all, so
+ * between waves the letters are not merely at zero, they are inert.
+ */
+@keyframes letter-wave {
+    0% {
+        --letter-wave: 0px;
+        animation-timing-function: var(--ease);
+    }
+
+    /*
+     * --ease on the way home rather than --ease-spring. The spring curve
+     * overshoots by design (its third control point is past 1), which on a
+     * return to zero means dipping below the baseline before settling — a
+     * bounce, on a motion that is supposed to end. The pointer lift keeps
+     * the spring, where the overshoot is the point; the wave decelerates.
+     */
+    18% {
+        --letter-wave: -12px;
+        animation-timing-function: var(--ease);
+    }
+
+    100% {
+        --letter-wave: 0px;
+    }
+}
+
+.magnetic-text.is-waving .letter {
+    animation: letter-wave 700ms both;
+    animation-delay: var(--wave-delay, 0ms);
+}
+
+/*
+ * Measuring pose. A letter that is currently lifted reports a centre that is
+ * up to 15px above where it rests, and a measure taken mid-interaction would
+ * cache that. This drops the displacement and its transition together for
+ * the length of the read, so every measure lands on the resting layout
+ * whatever the cursor is doing.
+ */
+.magnetic-text.is-measuring .letter {
+    animation: none;
+    transform: none;
+    transition: none;
 }
 
 .hero-actions {
@@ -273,6 +620,30 @@ body > main {
     flex-wrap: wrap;
     gap: 12px;
     margin-top: 44px;
+}
+
+/*
+ * Two offsets again, and the same reasoning as the title's letters: the
+ * hover lift and the idle bob are different intentions on the same axis, so
+ * each gets its own property and this rule is the only place they meet.
+ * Written both to `transform`, a hover landing mid-bob would drop the button
+ * to -2px from -3px — a visible twitch on the one control the page most
+ * wants you to press.
+ *
+ * Only --lift-y is transitioned. The bob is a keyframe animation with its
+ * own long, mostly-still cycle, and transitioning the composite would have
+ * the 0.25s ease chasing it frame by frame.
+ */
+@property --lift-y {
+    inherits: false;
+    initial-value: 0px;
+    syntax: "<length>";
+}
+
+@property --bob-y {
+    inherits: false;
+    initial-value: 0px;
+    syntax: "<length>";
 }
 
 .button {
@@ -285,12 +656,53 @@ body > main {
     font-weight: 500;
     padding: 14px 28px;
     text-decoration: none;
-    transition: opacity 0.25s ease, transform 0.25s var(--ease);
+    transform: translateY(calc(var(--lift-y, 0px) + var(--bob-y, 0px)));
+    transition: opacity 0.25s ease, --lift-y 0.25s var(--ease);
 }
 
 .button:hover {
+    --lift-y: -2px;
     opacity: 0.86;
-    transform: translateY(-2px);
+}
+
+/*
+ * Mostly rest. The movement occupies the last fifth of the cycle — about
+ * 0.3s up and 0.65s back out of five and a half seconds — so what the eye
+ * registers is a button that is still, and occasionally is not.
+ */
+@keyframes hero-bob {
+
+    0%,
+    82%,
+    100% {
+        --bob-y: 0px;
+    }
+
+    88% {
+        --bob-y: -3px;
+    }
+}
+
+.button.is-bobbing {
+    animation: hero-bob 5.5s var(--ease) infinite;
+}
+
+/*
+ * A control being used does not need to advertise itself. Paused rather
+ * than removed, so the bob resumes from where it was instead of snapping —
+ * and since 82% of the cycle is the resting position, a pause almost always
+ * catches it at rest anyway.
+ */
+.button.is-bobbing:hover,
+.button.is-bobbing:focus-visible,
+.button.is-bobbing:active {
+    animation-play-state: paused;
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .button.is-bobbing {
+        animation: none;
+    }
 }
 
 .button-ghost {
@@ -413,6 +825,21 @@ main [id] {
     overflow: hidden;
     position: relative;
     text-decoration: none;
+    /*
+     * THREE THINGS MOVE THIS CARD and they are all in this one function:
+     * the pointer drift (script.js, per frame), the scroll reveal, and the
+     * static tilt each card carries. The drift used to be written straight
+     * to style.transform, which meant it had to re-state the tilt every
+     * frame to avoid dropping it — and it would have erased a reveal offset
+     * outright, since an inline transform beats any rule.
+     *
+     * As variables the three simply add up, in a fixed order, and none of
+     * them needs to know the others exist.
+     */
+    transform:
+        translate(var(--drift-x, 0px), calc(var(--drift-y, 0px) + var(--reveal-y, 0px)))
+        rotate(var(--card-tilt, 0deg))
+        scale(var(--reveal-scale, 1));
     transition: transform 0.5s var(--ease), opacity 0.4s ease, border-color 0.3s ease;
     will-change: transform;
 }
@@ -603,24 +1030,24 @@ main [id] {
  * instead of floating free of it.
  */
 .feature-1 {
-    transform: rotate(-1.4deg);
+    --card-tilt: -1.4deg;
     z-index: 3;
 }
 
 .feature-2 {
     margin-top: clamp(18px, 3vw, 48px);
-    transform: rotate(1.1deg);
+    --card-tilt: 1.1deg;
     z-index: 4;
 }
 
 .feature-3 {
-    transform: rotate(1.6deg);
+    --card-tilt: 1.6deg;
     z-index: 2;
 }
 
 .feature-4 {
     margin-top: clamp(10px, 2vw, 30px);
-    transform: rotate(-1deg);
+    --card-tilt: -1deg;
     z-index: 3;
 }
 
@@ -720,6 +1147,135 @@ main [id] {
     color: var(--text);
     outline: 2px solid var(--text);
     outline-offset: 4px;
+}
+
+/*
+ * VIEW — the affordance on the category links.
+ *
+ * The cards had this too, and now have the pointer-following block instead:
+ * a card is a big target with room for a cursor to live in, a one-line text
+ * link is not. The whole link is already the anchor, so this adds nothing to
+ * the hit area and takes nothing from it. It is a signal, not a control:
+ * aria-hidden, because a screen reader is already being told this is a link
+ * to Creative Technology and does not need the word "view" after it.
+ *
+ * The size, tracking and case are the card eyebrow's, so the two affordances
+ * still read as the same family.
+ *
+ * It occupies its space at all times and only opacity and transform change,
+ * so nothing reflows when it appears: the card is the same size hovered as
+ * at rest. The travel is 6px, and it ends at the resting position rather
+ * than starting there, so the label arrives rather than drifting off.
+ */
+.link-view {
+    font-size: 11px;
+    letter-spacing: 0.13em;
+    opacity: 0;
+    text-transform: uppercase;
+    transform: translateX(-6px);
+    transition: opacity 0.3s ease, transform 0.3s var(--ease);
+    white-space: nowrap;
+}
+
+/*
+ * Dimmer than the link it sits beside, and it stays dimmer on hover while
+ * the label itself goes to full strength — so the label leads and this
+ * stays a marker.
+ */
+.disciplines-list .link-view {
+    color: var(--faint);
+    display: inline-block;
+    margin-left: 10px;
+}
+
+.disciplines-list a:hover .link-view,
+.disciplines-list a:focus-visible .link-view {
+    opacity: 1;
+    transform: none;
+}
+
+/*
+ * There is no hover on a touch screen, so the label cannot be something that
+ * appears on one. It rests visible instead, at an opacity low enough that it
+ * still reads as secondary to the title above it.
+ */
+@media (pointer: coarse) {
+    .link-view {
+        opacity: 0.55;
+        transform: none;
+    }
+}
+
+
+/*
+ * THE CARD CURSOR
+ *
+ * Two elements, because they answer to two different clocks. The outer one
+ * carries the position and is written every animation frame, so it must not
+ * be transitioned or it would lag the pointer it is supposed to be. The
+ * inner one carries the appearance — opacity and scale — and is transitioned,
+ * because that IS a motion rather than a position. Splitting them is what
+ * lets the block arrive softly and still track exactly.
+ *
+ * pointer-events: none on the outer element, so the thing sitting under the
+ * cursor never swallows the click the cursor is there to invite.
+ */
+.card-cursor {
+    left: 0;
+    pointer-events: none;
+    position: fixed;
+    top: 0;
+    z-index: 200;
+}
+
+.card-cursor-box {
+    /*
+     * The page's own palette rather than an inversion of it: --text on a
+     * veiled --bg, which is the same pairing the cards use, at the size of a
+     * caption rather than a button.
+     *
+     * 0.62 is the one number here that was chosen by measurement instead of
+     * taste, because this box floats over photographs and has to hold at
+     * both ends of them. Composited over white it resolves to rgb(103) and
+     * puts --text at 4.87:1; over black it is effectively opaque and runs to
+     * 18:1. Lighter than 0.62 fails AA on a bright image, darker than it
+     * stops reading as translucent at all.
+     *
+     * The border does the work the background cannot: against a dark
+     * photograph the veil is nearly the same value as the picture, and a
+     * 1px light edge is all that separates the two. No shadow and no blur —
+     * the edge is the whole of the separation.
+     *
+     * No width or height: the padding sizes it, so the box is 52x29 for
+     * VIEW and would still fit a longer word if one were ever used.
+     */
+    background-color: rgba(10, 10, 10, 0.62);
+    border: 1px solid var(--border-strong);
+    border-radius: 4px;
+    color: var(--text);
+    display: block;
+    font-family: var(--font-display);
+    font-size: 10.5px;
+    font-weight: 600;
+    letter-spacing: 0.12em;
+    line-height: 1.4;
+    opacity: 0;
+    padding: 7px 10px;
+    text-transform: uppercase;
+    /*
+     * The box hangs from its own top-left corner and the parent carries the
+     * offset, so the system pointer is never underneath it — the arrow stays
+     * the arrow and this reads as a label attached to it. Scale only here;
+     * the position is the parent's, written per frame and untransitioned.
+     */
+    transform: scale(0.86);
+    transition: opacity 0.18s ease, transform 0.18s var(--ease);
+    white-space: nowrap;
+}
+
+.card-cursor.is-visible .card-cursor-box {
+    opacity: 1;
+    transform: scale(1);
 }
 
 /* ---------- about ---------- */
@@ -1278,7 +1834,51 @@ main [id] {
     }
 }
 
+/*
+ * Below 354px "Isaac Cheaz" wraps onto two lines.
+ *
+ * The navbar is space-between with five text items across it, and the logo
+ * is the only one that CAN wrap — the others are single words. At 320px the
+ * row needs 318px and has 288px, so flex shrank the logo to 62px and broke
+ * it in half, taking the header from 65px tall to 93px.
+ *
+ * Measured, not guessed: the break is between 352px (two lines) and 356px
+ * (one), which is the 353.6px the arithmetic gives. So the bound is 359px —
+ * above the whole failing range and below every ordinary phone width. 360,
+ * 375 and 390 are all untouched, and nothing on this page changes above it.
+ *
+ * 30px has to come from somewhere and it is taken from spacing first: 8px
+ * off the two outer gaps, 12px off the two inside the link run, 6px off the
+ * gutter. The logo gives up the last point of type, which at 15px is the
+ * difference between wrapping and not. Link size stays at 13px, and the
+ * links keep the header's own 22px of block padding, so nothing here makes a
+ * touch target smaller or a label harder to read.
+ */
+@media (max-width: 359px) {
+    .navbar {
+        gap: 8px;
+        padding-inline: 4vw;
+    }
+
+    .logo {
+        font-size: 14px;
+    }
+
+    .nav-links {
+        gap: 10px;
+    }
+}
+
 @media (prefers-reduced-motion: reduce) {
+
+    /*
+     * The label still fades in — that is the affordance, and it is
+     * comprehension rather than decoration. Only the travel goes, which the
+     * global duration collapse would otherwise deliver as a jump.
+     */
+    .link-view {
+        transform: none;
+    }
 
     html {
         scroll-behavior: auto;

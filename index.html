@@ -28,28 +28,52 @@
             <a href="#contact">Contact</a>
         </nav>
 
-        <a href="https://docs.google.com/document/d/11qATXeMCFB1Io2WauJywyM81skCrmu7SGtFiiL8NM3w/export?format=pdf&tab=t.abc123xyz"
-            class="nav-resume" target="_blank" rel="noopener noreferrer">Resume</a>
+        <a href="https://docs.google.com/document/d/11qATXeMCFB1Io2WauJywyM81skCrmu7SGtFiiL8NM3w/view"
+            class="nav-resume" target="_blank" rel="noopener noreferrer"
+            aria-label="Resume preview, opens in a new tab">Resume</a>
     </header>
 
     <main id="top">
 
         <section class="hero has-comets">
-            <p class="eyebrow">hello, welcome to my portfolio...</p>
+            <!--
+              The opening line types itself between two phrases. Three parts:
+
+                .typewriter-sizer   holds the longest phrase, hidden but laid
+                                    out, so the box is already as wide and as
+                                    tall as it will ever need to be and
+                                    nothing below it moves while typing
+                .typewriter-line    the visible one, stacked in the same grid
+                                    cell as the sizer
+                .visually-hidden    one static sentence, which is the whole of
+                                    what a screen reader gets
+
+              The visible half is aria-hidden and there is no live region, so
+              nothing is announced letter by letter. With JavaScript off the
+              first phrase is already in the markup and simply stays.
+            -->
+            <p class="eyebrow" data-typewriter data-reveal>
+                <span class="typewriter" aria-hidden="true">
+                    <span class="typewriter-sizer">welcome to my portfolio...</span>
+                    <span class="typewriter-line"><span class="typewriter-text">hi, i&rsquo;m isaac</span><span
+                            class="typewriter-caret"></span></span>
+                </span>
+                <span class="visually-hidden">Hi, I&rsquo;m Isaac Welcome to my portfolio...</span>
+            </p>
             <h1 class="hero-title magnetic-text">
                 <span class="line-mask"><span class="line-inner">I want to design</span></span>
                 <span class="line-mask"><span class="line-inner">and build digital and</span></span>
                 <span class="line-mask"><span class="line-inner">physical products</span></span>
             </h1>
 
-            <div class="hero-actions">
+            <div class="hero-actions" data-reveal>
                 <a href="#work" class="button">View Work</a>
                 <a href="#contact" class="button button-ghost">Get in touch</a>
             </div>
         </section>
 
         <section id="work" class="section section-work">
-            <div class="section-head">
+            <div class="section-head" data-reveal>
                 <h2 class="section-title">Selected Work</h2>
                 <p class="section-note">Featured projects</p>
             </div>
@@ -73,10 +97,10 @@
               The order here also drives the "next project" link at the foot
               of each case study. If you reorder these, update those to match.
             -->
-            <div class="featured" id="featured">
+            <div class="featured" id="featured" data-reveal-stagger="80">
 
-                <a class="feature feature-1" href="projects/digital-kintsugi.html" data-project="digital-kintsugi"
-                    data-depth="1.2">
+                <a class="feature feature-1" data-reveal href="projects/digital-kintsugi.html"
+                    data-project="digital-kintsugi" data-depth="1.2">
                     <span class="feature-body">
                         <span class="feature-top">
                             <span class="feature-index" aria-hidden="true">01</span>
@@ -88,37 +112,38 @@
                     </span>
                 </a>
 
-                <a class="feature feature-2" href="projects/museum-npc.html" data-project="museum-npc" data-depth="0.8">
+                <a class="feature feature-2" data-reveal href="projects/museum-npc.html" data-project="museum-npc"
+                    data-depth="0.8">
                     <span class="feature-body">
                         <span class="feature-top">
                             <span class="feature-index" aria-hidden="true">02</span>
                             <span class="feature-descriptor">Interactive Systems</span>
                         </span>
-                        <span class="feature-title">LLM-Powered Museum</span>
+                        <span class="feature-title">如是觀</span>
                         <span class="feature-tools">Unity · Ollama · Local LLMs</span>
                     </span>
                 </a>
 
-                <a class="feature feature-3" href="projects/suzume-cnc-stool.html" data-project="suzume-cnc-stool"
-                    data-depth="1.1">
+                <a class="feature feature-3" data-reveal href="projects/suzume-cnc-stool.html"
+                    data-project="suzume-cnc-stool" data-depth="1.1">
                     <span class="feature-body">
                         <span class="feature-top">
                             <span class="feature-index" aria-hidden="true">03</span>
                             <span class="feature-descriptor">Product &amp; Fabrication</span>
                         </span>
-                        <span class="feature-title">Suzume-Inspired CNC Stool</span>
+                        <span class="feature-title">Suzume-Inspired Stool</span>
                         <span class="feature-tools">Rhino · Carbide Create · CNC Machining</span>
                     </span>
                 </a>
 
-                <a class="feature feature-4" href="projects/butterfly-pavilion.html" data-project="butterfly-pavilion"
-                    data-depth="0.9">
+                <a class="feature feature-4" data-reveal href="projects/butterfly-pavilion.html"
+                    data-project="butterfly-pavilion" data-depth="0.9">
                     <span class="feature-body">
                         <span class="feature-top">
                             <span class="feature-index" aria-hidden="true">04</span>
                             <span class="feature-descriptor">Parametric Design</span>
                         </span>
-                        <span class="feature-title">Parametric Butterfly Pavilion</span>
+                        <span class="feature-title">Butterfly Pavilion</span>
                         <span class="feature-tools">Rhino · Grasshopper · Laser Cutting</span>
                     </span>
                 </a>
@@ -131,19 +156,22 @@
               to the four featured projects above. Each is currently a stub whose
               former content is preserved in a comment on the page itself.
             -->
-            <nav class="disciplines" aria-labelledby="disciplines-title">
+            <nav class="disciplines" aria-labelledby="disciplines-title" data-reveal>
                 <h3 class="disciplines-title" id="disciplines-title">Explore by discipline</h3>
                 <ul class="disciplines-list">
-                    <li><a href="projects/product-fabrication.html">Product &amp; Fabrication</a></li>
-                    <li><a href="projects/creative-technology.html">Creative Technology</a></li>
-                    <li><a href="projects/ux-product.html">UX &amp; Product Experience</a></li>
+                    <li><a href="projects/product-fabrication.html">Product &amp; Fabrication<span class="link-view"
+                                aria-hidden="true">View</span></a></li>
+                    <li><a href="projects/creative-technology.html">Creative Technology<span class="link-view"
+                                aria-hidden="true">View</span></a></li>
+                    <li><a href="projects/ux-product.html">UX &amp; Product Experience<span class="link-view"
+                                aria-hidden="true">View</span></a></li>
                 </ul>
             </nav>
 
         </section>
 
         <section id="about" class="section section-about">
-            <div class="section-head">
+            <div class="section-head" data-reveal>
                 <h2 class="section-title">About</h2>
             </div>
 
@@ -158,9 +186,9 @@
               Those three fragments are replaced below by one introduction, one
               capability list, and education / location metadata.
             -->
-            <div class="about-grid">
+            <div class="about-grid" data-reveal-stagger="90">
 
-                <div class="about-intro">
+                <div class="about-intro" data-reveal>
                     <p class="about-lead">
                         I&rsquo;m an Interactive Media Business student at NYU Shanghai who builds
                         physical products, interactive systems, and digital experiences through
@@ -195,7 +223,7 @@
                   they carry the section on their own.
                 -->
 
-                <div class="about-side">
+                <div class="about-side" data-reveal>
                     <h3 class="about-subhead">Capabilities</h3>
 
                     <ul class="capability-list">
@@ -261,11 +289,11 @@
         </section>
 
         <section id="contact" class="section section-contact">
-            <div class="section-head">
+            <div class="section-head" data-reveal>
                 <h2 class="section-title">Contact</h2>
             </div>
 
-            <p class="contact-lead">
+            <p class="contact-lead" data-reveal>
                 Open to internships and creative technology collaborations.
             </p>
 
@@ -287,7 +315,7 @@
               aligned even though an envelope is landscape and the two brand
               marks are square.
             -->
-            <div class="contact-links">
+            <div class="contact-links" data-reveal>
                 <a href="https://mail.google.com/mail/?view=cm&fs=1&to=icheaz06@gmail.com&su=Portfolio%20Inquiry"
                     class="contact-link" target="_blank" rel="noopener noreferrer">
                     <span class="contact-label">
