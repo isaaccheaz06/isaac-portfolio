@@ -15,6 +15,7 @@
         rel="stylesheet">
 
     <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="home.css">
 </head>
 
 <body>
@@ -168,65 +169,80 @@
                         everyday problems into things people can use, test, and refine. I&rsquo;m
                         especially interested in industrial design and UX.
                     </p>
-
-                    <h3 class="about-subhead about-subhead-inline">Selected coursework</h3>
-
-                    <ul class="coursework-list">
-                        <li>Design for Digital Fabrication</li>
-                        <li>Introduction to 3D</li>
-                        <li>Innovation Lab</li>
-                        <li>Interaction Lab</li>
-                        <li>Creative Coding Lab</li>
-                        <li>Live Simulation and Agents</li>
-                    </ul>
                 </div>
 
                 <!--
-                  No <img> here on purpose. script.js reads
+                  No <img> here on purpose. js/home.js reads
                   window.SITE_MEDIA.portrait and, only once a real file is
                   configured, inserts the figure and adds .has-portrait to the grid.
                 -->
 
-                <div class="about-side" data-reveal>
-                    <h3 class="about-subhead">Capabilities</h3>
+                <div class="about-side">
+                    <div class="about-caps" data-reveal>
+                        <h3 class="about-subhead">Capabilities</h3>
 
-                    <ul class="capability-list">
-                        <li>3D CAD &amp; form development</li>
-                        <li>Product prototyping &amp; testing</li>
-                        <li>Digital fabrication</li>
-                        <li>Interaction &amp; experience design</li>
-                    </ul>
+                        <ul class="capability-list">
+                            <li>3D CAD &amp; form development</li>
+                            <li>Product prototyping &amp; testing</li>
+                            <li>Digital fabrication</li>
+                            <li>Interaction &amp; experience design</li>
+                        </ul>
+                    </div>
 
-                    <dl class="about-meta">
-                        <div class="about-meta-row">
-                            <dt>Education</dt>
-                            <dd>
-                                <span class="edu-degree">B.S. Interactive Media Business</span>
-                                <span class="edu-school">NYU Shanghai · Expected 2028</span>
-                            </dd>
-                        </div>
-                    <!-- City, then what that city is to you. -->
-                        <div class="about-meta-row">
-                            <dt>Location</dt>
-                            <dd>
-                                <ul class="location-list">
-                                    <li class="location">
-                                        <span class="location-city">Boston</span>
-                                        <span class="location-note">Home</span>
-                                    </li>
-                                    <li class="location">
-                                        <span class="location-city">Shanghai</span>
-                                        <span class="location-note">Studying</span>
-                                    </li>
-                                    <li class="location">
-                                        <span class="location-city">New York</span>
-                                        <span class="location-note">Open to opportunities</span>
-                                    </li>
-                                </ul>
-                            </dd>
-                        </div>
-                    </dl>
+                    <div class="about-study" data-reveal>
+                        <h3 class="about-subhead">Selected coursework</h3>
+
+                        <ul class="coursework-list">
+                            <li>Design for Digital Fabrication</li>
+                            <li>Live Simulation and Agents</li>
+                            <li>Introduction to 3D</li>
+                            <li>Interaction Lab</li>
+                            <li>Creative Coding Lab</li>
+                            <li>Innovation Lab</li>
+                        </ul>
+                    </div>
                 </div>
+
+                <!--
+                  Education and location are a grid child of their own so
+                  the left column can flow at its own rhythm; the right
+                  column's two blocks are wrapped instead, so the coursework
+                  follows Capabilities rather than waiting for a shared row.
+                -->
+                <dl class="about-meta" data-reveal>
+                    <div class="about-meta-row">
+                        <dt>Education</dt>
+                        <dd>
+                            <span class="edu-degree"><a class="meta-link"
+                                    href="https://shanghai.nyu.edu/content/interactive-media-and-business"
+                                    target="_blank" rel="noopener noreferrer">B.S. Interactive Media Business</a></span>
+                            <span class="edu-school">NYU Shanghai · Expected 2028</span>
+                        </dd>
+                    </div>
+                    <!-- City, then what that city is to you. -->
+                    <div class="about-meta-row">
+                        <dt>Location</dt>
+                        <dd>
+                            <ul class="location-list">
+                                <li class="location">
+                                    <span class="location-city">Boston</span>
+                                    <span class="location-sep" aria-hidden="true">—</span>
+                                    <span class="location-note">Home</span>
+                                </li>
+                                <li class="location">
+                                    <span class="location-city">Shanghai</span>
+                                    <span class="location-sep" aria-hidden="true">—</span>
+                                    <span class="location-note">Studying</span>
+                                </li>
+                                <li class="location">
+                                    <span class="location-city">New York</span>
+                                    <span class="location-sep" aria-hidden="true">—</span>
+                                    <span class="location-note">Open to opportunities</span>
+                                </li>
+                            </ul>
+                        </dd>
+                    </div>
+                </dl>
 
             </div>
         </section>
@@ -237,7 +253,7 @@
       The same block on every page. It carries id="contact", which is what
       the hero's "Get in touch" resolves to.
 
-      Markup in each file rather than injected by script.js: an address
+      Markup in each file rather than injected by JavaScript: an address
       nobody can read with JavaScript off is not a contact detail.
     -->
     <footer class="footer" id="contact">
@@ -279,7 +295,8 @@
 
     <!-- media paths live in media.js; it must load first -->
     <script src="media.js"></script>
-    <script src="script.js"></script>
+    <script src="js/home.js"></script>
+    <script src="js/site.js"></script>
 </body>
 
 </html>

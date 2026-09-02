@@ -68,7 +68,7 @@ window.SITE_MEDIA = {
     /* ---------------------------------------------------------------------
      * PROJECT PAGES
      * `hero` + `gallery`, or `sections` for a sectioned layout. A project
-     * that sets `sections` must not also set hero/gallery — script.js
+     * that sets `sections` must not also set hero/gallery — js/project.js
      * renders one shape or the other, not both.
      * ------------------------------------------------------------------ */
     projects: {
@@ -277,7 +277,7 @@ window.SITE_MEDIA = {
 };
 
 /*
- * Where this file lives, captured while it is still executing. script.js
+ * Where this file lives, captured while it is still executing. The page scripts
  * resolves every path above against it, so "assets/x.webp" is correct from
  * any page depth and under any repository sub-path on GitHub Pages.
  */

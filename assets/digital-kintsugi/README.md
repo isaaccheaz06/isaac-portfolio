@@ -62,7 +62,7 @@ Photographs are 3:4, clips are 9:16 — every source is portrait, straight off a
 phone. Two consequences, both handled and neither needing attention when you
 add more:
 
-- `script.js` tags anything taller than it is wide with `.is-portrait`, and
+- `js/project.js` tags anything taller than it is wide with `.is-portrait`, and
   `project.css` caps the lead image at 560px wide / 78vh so one photograph does
   not become two screens of scrolling.
 - Gallery cells are given a uniform 3:4 box with a centred CSS crop, so rows

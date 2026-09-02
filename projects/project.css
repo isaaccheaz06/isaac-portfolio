@@ -420,7 +420,7 @@
  * optional.
  */
 /*
- * The slot script.js fills from media.js. It is an ordinary empty div until
+ * The slot js/project.js fills from media.js. It is an ordinary empty div until
  * something is configured, so it occupies no height and draws nothing: an
  * unconfigured page has no media area rather than an empty one.
  */
@@ -444,7 +444,7 @@
 }
 
 /*
- * UPRIGHT MEDIA. script.js adds .is-portrait to anything configured taller than
+ * UPRIGHT MEDIA. js/project.js adds .is-portrait to anything configured taller than
  * it is wide.
  */
 .project-media img.is-portrait,
@@ -778,7 +778,7 @@
 }
 
 
-/* Process media: hero split (built by script.js renderSplit) */
+/* Process media: hero split (built by js/project.js renderSplit) */
 
 /*
  * Asymmetric on purpose: the lead photograph takes roughly two thirds and the
@@ -1360,7 +1360,7 @@
 /* Process media: commentary */
 
 /*
- * There is no empty state to design here. script.js builds nothing at all for a
+ * There is no empty state to design here. js/project.js builds nothing at all for a
  * blank field, so these rules only ever describe prose that exists, and a
  * section nobody has written about keeps exactly the spacing it had before the
  * fields were added.
