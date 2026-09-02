@@ -1,4 +1,4 @@
-# LLM-Powered Museum NPC — media
+# 如是觀 – "This Way of Seeing It" — media
 
 Tools on the project page: Unity · Ollama · Local LLMs
 

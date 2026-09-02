@@ -130,44 +130,44 @@ Photographs keep the `process-NN` sequence.
 
 ---
 
-## LLM-Powered Museum NPC — `assets/museum-npc/`
+## 如是觀 – "This Way of Seeing It" — `assets/museum-npc/`
 
 No video required for this project yet.
 
 | Project | Filename | Purpose | What the file actually shows | Alt text | Caption | Status |
 |---|---|---|---|---|---|---|
-| Museum NPC | `card.webp` | Homepage thumbnail | _(fill in)_ | _(fill in)_ | _(none — cards take no caption)_ | not uploaded |
-| Museum NPC | `hero.webp` | Lead visual — fullscreen game-view capture | _(fill in)_ | _(fill in)_ | _(fill in, optional)_ | not uploaded |
-| Museum NPC | `unity-editor-01.webp` | Unity editor screenshot 1 | _(fill in — name the panel that matters)_ | _(fill in)_ | _(fill in, optional)_ | not uploaded |
-| Museum NPC | `unity-editor-02.webp` | Unity editor screenshot 2 | _(fill in — name the panel that matters)_ | _(fill in)_ | _(fill in, optional)_ | not uploaded |
-| Museum NPC | `game-view-01.webp` | Game-view screenshot 1 | _(fill in)_ | _(fill in)_ | _(fill in, optional)_ | not uploaded |
-| Museum NPC | `game-view-02.webp` | Game-view screenshot 2 | _(fill in)_ | _(fill in)_ | _(fill in, optional)_ | not uploaded |
-| Museum NPC | `conversation-01.webp` | NPC conversation screenshot 1 | _(fill in — transcribe the visible dialogue)_ | _(fill in — the dialogue text is the content)_ | _(fill in, optional)_ | not uploaded |
-| Museum NPC | `conversation-02.webp` | NPC conversation screenshot 2 | _(fill in — transcribe the visible dialogue)_ | _(fill in — the dialogue text is the content)_ | _(fill in, optional)_ | not uploaded |
+| 如是觀 – "This Way of Seeing It" | `card.webp` | Homepage thumbnail | _(fill in)_ | _(fill in)_ | _(none — cards take no caption)_ | not uploaded |
+| 如是觀 – "This Way of Seeing It" | `hero.webp` | Lead visual — fullscreen game-view capture | _(fill in)_ | _(fill in)_ | _(fill in, optional)_ | not uploaded |
+| 如是觀 – "This Way of Seeing It" | `unity-editor-01.webp` | Unity editor screenshot 1 | _(fill in — name the panel that matters)_ | _(fill in)_ | _(fill in, optional)_ | not uploaded |
+| 如是觀 – "This Way of Seeing It" | `unity-editor-02.webp` | Unity editor screenshot 2 | _(fill in — name the panel that matters)_ | _(fill in)_ | _(fill in, optional)_ | not uploaded |
+| 如是觀 – "This Way of Seeing It" | `game-view-01.webp` | Game-view screenshot 1 | _(fill in)_ | _(fill in)_ | _(fill in, optional)_ | not uploaded |
+| 如是觀 – "This Way of Seeing It" | `game-view-02.webp` | Game-view screenshot 2 | _(fill in)_ | _(fill in)_ | _(fill in, optional)_ | not uploaded |
+| 如是觀 – "This Way of Seeing It" | `conversation-01.webp` | NPC conversation screenshot 1 | _(fill in — transcribe the visible dialogue)_ | _(fill in — the dialogue text is the content)_ | _(fill in, optional)_ | not uploaded |
+| 如是觀 – "This Way of Seeing It" | `conversation-02.webp` | NPC conversation screenshot 2 | _(fill in — transcribe the visible dialogue)_ | _(fill in — the dialogue text is the content)_ | _(fill in, optional)_ | not uploaded |
 
 ---
 
-## Suzume-Inspired CNC Stool — `assets/suzume-cnc-stool/`
+## Suzume-Inspired Stool — `assets/suzume-cnc-stool/`
 
 | Project | Filename | Purpose | What the file actually shows | Alt text | Caption | Status |
 |---|---|---|---|---|---|---|
-| Suzume CNC Stool | `card.webp` | Homepage thumbnail | _(fill in)_ | _(fill in)_ | _(none — cards take no caption)_ | not uploaded |
-| Suzume CNC Stool | `card-loop.mp4` | Optional muted homepage loop, `mode: 'preview'` | _(fill in)_ | _(fill in)_ | _(none)_ | not uploaded |
-| Suzume CNC Stool | `hero.webp` | Lead visual — finished stool | _(fill in)_ | _(fill in)_ | _(fill in, optional)_ | not uploaded |
-| Suzume CNC Stool | `cad-01.webp` | Model / toolpath view 1 | _(fill in)_ | _(fill in)_ | _(fill in, optional)_ | not uploaded |
-| Suzume CNC Stool | `cad-02.webp` | Model / toolpath view 2 | _(fill in)_ | _(fill in)_ | _(fill in, optional)_ | not uploaded |
-| Suzume CNC Stool | `process-01.webp` | Fabrication, chronological 1 | _(fill in)_ | _(fill in)_ | _(fill in, optional)_ | not uploaded |
-| Suzume CNC Stool | `process-02.webp` | Fabrication, chronological 2 | _(fill in)_ | _(fill in)_ | _(fill in, optional)_ | not uploaded |
-| Suzume CNC Stool | `process-03.webp` | Fabrication, chronological 3 | _(fill in)_ | _(fill in)_ | _(fill in, optional)_ | not uploaded |
-| Suzume CNC Stool | `process-04.webp` | Fabrication, chronological 4 | _(fill in)_ | _(fill in)_ | _(fill in, optional)_ | not uploaded |
-| Suzume CNC Stool | `final-01.webp` | Completed stool 1 | _(fill in)_ | _(fill in)_ | _(fill in, optional)_ | not uploaded |
-| Suzume CNC Stool | `final-02.webp` | Completed stool 2 | _(fill in)_ | _(fill in)_ | _(fill in, optional)_ | not uploaded |
-| Suzume CNC Stool | `process-film.mp4` | Full process film, `mode: 'player'` | _(fill in)_ | _(fill in — used as the player's accessible name)_ | _(fill in, optional)_ | not uploaded |
-| Suzume CNC Stool | `process-film-poster.webp` | Still shown before the film plays | _(fill in)_ | _(inherits the film's alt)_ | — | not uploaded |
+| Suzume-Inspired Stool | `card.webp` | Homepage thumbnail | _(fill in)_ | _(fill in)_ | _(none — cards take no caption)_ | not uploaded |
+| Suzume-Inspired Stool | `card-loop.mp4` | Optional muted homepage loop, `mode: 'preview'` | _(fill in)_ | _(fill in)_ | _(none)_ | not uploaded |
+| Suzume-Inspired Stool | `hero.webp` | Lead visual — finished stool | _(fill in)_ | _(fill in)_ | _(fill in, optional)_ | not uploaded |
+| Suzume-Inspired Stool | `cad-01.webp` | Model / toolpath view 1 | _(fill in)_ | _(fill in)_ | _(fill in, optional)_ | not uploaded |
+| Suzume-Inspired Stool | `cad-02.webp` | Model / toolpath view 2 | _(fill in)_ | _(fill in)_ | _(fill in, optional)_ | not uploaded |
+| Suzume-Inspired Stool | `process-01.webp` | Fabrication, chronological 1 | _(fill in)_ | _(fill in)_ | _(fill in, optional)_ | not uploaded |
+| Suzume-Inspired Stool | `process-02.webp` | Fabrication, chronological 2 | _(fill in)_ | _(fill in)_ | _(fill in, optional)_ | not uploaded |
+| Suzume-Inspired Stool | `process-03.webp` | Fabrication, chronological 3 | _(fill in)_ | _(fill in)_ | _(fill in, optional)_ | not uploaded |
+| Suzume-Inspired Stool | `process-04.webp` | Fabrication, chronological 4 | _(fill in)_ | _(fill in)_ | _(fill in, optional)_ | not uploaded |
+| Suzume-Inspired Stool | `final-01.webp` | Completed stool 1 | _(fill in)_ | _(fill in)_ | _(fill in, optional)_ | not uploaded |
+| Suzume-Inspired Stool | `final-02.webp` | Completed stool 2 | _(fill in)_ | _(fill in)_ | _(fill in, optional)_ | not uploaded |
+| Suzume-Inspired Stool | `process-film.mp4` | Full process film, `mode: 'player'` | _(fill in)_ | _(fill in — used as the player's accessible name)_ | _(fill in, optional)_ | not uploaded |
+| Suzume-Inspired Stool | `process-film-poster.webp` | Still shown before the film plays | _(fill in)_ | _(inherits the film's alt)_ | — | not uploaded |
 
 ---
 
-## Parametric Butterfly Pavilion — `assets/butterfly-pavilion/`
+## Butterfly Pavilion — `assets/butterfly-pavilion/`
 
 | Project | Filename | Purpose | What the file actually shows | Alt text | Caption | Status |
 |---|---|---|---|---|---|---|

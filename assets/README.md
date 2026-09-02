@@ -123,6 +123,32 @@ asking you first.** That applies to originals and derivatives alike.
   what reserve the correct box before a file arrives, and are what stop the
   page jumping as it loads.
 
+## media.js entry fields
+
+Every entry is an object. `src` is relative to `assets/`; `width` and
+`height` are the file's real pixel dimensions and are what reserve the box
+before it loads.
+
+| Field | Applies to | Notes |
+|---|---|---|
+| `src` | image, video poster | Path under `assets/` |
+| `width`, `height` | both | Real pixels, not display size |
+| `alt` | both | Required; copy it from `MEDIA-MANIFEST.md` |
+| `caption` | both | Optional, prints under that frame only |
+| `sources` | video | `[{src, type}]`, MP4 first |
+| `poster` | video | Required for `player`, or it renders black |
+| `mode` | video | `preview` or `player` — see below |
+
+`mode: 'preview'` is a muted, looping, `playsinline` autoplay with no
+controls; under `prefers-reduced-motion` it shows its poster instead of
+playing. `mode: 'player'` gets native controls, `preload="metadata"`, audio,
+and never autoplays, so reduced motion does not apply to it. On the homepage
+cards `mode` is ignored and everything behaves as a preview — native
+controls inside a card's link would nest a control in a link.
+
+Leave an entry `null`, or a gallery `[]`, and nothing renders for it: no
+empty box, no placeholder.
+
 ## Where each thing goes
 
 | What | Folder |

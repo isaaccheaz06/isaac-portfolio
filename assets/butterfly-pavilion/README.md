@@ -1,4 +1,4 @@
-# Parametric Butterfly Pavilion — media
+# Butterfly Pavilion — media
 
 Tools on the project page: Rhino · Grasshopper · Laser Cutting
 

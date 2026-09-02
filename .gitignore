@@ -4,3 +4,16 @@
 # OS cruft
 .DS_Store
 Thumbs.db
+
+# The full-resolution source for assets/images/isaac-about.webp. Kept on disk
+# so the derivative can be regenerated; 13MB has no business in a static site,
+# and git would keep every version of it forever.
+assets/images/Me.JPG
+assets/images/Me2.JPG
+assets/images/Me3.JPG
+
+# Full-resolution originals awaiting a web-sized derivative, for the same
+# reason: 4-5MB each, and nothing references them. The .webp beside a
+# project-page-img.jpg is what media.js actually loads.
+assets/butterfly-pavilion/project-page-img.jpg
+assets/suzume-cnc-stool/project-page-img.jpg

@@ -1,4 +1,4 @@
-# Suzume-Inspired CNC Stool — media
+# Suzume-Inspired Stool — media
 
 Tools on the project page: Rhino · Carbide Create · CNC Machining
 
