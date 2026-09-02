@@ -1,23 +1,7 @@
-/*
- * Shared stylesheet for every page under /projects.
- *
- * Consolidates what were three byte-identical stylesheets duplicating the
- * project-detail rules verbatim.
- *
- * Design tokens (--bg, --text, --muted, --font-display, …) come from
- * ../style.css, which every project page loads first.
- *
- * .project-page is the one page shape left: a single case study,
- * constrained to a reading measure.
- *
- * The .category-page / .project-grid / .experiment-list / .empty-state rules
- * below belonged to the three discipline pages, which were removed. They are
- * kept because they cost nothing and are the starting point if a landing page
- * is ever wanted again; git history has the markup that used them.
- */
+/* Shared stylesheet for every page under /projects. */
 
 
-/* ---------- shared chrome ---------- */
+/* Shared project chrome */
 
 .back-link {
     color: var(--muted);
@@ -39,7 +23,7 @@
 }
 
 
-/* ---------- category page ---------- */
+/* Category pages */
 
 .category-page {
     padding: 90px var(--gutter) 40px;
@@ -78,7 +62,7 @@
 }
 
 
-/* ---------- project grid ---------- */
+/* Category pages: project grid */
 
 .project-grid {
     display: grid;
@@ -88,9 +72,9 @@
 }
 
 /*
- * The whole card is the link, mirroring .tile-project on the home page:
- * inline children are spans so the anchor stays valid and the hover
- * treatment matches the collage tiles.
+ * The whole card is the link, mirroring .tile-project on the home page: inline
+ * children are spans so the anchor stays valid and the hover treatment matches
+ * the collage tiles.
  */
 .project-card {
     background-color: var(--surface);
@@ -115,15 +99,7 @@
     outline-offset: 3px;
 }
 
-/*
- * Card artwork, present only once a real image exists.
- *
- * This used to be an empty 16:9 box holding a dashed "16 : 9 image" label,
- * which every visitor could read. An advertised gap is worse than no gap:
- * the card now carries no image area at all until one is added, and the type
- * is spaced to read as finished on its own. The commented markup in each
- * category page shows exactly what to paste in.
- */
+/* Card artwork, present only once a real image exists. */
 .project-thumb {
     display: block;
     line-height: 0;
@@ -177,7 +153,7 @@
 }
 
 
-/* ---------- experiments / smaller work ---------- */
+/* Category pages: experiments */
 
 .experiment-list {
     display: grid;
@@ -215,7 +191,7 @@
 }
 
 
-/* ---------- empty / in-progress state ---------- */
+/* Category pages: empty state */
 
 .empty-state {
     border: 1px dashed var(--border-strong);
@@ -260,7 +236,7 @@
 }
 
 
-/* ---------- project detail page ---------- */
+/* Project detail foundations */
 
 .project-page {
     margin: 0 auto;
@@ -287,32 +263,18 @@
 
 .project-summary {
     color: var(--muted);
-    /*
-     * The floor was 10px, and 1.65vw does not reach 15px until a 909px
-     * viewport — so every phone got the floor exactly: 10px type on a 15px
-     * line, measured at both 390px and 320px. This is the opening paragraph
-     * of the page and it was the smallest text on it.
-     *
-     * 14px is the floor now and the ramp is unchanged, so the size on
-     * desktop is the same 15px it always was; only the narrow end moves.
-     * Leading goes to 1.55 with it — at 14px that is 21.7px, which keeps
-     * the same open feel the 15px setting had.
-     */
     font-size: clamp(14px, 1.65vw, 15px);
     line-height: 1.55;
-    /* the metadata block sits directly under this now, so the old 80px gap
-       would have split the header apart; .project-meta carries the larger
-       margin below itself instead */
+    /* .project-meta carries the larger margin below itself. */
     margin-bottom: 25px;
     max-width: 60ch;
     text-wrap: pretty;
 }
 
 /*
- * Inline links in prose. Without this a bare <a> falls through to the UA
- * default (#0000EE), which is ~2:1 against --bg — notably on the redirect
- * pages, where the fallback link is the only way out if the meta refresh
- * is blocked.
+ * Inline links in prose. Without this a bare <a> falls through to the UA default
+ * (#0000EE), which is ~2:1 against --bg — notably on the redirect pages, where
+ * the fallback link is the only way out if the meta refresh is blocked.
  */
 .project-summary a,
 .project-section p a {
@@ -334,13 +296,13 @@
 }
 
 
-/* ---------- compact project metadata ---------- */
+/* Project metadata */
 
 /*
- * Role / Tools / Year, sitting directly under the summary. Rows are added
- * one at a time as facts become known — an unknown year is simply an absent
- * row rather than a visible blank or a guess, so the block is always
- * truthful at whatever level of completeness it happens to be at.
+ * Role / Tools / Year, sitting directly under the summary. Rows are added one at
+ * a time as facts become known — an unknown year is simply an absent row rather
+ * than a visible blank or a guess, so the block is always truthful at whatever
+ * level of completeness it happens to be at.
  */
 .project-meta {
     border-top: 1px solid var(--border);
@@ -371,18 +333,11 @@
 }
 
 
-/* ---------- optional external links ---------- */
+/* Project external links */
 
 /*
  * A reusable row of outbound links — a devlog, a repository, a running build.
  * Holds one link or several; wraps rather than compressing them on a phone.
- *
- * Written in each project page's own markup rather than injected from
- * media.js. A link is content, not decoration: it has to survive JavaScript
- * being off, and it has to be there for anything reading the page without
- * running it. Only media is JS-injected on this site, and for the opposite
- * reason — an absent image should leave no trace, whereas an absent link is
- * simply lost.
  */
 .project-links {
     display: flex;
@@ -413,10 +368,10 @@
 }
 
 /*
- * The ↗ that marks a link as outbound. Dimmer than the label so it reads as
- * a mark rather than a character, and it lifts with the link on hover.
- * aria-hidden in the markup — the words "(opens in a new tab)" sit beside it
- * in a .visually-hidden span, which is what a screen reader gets instead.
+ * The ↗ that marks a link as outbound. Dimmer than the label so it reads as a
+ * mark rather than a character, and it lifts with the link on hover. aria-hidden
+ * in the markup — the words "(opens in a new tab)" sit beside it in a
+ * .visually-hidden span, which is what a screen reader gets instead.
  */
 .project-link-external {
     color: var(--faint);
@@ -432,12 +387,8 @@
 }
 
 /*
- * Touch targets. As text these links are only about 18px tall, and stacked on
- * a phone they sit close enough together to mis-tap. Padding grows the hit
- * area to ~44px; the row gap comes off to keep the spacing looking the same.
- *
- * Scoped to coarse pointers so the desktop composition is untouched — nothing
- * moves for a mouse, where an 18px line is a comfortable target already.
+ * Touch targets. As text these links are only about 18px tall, and stacked on a
+ * phone they sit close enough together to mis-tap.
  */
 @media (pointer: coarse) {
     .project-links {
@@ -454,8 +405,7 @@
 
     /*
      * The global rule only collapses the duration, so the nudge would still
-     * arrive — instantly, which is a jump rather than a motion. Drop the
-     * travel and keep the colour change.
+     * arrive — instantly, which is a jump rather than a motion.
      */
     .project-link:hover .project-link-external,
     .project-link:focus-visible .project-link-external {
@@ -463,17 +413,11 @@
     }
 }
 
-/* ---------- media ---------- */
+/* Media and galleries */
 
 /*
- * A project page is media-led: the pictures carry the argument and the prose
- * is optional. None of these rules reserve space on their own, so a page
- * with no media yet simply has no media area rather than a row of empty
- * boxes.
- *
- * Every image wants explicit width and height attributes. The browser uses
- * their ratio to reserve the right box before the file arrives, which is
- * what stops the page jumping as images load.
+ * A project page is media-led: the pictures carry the argument and the prose is
+ * optional.
  */
 /*
  * The slot script.js fills from media.js. It is an ordinary empty div until
@@ -500,26 +444,8 @@
 }
 
 /*
- * UPRIGHT MEDIA.
- * script.js adds .is-portrait to anything configured taller than it is wide.
- *
- * The full measure is the right width for a landscape hero and the wrong one
- * for an upright photograph: at ~1100px wide a 3:4 frame stands 1470px tall,
- * and a 9:16 phone clip nearly 2000px — one picture becomes two screens of
- * scrolling. Capping the width keeps an upright lead image commanding without
- * making the reader work for it, and the ratio is never touched.
- *
- * Both axes are capped, and width/height are left auto so the browser scales
- * from the intrinsic ratio and honours whichever limit bites first. That is
- * what lets one rule hold for a 3:4 photograph and a 9:16 phone clip: the
- * photograph is bounded by the width, the much taller clip by the height,
- * and neither is ever distorted or cropped.
- *
- * The viewport-relative height is the important half — it keeps the lead
- * image roughly one screen tall whatever the screen is.
- *
- * Gallery cells are already ~350px wide, so the grid constrains those on its
- * own; only the lead image and anything opting into the full measure need it.
+ * UPRIGHT MEDIA. script.js adds .is-portrait to anything configured taller than
+ * it is wide.
  */
 .project-media img.is-portrait,
 .project-media video.is-portrait,
@@ -532,20 +458,9 @@
 }
 
 /*
- * EVEN GALLERY ROWS.
- * Upright sources rarely share one ratio — here the photographs are 3:4 and
- * the phone clips 9:16 — so left alone a row is as tall as its tallest cell
- * and everything shorter trails a gap beneath it. Giving every upright cell
- * the same 3:4 box makes the grid read as a contact sheet instead.
- *
- * 3:4 rather than a compromise ratio because it is the photographs' own
- * shape: they are not touched at all, and only the clips give up height.
- * The crop is centred and lives entirely in CSS, so the files on disk keep
- * their true dimensions and this is one value to change or delete.
- *
- * Scoped to .is-portrait, so a future project shot in landscape keeps its own
- * shape rather than being squeezed upright. .span-full opts out: the one item
- * given the full measure is featured, and shows uncropped.
+ * EVEN GALLERY ROWS. Upright sources rarely share one ratio — here the
+ * photographs are 3:4 and the phone clips 9:16 — so left alone a row is as tall
+ * as its tallest cell and everything shorter trails a gap beneath it.
  */
 .project-gallery figure:not(.span-full) img.is-portrait,
 .project-gallery figure:not(.span-full) video.is-portrait {
@@ -587,7 +502,7 @@
 }
 
 
-/* ---------- next project ---------- */
+/* Project navigation */
 
 .project-nav {
     border-top: 1px solid var(--border);
@@ -661,14 +576,7 @@
     margin-bottom: 6px;
 }
 
-/*
- * Marks a case-study section that is still awaiting real content.
- * Delete the .section-placeholder element once the section is written.
- *
- * Scoped to .project-section so it out-specifies `.project-section p`
- * above — as a bare `.section-placeholder` it lost colour and font-size
- * to that rule and rendered identically to real body copy.
- */
+/* Marks a case-study section that is still awaiting real content. */
 .project-section .section-placeholder {
     border: 1px dashed var(--border);
     border-radius: 4px;
@@ -680,7 +588,7 @@
 
 
 
-/* ---------- responsive ---------- */
+/* Responsive: project and category pages */
 
 @media (max-width: 900px) {
     .category-section {
@@ -715,62 +623,22 @@
 }
 
 
-/* ==========================================================================
- * PROJECT MEDIA SECTIONS
- *
- * An opt-in layout system for media-led case studies. A project that sets
- * `sections` in media.js gets this; one that sets `hero`/`gallery` keeps the
- * simpler stacked gallery above. Nothing here fires unless it is asked for.
- *
- * The problem it solves: a page of portrait phone media rendered as a uniform
- * grid reads as a contact sheet of clips, all equally important, with no
- * argument. These rules give it a rhythm instead — a dominant hero against a
- * small counterweight, alternating feature/support blocks, one interactive
- * viewer, a quiet closing frame.
- * ========================================================================== */
+/* Project media sections */
 
-/*
- * Media breaks out of the 820px reading measure; prose does not. A comfortable
- * line length and a comfortable image width are different numbers, and the
- * page should not have to pick one.
- *
- * --pm-half is half the widest the media may go, clamped so it never reaches
- * past the gutter. On a phone it resolves to exactly half the content box, the
- * margins collapse to zero, and the breakout quietly stops happening.
- */
+/* Media breaks out of the 820px reading measure; prose does not. */
 .pm-section {
     margin-block: clamp(72px, 9vw, 132px);
 }
 
-/*
- * One exception. The film's two-column composition was sized against a wider
- * measure and works there, so it keeps the breakout the other sections gave
- * up. It is the only place on the page that leaves the baseline.
- */
+/* One exception: the film's two-column composition keeps the breakout. */
 .pm-film-section {
     --pm-half: min(590px, 50vw - var(--gutter));
     margin-inline: calc(50% - var(--pm-half));
 
     /*
-     * A wider gap than the section rhythm gives, to separate the film from
-     * the viewer above it.
-     *
-     * Every other section announces itself with .pm-head — a hairline, a
-     * number and a label. The film has no label in media.js, so it gets no
-     * head, and the carousel ran straight into it with nothing but the
-     * ordinary margin between them. Space is what stands in for that head.
-     *
-     * padding rather than margin, because adjacent section margins collapse
-     * to the larger of the two: a margin-top here would have to beat the
-     * carousel's margin-bottom outright to change anything, which means
-     * restating the rhythm instead of adding to it. Padding is additive, so
-     * this reads as "the usual gap, plus a bit more" and stays correct if
-     * that rhythm is ever retuned. The section has no background or border,
-     * so the padding is purely space.
-     *
-     * The amount is .pm-head's own internal spacing — its 18px padding-top
-     * plus its clamp(28px, 3vw, 44px) margin-bottom — so the film sits as
-     * far below the carousel as section content sits below its own heading.
+     * A wider gap than the section rhythm gives, to separate the film from the
+     * viewer above it. Every other section announces itself with .pm-head — a
+     * hairline, a number and a label.
      */
     padding-top: clamp(46px, calc(18px + 3vw), 62px);
 }
@@ -807,9 +675,9 @@
 }
 
 /*
- * Media is square-edged apart from a 2px softening — enough to look
- * considered, not enough to read as a card. object-fit only ever engages
- * where a ratio is imposed; everywhere else the frame follows the file.
+ * Media is square-edged apart from a 2px softening — enough to look considered,
+ * not enough to read as a card. object-fit only ever engages where a ratio is
+ * imposed; everywhere else the frame follows the file.
  */
 .pm-section img,
 .pm-section video {
@@ -820,13 +688,7 @@
     max-width: 100%;
 }
 
-/*
- * Selected on the element as well as the class. The class was the only
- * selector here and nothing ever carried it — buildFigure appends a plain
- * <figcaption> — so captions were inheriting 16px body type at full text
- * colour with no gap above, which made them compete with their pictures
- * instead of sitting under them.
- */
+/* Selected on the element as well as the class. */
 .pm-caption,
 .pm-section figcaption {
     color: var(--faint);
@@ -837,24 +699,20 @@
     text-wrap: pretty;
 }
 
-/* ---------- 1. hero frame ---------- */
+/* Process media: hero frame */
 
 /*
- * One box, two layers, a fixed ratio.
- *
- * The ratio arrives as an inline style from media.js, so the frame is the
- * right size before either file has loaded — which is the whole reason
- * swapping the still for the clip costs no layout. Both layers fill it with
- * `cover`, and cover crops nothing here: the photograph is 1200x1600 and the
- * clip 720x960, both exactly 3:4. That match is why the derivative was cut.
+ * One box, two layers, a fixed ratio. The ratio arrives as an inline style from
+ * media.js, so the frame is the right size before either file has loaded — which
+ * is the whole reason swapping the still for the clip costs no layout.
  */
 .pm-hero {
     /*
-     * The cap is a height cap expressed as a width. A max-height on a box
-     * with an aspect-ratio does not scale the box — it squashes it and lets
+     * The cap is a height cap expressed as a width. A max-height on a box with
+     * an aspect-ratio does not scale the box — it squashes it and lets
      * object-fit crop the difference — so the limit has to be applied on the
-     * axis the ratio is derived from. 78vh matches the cap every other
-     * upright frame on this page uses.
+     * axis the ratio is derived from. 78vh matches the cap every other upright
+     * frame on this page uses.
      */
     margin-inline: auto;
     max-width: min(100%, calc(78vh * 3 / 4));
@@ -863,9 +721,7 @@
 /*
  * No breakpoint override for the above, deliberately. The min() already picks
  * the right constraint at every width: on a phone the column is narrower than
- * the cap and wins, on a tablet the cap is narrower and wins. Releasing it at
- * <=900px — which looked reasonable — gave a 661px column a 881px-tall frame,
- * a full screen of one photograph.
+ * the cap and wins, on a tablet the cap is narrower and wins.
  */
 
 .pm-hero-frame {
@@ -887,12 +743,7 @@
     width: 100%;
 }
 
-/*
- * The clip is the layer that arrives, so it is the one that moves. Opacity
- * only — no scale, no slide. The two layers are the same object at the same
- * size and the same scale; anything more would be motion for its own sake,
- * and it would show as a shudder because the frames do not line up exactly.
- */
+/* The clip is the layer that arrives, so it is the one that moves. */
 .pm-hero-clip {
     opacity: 0;
     transition: opacity 0.4s ease;
@@ -907,8 +758,10 @@
  * floating on the photograph: over the image it would need its own contrast
  * treatment and at some widths it would sit on the vase.
  */
-/* .pm-hero prefix so this outranks .pm-btn's own width/padding, which are
-   declared later in the file and would otherwise win on source order */
+/*
+ * .pm-hero prefix so this outranks .pm-btn's own width/padding, which are
+ * declared later in the file and would otherwise win on source order
+ */
 .pm-hero .pm-hero-toggle {
     gap: 10px;
     justify-content: flex-start;
@@ -925,13 +778,12 @@
 }
 
 
-/* ---------- hero split (unused: kept for any project that wants one) ---------- */
+/* Process media: hero split (built by script.js renderSplit) */
 
 /*
  * Asymmetric on purpose: the lead photograph takes roughly two thirds and the
- * loop sits beside it as a counterweight, dropped down the page so the two
- * tops do not line up. Equal columns would read as a comparison; this reads as
- * a subject and a footnote.
+ * loop sits beside it as a counterweight, dropped down the page so the two tops
+ * do not line up.
  */
 .pm-split {
     align-items: start;
@@ -954,33 +806,17 @@
     width: 100%;
 }
 
-/* ---------- 2. editorial blocks ---------- */
+/* Process media: editorial blocks */
 
 /*
- * One large item against two small ones, and the large side alternates block
- * to block so the eye is not marched down a single column. The supports share
- * the feature's height rather than setting their own, which is what keeps the
- * row square at the bottom.
+ * One large item against two small ones, and the large side alternates block to
+ * block so the eye is not marched down a single column.
  */
 .pm-editorial+.pm-editorial {
     margin-top: clamp(28px, 4vw, 56px);
 }
 
-/*
- * Space between one row and the next. The blocks were plain siblings with no
- * gap of any kind, so the bottom of one row's supports sat flush against the
- * top of the next row's feature and the two read as a single four-image
- * grid rather than two compositions.
- *
- * One rule on the join rather than a margin on every block: nothing is added
- * above the first row or below the last, where the section's own margin is
- * already doing the work.
- *
- * It has to beat the gap INSIDE a block (16-28px) to read as a boundary, and
- * the clamp does that at every width — 24px against 16px on a phone, 43px
- * against 28px at 1440. Tighter on a phone on purpose: stacked, the rows are
- * already separated by the full width of the screen.
- */
+/* Space between one row and the next, so two rows do not read as one grid. */
 .pm-block+.pm-block {
     margin-top: clamp(24px, 3vw, 48px);
 }
@@ -1027,20 +863,19 @@
 }
 
 /*
- * The feature carries a caption and the supports usually do not, so the
- * feature column needs the picture to flex and the text to sit under it.
+ * The feature carries a caption and the supports usually do not, so the feature
+ * column needs the picture to flex and the text to sit under it.
  */
 .pm-feature figure> :is(img, video) {
     flex: 1;
     min-height: 0;
 }
 
-/* ---------- 4. closing frame ---------- */
+/* Process media: closing frame */
 
 /*
  * The last image is given room rather than another row: wide margins, nothing
- * beside it, no caption competing for attention. It should read as the end of
- * an argument, not as item fourteen.
+ * beside it, no caption competing for attention.
  */
 .pm-finale {
     margin-block: clamp(96px, 13vw, 190px);
@@ -1049,7 +884,7 @@
 
 
 
-/* ---------- 3. process viewer ---------- */
+/* Process media: viewer */
 
 /*
  * One stage, one caption line, one row of controls. Everything that could be
@@ -1090,8 +925,8 @@
 }
 
 /*
- * Contained, never cropped: these are upright frames of differing ratios and
- * the whole point of the viewer is to show each one whole.
+ * Contained, never cropped: these are upright frames of differing ratios and the
+ * whole point of the viewer is to show each one whole.
  */
 .pm-slide img,
 .pm-slide video {
@@ -1102,21 +937,8 @@
 }
 
 /*
- * The bar is the positioning context for the rotation control, which is
- * taken out of the flow entirely (see .pm-controls). Two reasons:
- *
- * 1. Out of flow, the control CANNOT be pushed down by a description, at any
- *    length or width. A grid column got the same result, but only as an
- *    outcome of the track sizing; this is structural.
- * 2. It gives the description the full width of the bar. As a grid column
- *    the text had to share the row with the control's 44px + 20px gutter,
- *    and at 320px that left the description 218px of a 282px bar — 27
- *    characters a line, with a mostly empty gutter beside ten of them.
- *    Now: 282px, the whole bar.
- *
- * min-height so the pinned control cannot spill past the bottom border on a
- * stage that has a title and no description: 1px border + 4px offset + 44px
- * control.
+ * The bar is the positioning context for the rotation control, which is taken
+ * out of the flow entirely (see .pm-controls).
  */
 .pm-bar {
     border-top: 1px solid var(--border);
@@ -1126,27 +948,7 @@
     position: relative;
 }
 
-/*
- * Two rows, not a wrapping flex line.
- *
- * As flex, .pm-desc carried `flex: 1 1 100%` but was capped by
- * `max-width: 56ch` (459px), so its hypothetical main size was 459px rather
- * than the whole line — and flex then kept it BESIDE the title whenever
- * titleWidth + 14px gap + 459px happened to fit the step.
- *
- * The title widths differ per stage (157 / 83 / 188 / 83px), so every stage
- * had its own threshold: 630 / 556 / 661 / 556px. Anywhere between 556 and
- * 630 the two short-titled stages sat beside their description while the two
- * long-titled ones stacked. Measured on a step swept from 554px to 680px:
- * at 560-620px stages 2 and 4 went beside, 1 and 3 did not.
- *
- * Rows cannot do that. Title is row 1 and description row 2 at every stage
- * and every width, whatever length either one runs to.
- *
- * min-width so a long unbroken word shrinks the text rather than widening
- * the whole bar — the parent track is minmax(0, 1fr) and would otherwise be
- * pushed out by this item's min-content size.
- */
+/* Two rows, not a wrapping flex line. */
 .pm-step {
     display: grid;
     min-width: 0;
@@ -1154,10 +956,8 @@
 }
 
 /*
- * The title is the one line the control sits beside, so it is the only line
- * that reserves room for it: 44px of control plus a 12px gutter. The
- * description below starts past the control's bottom edge and takes the
- * full width.
+ * The title is the one line the control sits beside, so it is the only line that
+ * reserves room for it: 44px of control plus a 12px gutter.
  */
 .pm-title {
     color: var(--text);
@@ -1169,12 +969,9 @@
 }
 
 /*
- * Pinned to the bar's top-right corner.
- *
- * top:4px centres the 44px control on the title's line rather than hanging
- * it below: the title sits 14px down (the bar's padding) and is 24px tall,
- * so its centre is at 26px — and 4 + 22 is 26. Measured centre-to-centre
- * offset is 0 at every width and on every stage.
+ * Pinned to the bar's top-right corner. top:4px centres the 44px control on the
+ * title's line rather than hanging it below: the title sits 14px down (the bar's
+ * padding) and is 24px tall, so its centre is at 26px — and 4 + 22 is 26.
  */
 .pm-controls {
     align-items: center;
@@ -1189,9 +986,6 @@
  * The rotation toggle is the only control left in the row, so it has to be a
  * comfortable target on its own rather than one of a cluster of three. 44px
  * square, which is the floor for a thumb.
- *
- * Scoped to .pm-controls so the hero's own toggle, which is a wide button
- * with a text label beside its icon, keeps its own proportions.
  */
 .pm-controls .pm-btn {
     height: 44px;
@@ -1199,8 +993,8 @@
 }
 
 /*
- * Square, borderless, text-coloured. 40px so they clear the touch-target
- * minimum without drawing a button around themselves.
+ * Square, borderless, text-coloured. 40px so they clear the touch-target minimum
+ * without drawing a button around themselves.
  */
 .pm-btn {
     align-items: center;
@@ -1236,8 +1030,7 @@
 /* Thumbnail rail — the direct route to any stage. */
 /*
  * A rule of numbered segments under a thin line each — no dots, no pills, no
- * running bar. Pulled a little closer to the status row now that it is one
- * line of digits rather than a row of stage names.
+ * running bar.
  */
 .pm-thumbs {
     display: grid;
@@ -1248,12 +1041,7 @@
     padding: 0;
 }
 
-/*
- * The padding is the touch target. A number on its own is 16px tall, which is
- * not something to ask a thumb to hit, so the block padding brings the button
- * to 44px — at every width, not just on a phone, since the button holds the
- * same thing everywhere now.
- */
+/* The padding is the touch target. */
 .pm-thumb {
     background: none;
     border: 0;
@@ -1300,12 +1088,11 @@
     opacity: 1;
 }
 
-/* ---------- 5. full film ---------- */
+/* Process media: full film */
 
 /*
  * Two columns on desktop: the film beside its heading rather than stretched
- * across the viewport. A 9:16 frame run full width would stand several
- * screens tall and stop reading as a composition at all.
+ * across the viewport.
  */
 .pm-film {
     align-items: start;
@@ -1334,8 +1121,8 @@
 }
 
 /*
- * The frame holds the aspect ratio from first paint, so swapping the poster
- * for the iframe moves nothing else on the page.
+ * The frame holds the aspect ratio from first paint, so swapping the poster for
+ * the iframe moves nothing else on the page.
  */
 .pm-film-frame {
     aspect-ratio: 9 / 16;
@@ -1434,14 +1221,14 @@
 }
 
 /*
- * Stays visible whether or not the iframe ever loads, which is the fallback
- * if Drive is blocked.
+ * Stays visible whether or not the iframe ever loads, which is the fallback if
+ * Drive is blocked.
  */
 .pm-film-note {
     margin-top: 18px;
 }
 
-/* ---------- responsive ---------- */
+/* Responsive: process media */
 
 
 
@@ -1450,35 +1237,15 @@
 
 
 
-/* ==========================================================================
- * SIZING CORRECTIONS
- *
- * All the media on this page is upright — 3:4 photographs and 9:16 phone
- * clips. Three consequences of that only show themselves once real assets are
- * in: a feature cell stretches to whatever its supports add up to, a frame
- * run at the full band is nearly two screens tall, and a viewer sized for
- * landscape leaves an upright clip stranded in the middle of a wide panel.
- * ========================================================================== */
+/* Sizing corrections */
 
 /*
- * The block sets its own shape rather than inheriting it from whichever
- * column happens to be tallest. Left to itself the support column decided the
- * height and the feature stretched to match — a 9:16 clip pulled to 1245px.
- *
- * The feature is 4:5 and the supports square-ish, which are the two crops
- * that cost the least here: 4:5 takes 28% off the height of a 9:16 clip and
- * only 6% off the width of a 3:4 photograph, and a square keeps the middle
- * three quarters of an upright frame. Centre focal point throughout, because
- * in every one of these the subject is the middle of the frame.
+ * The block sets its own shape rather than inheriting it from whichever column
+ * happens to be tallest.
  */
 /*
- * A definite height, so the band governs its contents rather than the other
- * way round. Left to size itself the row took the taller column — two stacked
- * supports at 1232px — and stretched the feature to match, which pulled a
- * 9:16 clip to 1207px and made aspect-ratio on it inert.
- *
- * Tied to viewport width so the band scales with the composition, and bounded
- * at both ends so it can neither collapse nor run past a screen.
+ * A definite height, so the band governs its contents rather than the other way
+ * round.
  */
 .pm-block {
     align-items: stretch;
@@ -1487,9 +1254,9 @@
 }
 
 /*
- * Placed by column rather than reordered. `order` cannot move an item that
- * has an explicit grid-row, so the flipped block silently kept its original
- * columns and put the small frame where the large one belonged.
+ * Placed by column rather than reordered. `order` cannot move an item that has
+ * an explicit grid-row, so the flipped block silently kept its original columns
+ * and put the small frame where the large one belonged.
  */
 .pm-feature {
     grid-column: 1;
@@ -1516,9 +1283,7 @@
 
 /*
  * height:auto, not 100%: a definite height beats aspect-ratio, so asking for
- * both left the ratio inert and the clip stretched to 1207px. Letting the
- * ratio set the height is what makes the feature govern the block instead of
- * inheriting whatever its supports happened to add up to.
+ * both left the ratio inert and the clip stretched to 1207px.
  */
 .pm-feature img,
 .pm-feature video {
@@ -1537,43 +1302,25 @@
 }
 
 /*
- * A block with one support has nothing to stack, so the single frame takes
- * the whole column and keeps a taller crop instead of a square one.
+ * A block with one support has nothing to stack, so the single frame takes the
+ * whole column and keeps a taller crop instead of a square one.
  */
 .pm-support:has(> :only-child) {
     grid-template-rows: 1fr;
 }
 
-/* ---------- shared supporting-media rail ---------- */
+/* Process media: supporting rail */
 
 /*
  * One rule for every standalone frame on the page, so they stop arriving at
- * whatever width their own section happened to give them. Before this the
- * closing image ran the full 1180px band while the retained process frame sat
- * at 340px — the same kind of element, three times apart.
- *
- * The rail caps width; the ratio decides the rest. A 4:3 frame reaches the
- * 1040px cap, an upright one meets the height cap first and simply sits
- * narrower — which is what preserving aspect ratio means. Nothing here forces
- * a common height, and nothing crops: width and height stay auto so the
- * browser scales from the file's own dimensions.
- *
- * The height cap is the important half. Without it a 3:4 photograph at 1040px
- * stands 1387px tall, and one supporting image becomes a screen and a half.
- *
- * The hero split and the process viewer opt out deliberately — they are
- * compositions, not standalone frames.
+ * whatever width their own section happened to give them.
  */
 .pm-rail {
     margin-inline: auto;
     max-width: 100%;
 }
 
-/*
- * fit-content so the caption is exactly as wide as the frame above it. Left
- * at 100% a caption under an upright image would run the full rail and float
- * unattached to the picture it belongs to.
- */
+/* fit-content so the caption is exactly as wide as the frame above it. */
 .pm-rail figure {
     margin-inline: auto;
     max-width: 100%;
@@ -1582,9 +1329,7 @@
 
 /*
  * width:0 + min-width:100% keeps the caption from widening the figure while
- * still filling it. Sized normally the caption's own 46ch measure was wider
- * than an upright frame, so fit-content took the caption's width instead of
- * the picture's and the two no longer lined up.
+ * still filling it.
  */
 .pm-rail figcaption {
     min-width: 100%;
@@ -1602,10 +1347,8 @@
 }
 
 /*
- * The viewer is sized for upright media: tall stage, narrow column, centred
- * in the band. At the full 1180px a 9:16 clip sat 313px wide in the middle of
- * a mostly empty panel. `contain` still guarantees nothing is cropped, so the
- * one 3:4 slide among the clips shows whole and simply sits wider.
+ * The viewer is sized for upright media: tall stage, narrow column, centred in
+ * the band.
  */
 .pm-viewer {
     --pm-stage: min(50vh, 400px);
@@ -1614,17 +1357,13 @@
 }
 
 
-/* ---------- optional commentary ---------- */
+/* Process media: commentary */
 
 /*
- * There is no empty state to design here. script.js builds nothing at all for
- * a blank field, so these rules only ever describe prose that exists, and a
- * section nobody has written about keeps exactly the spacing it had before
- * the fields were added.
- *
- * A measure rather than a width: 58ch is around eleven words a line, which is
- * past the point where a note reads as a caption and short of where it starts
- * needing to be a column.
+ * There is no empty state to design here. script.js builds nothing at all for a
+ * blank field, so these rules only ever describe prose that exists, and a
+ * section nobody has written about keeps exactly the spacing it had before the
+ * fields were added.
  */
 .pm-prose {
     color: var(--muted);
@@ -1653,15 +1392,8 @@
 }
 
 /*
- * The stage description, on its own row under the stage name and inside the
- * same live region, so a slide change is announced once rather than twice.
- *
- * No flex sizing any more: as a grid row it fills the column by default and
- * the measure below is the only thing that limits it.
- *
- * :empty is doing real work: an undescribed stage still has the element, and
- * display:none is what drops both the row and its gap, so a stage with no
- * description keeps exactly the bar it had before descriptions existed.
+ * The stage description, on its own row under the stage name and inside the same
+ * live region, so a slide change is announced once rather than twice.
  */
 .pm-desc {
     color: var(--muted);
@@ -1678,9 +1410,7 @@
 
 /*
  * The film reflection: a quiet note, not a pull quote. No box, no card, no
- * quotation marks. One hairline separates it from the overview it follows,
- * and the Drive link keeps its own weight underneath, which is the order the
- * block is meant to be read in.
+ * quotation marks.
  */
 .pm-film-reflection {
     border-top: 1px solid var(--border);
@@ -1712,32 +1442,19 @@ p.pm-film-reflection-label {
 }
 
 
-/* ==========================================================================
- * PM RESPONSIVE + REDUCED MOTION
- *
- * Last in the file on purpose. These override the sizing rules above, and
- * at equal specificity the later rule wins — authored earlier, the fixed
- * band height and the flipped-column placement kept beating them, so a
- * phone still got a two-column block frozen at 60vw tall.
- * ========================================================================== */
+/* Pm responsive + reduced motion */
 
 @media (max-width: 900px) {
 
     /* every multi-column composition folds to one column, in source order */
     .pm-split,
     .pm-block,
-    /*
-     * The 150px inset is a desktop gesture. Stacked in one column it was
-     * still being subtracted from the whole column, leaving the film 193px
-     * wide inside a 343px page — 44% of the width gone to margin. Full
-     * width here; the section's own padding is the only inset that scales.
-     */
+    /* The 150px inset is a desktop gesture. */
     .pm-film {
         grid-template-columns: minmax(0, 1fr);
         width: 100%;
     }
 
-    /* the offset that made the asymmetry has nothing left to offset against */
     .pm-split-aside {
         margin-top: 0;
     }
@@ -1747,8 +1464,8 @@ p.pm-film-reflection-label {
     }
 
     /*
-     * Stacked, a feature and its supports are the same width, so cropping
-     * them to share a height buys nothing — let each frame be its own shape.
+     * Stacked, a feature and its supports are the same width, so cropping them
+     * to share a height buys nothing — let each frame be its own shape.
      */
     .pm-feature img,
     .pm-feature video,
@@ -1758,39 +1475,15 @@ p.pm-film-reflection-label {
         object-fit: contain;
     }
 
-    /*
-     * As many columns as there are images, not always two.
-     *
-     * `repeat(2, ...)` was right for the first block, which has two supports,
-     * and wrong for the second, which has one: the lone image took column one
-     * and column two stayed empty, so at 900px it rendered 347px wide inside
-     * a 712px row with a 347px dead strip beside it — half the width of
-     * every other frame in the sequence, and reading as detached from it.
-     *
-     * auto-fit collapses the tracks nothing occupies, so one image fills the
-     * row and two still sit side by side. General, and keyed to the content
-     * rather than to which block it is, so a support group of any size lands
-     * correctly without an nth-child exception.
-     *
-     * min() so the track can never demand more than the column has; below
-     * 560px the single-column rule takes over regardless.
-     */
+    /* As many columns as there are images, not always two. */
     .pm-support {
         grid-auto-rows: auto;
         grid-template-columns: repeat(auto-fit, minmax(min(220px, 100%), 1fr));
     }
 
     /*
-     * One column: each frame is its own shape again, so no fixed band — and
-     * no fixed ROWS either. Releasing only the height left grid-template-rows
-     * at `1fr 1fr`, so the two stacked support images sized a row that the
-     * feature then spanned and stretched to fill: a 540x960 clip rendered
-     * 892px tall inside a 390px column, the extra height showing as black
-     * because object-fit is `contain` here.
-     *
-     * The figure and its media have to be released with it. `height: 100%`
-     * on the figure and `flex: 1` on the media were what carried the row's
-     * height down into the video in the first place.
+     * One column: each frame is its own shape again, so no fixed band — and no
+     * fixed ROWS either.
      */
     .pm-block {
         grid-template-rows: auto;
@@ -1812,16 +1505,11 @@ p.pm-film-reflection-label {
     }
 
     /*
-     * The columns themselves, which the reset above never reached.
-     *
-     * `.pm-block` is (0,1,0) and `.pm-block.is-flipped` is (0,2,0), so the
-     * flipped block's own two-column rule outranked the one-column rule in
-     * this breakpoint no matter which came later in the file — and kept its
-     * desktop proportions all the way down. Measured: at 390px the flipped
-     * block was still `139px 188px`, so its feature image rendered 139px
-     * wide beside a sibling block whose feature was the full 343px.
-     *
-     * Matched specificity, so it lands.
+     * The columns themselves, which the reset above never reached. `.pm-block`
+     * is (0,1,0) and `.pm-block.is-flipped` is (0,2,0), so the flipped block's
+     * own two-column rule outranked the one-column rule in this breakpoint no
+     * matter which came later in the file — and kept its desktop proportions all
+     * the way down.
      */
     .pm-block.is-flipped {
         grid-template-columns: minmax(0, 1fr);
@@ -1851,12 +1539,7 @@ p.pm-film-reflection-label {
         grid-template-columns: minmax(0, 1fr);
     }
 
-    /*
-     * Nothing here for the rail any more. It used to hide the stage names
-     * with font-size:0 and pad the button back up to a thumb-sized target;
-     * the names are gone from the markup and the padding is in the base rule,
-     * so both applied at every width now.
-     */
+    /* Nothing here for the rail any more. */
     .pm-thumb-num {
         font-size: 11px;
     }
@@ -1866,8 +1549,8 @@ p.pm-film-reflection-label {
 
     /*
      * Slides cross-fade in place with no lateral travel. The fade stays: it
-     * still signals that the stage changed, which is comprehension rather
-     * than decoration.
+     * still signals that the stage changed, which is comprehension rather than
+     * decoration.
      */
     .pm-slide {
         transform: none !important;
@@ -1879,44 +1562,13 @@ p.pm-film-reflection-label {
 }
 
 
-/* ==========================================================================
- * PROCESS VIEWER — DESKTOP PROPORTIONS
- *
- * min-width only, and last in the file, so it overrides the desktop sizing
- * above without reaching the phone: at 900px and below not one of these
- * declarations applies and the stacked viewer stands exactly as it was.
- * ========================================================================== */
+/* Process viewer — desktop proportions */
 
 @media (min-width: 901px) {
 
     /*
-     * A column the shape of the film, rather than a portrait clip parked in
-     * the middle of a landscape panel.
-     *
-     * All four clips are 9:16 — 540x960, 540x960, 540x960 and 720x1280 — so
-     * with `contain` the picture is exactly `height * 0.5625` wide and the
-     * rest of the stage is empty. At the old 618px stage and 400px height
-     * that was 225px of video inside 618px of box: the video occupied 36% of
-     * its own stage and the other 64% was nothing.
-     *
-     * Both numbers move. The stage grows to 520-560px, which paints 293-315px
-     * of picture, and the box comes in to 520px — so the picture now holds
-     * 58% of the stage and the whole viewer reads as one upright column.
-     *
-     * 520px is also a real measure for what sits underneath: .pm-desc is
-     * capped at 56ch, which is 459px at its 13px size, so the description
-     * fills the bar rather than trailing off across it. The bar and the rail
-     * are siblings inside this box, so both inherit the width — stage,
-     * status row and numbers all end on the same two edges.
-     *
-     * Height as a clamp, not a fixed value: the vh term lets the stage use a
-     * tall window, and the 520px floor keeps the picture at 293px on a short
-     * one (1024x768 resolves to the floor) rather than collapsing with it.
-     * `contain` is untouched, so a slide of some other ratio would still show
-     * whole and simply sit narrower — nothing here can crop or stretch one.
-     *
-     * margin-inline: auto is already on .pm-viewer, so capping the width
-     * centres it.
+     * A column the shape of the film, rather than a portrait clip parked in the
+     * middle of a landscape panel.
      */
     .pm-viewer {
         --pm-stage: clamp(520px, 60vh, 560px);

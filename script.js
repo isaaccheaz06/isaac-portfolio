@@ -1,3 +1,5 @@
+/* Navbar and anchor navigation */
+
 const navbar = document.querySelector('.navbar');
 let lastScrollY = window.scrollY;
 
@@ -9,8 +11,7 @@ if (navbar) {
      * lands the target's top edge at viewport y=0 — directly underneath it,
      * hiding part of the heading. --navbar-height feeds scroll-margin-top on
      * those sections so the browser stops short by the navbar's own height
-     * instead. Measured rather than hardcoded because the height changes
-     * across breakpoints and grows if the logo ever wraps to two lines.
+     * instead.
      */
     const setNavbarHeight = () => {
         document.documentElement.style.setProperty('--navbar-height', `${navbar.offsetHeight}px`);
@@ -24,29 +25,18 @@ if (navbar) {
     }
 
     /*
-     * Anchor navigation vs. auto-hide.
-     *
-     * Jumping to #work/#about/#contact always scrolls DOWN, which tripped the
-     * auto-hide below. The browser had already reserved --navbar-height of
-     * clearance via scroll-margin-top, so the section landed correctly but the
-     * bar it was making room for had slid away — leaving a void at the top,
-     * and snapping back over the heading the moment the user scrolled up 1px.
-     *
-     * Holding the bar visible for the duration of the jump makes the reserved
-     * space correct: the heading comes to rest directly beneath a bar that is
-     * actually there.
+     * Anchor navigation vs. auto-hide. Jumping to #work/#about/#contact always
+     * scrolls DOWN, which tripped the auto-hide below.
      */
     let anchorNavigating = false;
     let anchorNavStartedAt = 0;
     let settleTimer = null;
 
     /*
-     * With scroll-behavior:auto — which is what prefers-reduced-motion users
-     * get — the jump is instantaneous and scrollend can fire in the same
-     * frame, releasing the guard before the trailing scroll events have
-     * settled and letting the auto-hide fire anyway. Holding the guard for a
-     * short floor covers that, and the explicit un-hide here guarantees we
-     * always come to rest with the bar visible however the race resolves.
+     * With scroll-behavior:auto — which is what prefers-reduced-motion users get
+     * — the jump is instantaneous and scrollend can fire in the same frame,
+     * releasing the guard before the trailing scroll events have settled and
+     * letting the auto-hide fire anyway.
      */
     const MIN_GUARD_MS = 350;
 
@@ -124,12 +114,11 @@ if (navbar) {
     });
 }
 
-/* ---------- featured cards: pointer parallax ---------- */
+/* Featured-card interaction */
 
 /*
- * Each card drifts against the cursor by an amount set by its data-depth,
- * on top of the static rotation it already carries in CSS. Decorative only:
- * the cards are ordinary links and behave identically without this.
+ * Each card drifts against the cursor by an amount set by its data-depth, on top
+ * of the static rotation it already carries in CSS.
  */
 const featured = document.getElementById('featured');
 const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
@@ -154,10 +143,10 @@ if (featured && !reduceMotion.matches && !coarsePointer.matches) {
 
             for (const { el, depth } of cards) {
                 /*
-                 * Two variables, not a transform. .feature composes these
-                 * with the card's tilt and with the scroll reveal, so the
-                 * drift no longer has to carry the tilt along with it — and
-                 * cannot flatten a reveal that is still in flight.
+                 * Two variables, not a transform. .feature composes these with
+                 * the card's tilt and with the scroll reveal, so the drift no
+                 * longer has to carry the tilt along with it — and cannot
+                 * flatten a reveal that is still in flight.
                  */
                 el.style.setProperty('--drift-x', `${-offsetX * depth * 16}px`);
                 el.style.setProperty('--drift-y', `${-offsetY * depth * 16}px`);
@@ -173,21 +162,7 @@ if (featured && !reduceMotion.matches && !coarsePointer.matches) {
     });
 }
 
-/* ==========================================================================
- * THE HERO STAGE
- *
- * Three things move in the hero and none of them may move at the same time
- * as another: the line that types itself, the wave that crosses the title,
- * and the small bob under View Work. Left to their own timers they were
- * three animations competing for one pair of eyes — the wave arriving
- * halfway through a word being deleted, the button nodding under both.
- *
- * So none of them owns a schedule any more. Each registers what it can DO
- * on this object, and the director at the bottom of the file decides when.
- * That is also what makes the whole hero idempotent in one place: there is a
- * single token to bump and a single timer to clear, however many effects are
- * eventually hung off it.
- */
+/* The hero stage */
 const heroStage = {
     wave: null,     // { run(alive), stop() }
     type: null,     // { typeIn(alive), deleteOut(alive), advance(), setStill(), stop() }
@@ -195,14 +170,11 @@ const heroStage = {
 };
 
 
-/* ---------- magnetic letters ---------- */
+/* Hero interactions: magnetic title */
 
 /*
  * Splits the text content of any .magnetic-text element into one span per
- * character at runtime — the HTML source stays plain, editable text. Each
- * letter is nudged away from the cursor within a radius and springs back
- * via the CSS transition on .letter, so no per-frame easing math is needed
- * here beyond the displacement itself.
+ * character at runtime — the HTML source stays plain, editable text.
  */
 const magneticRoots = document.querySelectorAll('.magnetic-text');
 
@@ -211,25 +183,8 @@ if (magneticRoots.length && !reduceMotion.matches && !coarsePointer.matches) {
     const MAX_LIFT = 15;
 
     /*
-     * The wave.
-     *
-     * STEP is the gap between one letter starting and the next; WORD_GAP is
-     * added again at every space. Without it the wave crosses a space at the
-     * same rate it crosses a letter, which reads as a machine sweeping a
-     * string rather than as something travelling through a sentence — the
-     * pause at a word boundary is what makes it feel like reading.
-     *
-     * 46 gaps at 58ms plus 9 word boundaries at 100ms puts the last letter
-     * 3.57s behind the first, and its own 0.7s of travel closes the wave at
-     * about 4.3s — slow enough that the pulse reads as one thing crossing
-     * the sentence rather than as a shimmer over all of it at once.
-     *
-     * The sweep is comfortably shorter than EVERY, so a wave has always
-     * finished and cleared before the next is armed; runWave() takes the
-     * class off at waveSpan and does not put it back until 15s.
-     *
-     * EVERY is measured start-to-start, so the title is still for roughly
-     * twelve of the fifteen seconds.
+     * The wave. STEP is the gap between one letter starting and the next;
+     * WORD_GAP is added again at every space.
      */
     const WAVE_STEP = 58;
     const WAVE_WORD_GAP = 100;
@@ -237,31 +192,6 @@ if (magneticRoots.length && !reduceMotion.matches && !coarsePointer.matches) {
     const WAVE_FIRST = 1500;
     const WAVE_EVERY = 15000;
 
-    /*
-     * Two coordinate systems used to be one, and that was the bug.
-     *
-     * `points` caches a centre per letter so the pointer handler is not
-     * calling getBoundingClientRect 47 times a frame. It used to cache
-     * getBoundingClientRect's own output, which is VIEWPORT-relative, and
-     * refresh it on resize and on fonts.ready only — never on scroll. So the
-     * hot zone stayed wherever the page happened to be scrolled the last
-     * time measure() ran, and every scroll moved the letters out from under
-     * it. Measured: with the page scrolled 1574px, hovering a letter did
-     * nothing and hovering 1574px below it lifted six.
-     *
-     * That is what made Back navigation look like the trigger. Coming back,
-     * the browser restores the previous scroll offset, and measure() runs
-     * 0.7s later off the reveal animation — by then at the restored offset.
-     * The centres are cached against that, so scrolling up to the title
-     * leaves the hot zone a screen and a half below it, and the effect is
-     * dead for the life of the page: nothing re-measures except a resize,
-     * which is exactly why resizing the window "fixed" it.
-     *
-     * Document coordinates instead. A letter's document position does not
-     * change when the page scrolls, so the cache stays true and there is no
-     * scroll listener to throttle — the pointer is converted on the way in
-     * rather than 47 centres being converted on the way out.
-     */
     const letters = [];
     let points = [];
 
@@ -270,17 +200,7 @@ if (magneticRoots.length && !reduceMotion.matches && !coarsePointer.matches) {
     let pending = null;          // newest pointer position, document coords
     let measureQueued = false;
 
-    /*
-     * The letters own --letter-lift, and nothing else writes to it.
-     *
-     * The lift used to be written straight to el.style.transform, which made
-     * `transform` on .letter a shared resource: anything else that wanted to
-     * transform a letter — a scroll reveal, most obviously — would silently
-     * erase the lift, or be erased by it, depending on which wrote last.
-     * A custom property cannot collide that way. The CSS composes it into
-     * transform, and the transition on .letter still runs because the
-     * computed transform changes when the variable does.
-     */
+    /* The letters own --letter-lift, and nothing else writes to it. */
     const rest = () => {
         for (const el of letters) el.style.removeProperty('--letter-lift');
     };
@@ -288,8 +208,8 @@ if (magneticRoots.length && !reduceMotion.matches && !coarsePointer.matches) {
     /*
      * Read the resting layout, not wherever the cursor has pushed a letter.
      * .is-measuring drops both the displacement and its transition for the
-     * length of the read, so a measure taken mid-interaction lands on the
-     * same numbers as one taken at rest.
+     * length of the read, so a measure taken mid-interaction lands on the same
+     * numbers as one taken at rest.
      */
     const measure = () => {
         measureQueued = false;
@@ -318,13 +238,8 @@ if (magneticRoots.length && !reduceMotion.matches && !coarsePointer.matches) {
     };
 
     /*
-     * animationend tells us the reveal has finished and the letters are
-     * where they will stay — but it is not a signal that always arrives. An
-     * animation that is interrupted fires animationcancel instead, and one
-     * that never starts fires nothing, and in either case `ready` would
-     * stick at false and the effect would be dead with no way back. So:
-     * whichever of the three arrives first settles the line, and the timeout
-     * guarantees there is a third.
+     * animationend tells us the reveal has finished and the letters are where
+     * they will stay — but it is not a signal that always arrives.
      */
     let pendingLines = 0;
     let settledLines = 0;
@@ -336,10 +251,8 @@ if (magneticRoots.length && !reduceMotion.matches && !coarsePointer.matches) {
     };
 
     /*
-     * One running offset across every line of the title, so the wave crosses
-     * a line break as one continuous sweep instead of restarting three
-     * times. Set once here as an inline custom property and never touched
-     * again — the animation reads it as its delay.
+     * One running offset across every line of the title, so the wave crosses a
+     * line break as one continuous sweep instead of restarting three times.
      */
     let waveOffset = 0;
 
@@ -415,12 +328,10 @@ if (magneticRoots.length && !reduceMotion.matches && !coarsePointer.matches) {
             }
 
             /*
-             * Lift straight up rather than pushing radially away. A radial
-             * push scatters letters in every direction at once and reads as
-             * noise on a line of text; a vertical hop keeps the baseline
-             * legible and reads as the cursor sweeping letters up as it
-             * passes. Quadratic falloff so only letters genuinely near the
-             * cursor move much.
+             * Lift straight up rather than pushing radially away. A radial push
+             * scatters letters in every direction at once and reads as noise on
+             * a line of text; a vertical hop keeps the baseline legible and
+             * reads as the cursor sweeping letters up as it passes.
              */
             const strength = (1 - distance / RADIUS) ** 2;
             el.style.setProperty('--letter-lift', `${-strength * MAX_LIFT}px`);
@@ -429,9 +340,9 @@ if (magneticRoots.length && !reduceMotion.matches && !coarsePointer.matches) {
 
     /*
      * One frame in flight at a time, and it always renders the NEWEST pointer
-     * position rather than the one that happened to open the window — the
-     * old guard returned early and threw away every later move in the frame,
-     * so a fast sweep lagged the cursor by up to 16ms of stale input.
+     * position rather than the one that happened to open the window — the old
+     * guard returned early and threw away every later move in the frame, so a
+     * fast sweep lagged the cursor by up to 16ms of stale input.
      */
     const schedule = () => {
         if (frame !== null) return;
@@ -446,17 +357,7 @@ if (magneticRoots.length && !reduceMotion.matches && !coarsePointer.matches) {
         schedule();
     });
 
-    /*
-     * Letting go.
-     *
-     * Distance alone used to be the only way a letter came down, so a cursor
-     * that left the window mid-sweep left whatever it was touching held up
-     * until the pointer came back. pointerleave on the document fires when
-     * the cursor leaves the window entirely; blur covers the tab or window
-     * losing focus while the pointer is still inside it. The letters ease
-     * home on their own transition rather than snapping — removing the
-     * property animates to 0 the same way setting it animates away from it.
-     */
+    /* Letting go. */
     const release = () => {
         pending = null;
         if (frame !== null) {
@@ -470,12 +371,11 @@ if (magneticRoots.length && !reduceMotion.matches && !coarsePointer.matches) {
     window.addEventListener('blur', release);
 
     /*
-     * THE WAVE, AS SOMETHING THE DIRECTOR CAN ASK FOR
-     *
-     * No cadence here and no timer of its own beyond the one that takes the
-     * class off at the end of a sweep. run() resolves when the last letter
-     * is home, which is what lets the director say "wave, then wait, then
-     * type" in a straight line instead of guessing durations.
+     * THE WAVE, AS SOMETHING THE DIRECTOR CAN ASK FOR No cadence here and no
+     * timer of its own beyond the one that takes the class off at the end of a
+     * sweep. run() resolves when the last letter is home, which is what lets the
+     * director say "wave, then wait, then type" in a straight line instead of
+     * guessing durations.
      */
     let waveEnd = null;
     // the whole sweep: the last letter's delay plus its own travel
@@ -493,10 +393,10 @@ if (magneticRoots.length && !reduceMotion.matches && !coarsePointer.matches) {
         run: (alive) => new Promise((resolve) => {
             for (const root of magneticRoots) {
                 /*
-                 * Off, reflow, on. Re-adding a class the element already
-                 * has does not restart a CSS animation; taking it off and
-                 * forcing the style to be recomputed in between does.
-                 * offsetWidth is read for that flush and nothing else.
+                 * Off, reflow, on. Re-adding a class the element already has
+                 * does not restart a CSS animation; taking it off and forcing
+                 * the style to be recomputed in between does. offsetWidth is
+                 * read for that flush and nothing else.
                  */
                 root.classList.remove('is-waving');
                 void root.offsetWidth;
@@ -514,30 +414,14 @@ if (magneticRoots.length && !reduceMotion.matches && !coarsePointer.matches) {
     window.addEventListener('resize', remeasure);
 
     /*
-     * The display face is loaded async with font-display: swap, so it can
-     * land after the reveal finishes. When it does, every glyph advance
-     * changes and the cached centres are silently wrong — letters would then
-     * lift while the cursor is nowhere near them.
+     * The display face is loaded async with font-display: swap, so it can land
+     * after the reveal finishes.
      */
     if (document.fonts && document.fonts.ready) {
         document.fonts.ready.then(remeasure);
     }
 
-    /*
-     * Coming back to the page.
-     *
-     * Restored from the back/forward cache, none of the code above runs
-     * again: the listeners, the split letters and the cached centres are all
-     * still in the heap exactly as they were left. What is NOT still true is
-     * the interaction state — the pointer is wherever it is now, not where
-     * it was when the page was navigated away from, and any letter left
-     * lifted is still lifted. And if the page was navigated away from during
-     * the reveal, `ready` never became true.
-     *
-     * So this resets rather than re-initialises. It attaches nothing, builds
-     * nothing and re-splits nothing, which is what keeps a second visit from
-     * ending up with two of every listener.
-     */
+    /* Coming back to the page. */
     window.addEventListener('pageshow', (event) => {
         if (event.persisted) ready = true;
         release();
@@ -554,28 +438,18 @@ if (magneticRoots.length && !reduceMotion.matches && !coarsePointer.matches) {
 }
 
 
-/* ---------- the project-card cursor ---------- */
+/* Featured-card cursor */
 
-/*
- * One block, shared by all four cards, that stands in for the pointer while
- * it is over one of them.
- *
- * Delegated to the grid rather than bound per card: three listeners in
- * total, not twelve, and a card added to the markup later is picked up with
- * no change here.
- */
-const cardGrid = document.querySelector('.featured');
+/* One block, shared by everything that wants to say something under the pointer. */
+const cursorTargets = document.querySelectorAll('[data-cursor-label]');
 const finePointer = window.matchMedia('(hover: hover) and (pointer: fine)');
 
 /*
- * A block that follows the pointer is only meaningful where there IS a
- * pointer to follow, and hiding the real cursor for someone who asked for
- * less motion takes away a thing they rely on to give them a thing they did
- * not ask for. Both cases keep the ordinary cursor and no block is ever
- * built — which is also why the <html> class is set from in here rather
- * than sitting in the markup.
+ * A block that follows the pointer is only meaningful where there IS a pointer
+ * to follow, and hiding the real cursor for someone who asked for less motion
+ * takes away a thing they rely on to give them a thing they did not ask for.
  */
-if (cardGrid && finePointer.matches && !reduceMotion.matches
+if (cursorTargets.length && finePointer.matches && !reduceMotion.matches
     && !document.querySelector('.card-cursor')) {
 
     const cursor = document.createElement('div');
@@ -586,16 +460,14 @@ if (cardGrid && finePointer.matches && !reduceMotion.matches
 
     const box = document.createElement('span');
     box.className = 'card-cursor-box';
-    box.textContent = 'View';
     cursor.appendChild(box);
     document.body.appendChild(cursor);
 
     /*
-     * Beside the pointer, not under it. The system cursor is left alone —
-     * it is the thing that says "this is clickable" and it says it in the
-     * shape the visitor's own OS taught them — so this sits down and to the
-     * right of the arrow's tip, clear of the roughly 12x19px the arrow
-     * itself occupies.
+     * Beside the pointer, not under it. The system cursor is left alone — it is
+     * the thing that says "this is clickable" and it says it in the shape the
+     * visitor's own OS taught them — so this sits down and to the right of the
+     * arrow's tip, clear of the roughly 12x19px the arrow itself occupies.
      */
     const OFFSET_X = 16;
     const OFFSET_Y = 8;
@@ -610,14 +482,10 @@ if (cardGrid && finePointer.matches && !reduceMotion.matches
         frame = null;
 
         /*
-         * Flipped rather than squashed at an edge. Placing it to the left of
-         * the pointer keeps the whole label on screen and keeps the same gap
-         * between arrow and box, where clamping would slide the box under
-         * the arrow at exactly the moment it is hardest to read.
-         *
-         * Measured per frame because the box is a fixed 52x29 only until the
-         * text or the type size changes; offsetWidth on a fixed, composited
-         * element that has already been laid out is a cheap read.
+         * Flipped rather than squashed at an edge. Placing it to the left of the
+         * pointer keeps the whole label on screen and keeps the same gap between
+         * arrow and box, where clamping would slide the box under the arrow at
+         * exactly the moment it is hardest to read.
          */
         const w = box.offsetWidth;
         const h = box.offsetHeight;
@@ -644,9 +512,17 @@ if (cardGrid && finePointer.matches && !reduceMotion.matches
         if (frame === null) frame = requestAnimationFrame(draw);
     };
 
-    const show = (event) => {
+    const show = (event, target) => {
         x = event.clientX;
         y = event.clientY;
+
+        /*
+         * Written only when it actually changes. The box is sized by its own
+         * text, so every write is a relayout — and the pointer crosses a card
+         * hundreds of times on the way across it.
+         */
+        const label = target.dataset.cursorLabel;
+        if (box.textContent !== label) box.textContent = label;
 
         if (!shown) {
             shown = true;
@@ -669,30 +545,29 @@ if (cardGrid && finePointer.matches && !reduceMotion.matches
         }
     };
 
-    const overCard = (node) => !!(node && node.closest && node.closest('.feature'));
+    const labelled = (node) =>
+        (node && node.closest) ? node.closest('[data-cursor-label]') : null;
 
-    cardGrid.addEventListener('pointermove', (event) => {
+    document.addEventListener('pointermove', (event) => {
         if (event.pointerType !== 'mouse') return;
-        if (overCard(event.target)) show(event);
+        const target = labelled(event.target);
+        if (target) show(event, target);
         else hide();
-    });
+    }, { passive: true });
 
     // entering without moving again — the page scrolling under a still
     // pointer, or the pointer arriving from outside the window
-    cardGrid.addEventListener('pointerover', (event) => {
-        if (event.pointerType === 'mouse' && overCard(event.target)) show(event);
-    });
-
-    cardGrid.addEventListener('pointerout', (event) => {
-        if (!overCard(event.relatedTarget)) hide();
+    document.addEventListener('pointerover', (event) => {
+        if (event.pointerType !== 'mouse') return;
+        const target = labelled(event.target);
+        if (target) show(event, target);
     });
 
     /*
-     * Every way out of the grid that is not a pointer moving off a card.
-     * A block left visible after any of these is a block frozen on screen
-     * with no cursor near it, which is worse than never showing one.
+     * Every way out that is not a pointer moving off a target. A block left
+     * visible after any of these is a block frozen on screen with no cursor near
+     * it, which is worse than never showing one.
      */
-    cardGrid.addEventListener('pointerleave', hide);
     document.addEventListener('pointerleave', hide);
     window.addEventListener('blur', hide);
     window.addEventListener('pagehide', hide);
@@ -706,17 +581,13 @@ if (cardGrid && finePointer.matches && !reduceMotion.matches
 }
 
 
-/* ---------- the typing line ---------- */
+/* Hero interactions: typing line */
 
 /*
  * Two phrases on the small line above the hero title. Scoped to
  * [data-typewriter] so it can only ever touch the one element that opts in —
  * .eyebrow is also the label on every category page and none of those should
  * start typing.
- *
- * This no longer decides WHEN anything happens. It exposes two verbs, each
- * resolving when its own run of characters is finished, and the director
- * below places them around the title wave.
  */
 const typewriter = document.querySelector('[data-typewriter]');
 
@@ -740,11 +611,8 @@ if (typewriter) {
     };
 
     /*
-     * Walk the visible text towards a target length, one character per
-     * tick, and resolve when it arrives. Reading the length off the DOM
-     * rather than from a counter is what makes this safe to interrupt:
-     * whatever is on screen when a run is cancelled is exactly where the
-     * next run starts from, with no separate index to fall out of step.
+     * Walk the visible text towards a target length, one character per tick, and
+     * resolve when it arrives.
      */
     const walk = (target, per, alive) => new Promise((resolve) => {
         const text = PHRASES[phrase];
@@ -795,28 +663,9 @@ if (typewriter) {
 }
 
 
-/* ---------- the hero director ---------- */
+/* Hero interactions: director */
 
-/*
- * WHO MOVES, AND WHEN.
- *
- * The rule is that the hero says one thing at a time. Typing finishes, the
- * page goes quiet, the title waves, the page goes quiet again, and only then
- * does the line delete itself and write the next phrase. Nothing overlaps,
- * and between any two effects there is at least QUIET of complete stillness —
- * which is the part that makes it read as pacing rather than as activity.
- *
- * Written as one await-chain because that is what the requirement literally
- * is: a sequence. A set of timers that each knew their own interval could
- * express the same intent only as an arithmetic coincidence, and would drift
- * out of it the moment a phrase changed length.
- *
- * Cancellation is a single integer. Every await checks whether the token it
- * started with is still current, so a pageshow or a tab switch simply bumps
- * it and every waiting step in the old run returns instead of resuming. That
- * is the whole of the idempotence: there is no way to have two chains
- * running, because the second one invalidates the first before it starts.
- */
+/* WHO MOVES, AND WHEN. The rule is that the hero says one thing at a time. */
 const heroDirector = () => {
     const hero = document.querySelector('.hero');
     if (!hero || (!heroStage.type && !heroStage.wave)) return null;
@@ -825,9 +674,13 @@ const heroDirector = () => {
     const QUIET = 1350;      // stillness between any two effects
     const HOLD = 5000;       // a finished phrase stays at least this long
     const CADENCE = 15000;   // wave start to wave start, when it can be met
+    const FLOAT_IN = 3000;   // before the button starts moving
 
     let token = 0;
     let timer = null;
+    // the float's own handle: it runs beside the sequence rather than inside
+    // it, so it cannot share the one the await-chain uses
+    let floatTimer = null;
 
     const wait = (ms, alive) => new Promise((resolve) => {
         timer = setTimeout(() => {
@@ -839,7 +692,9 @@ const heroDirector = () => {
     const stop = () => {
         token++;
         clearTimeout(timer);
+        clearTimeout(floatTimer);
         timer = null;
+        floatTimer = null;
         if (heroStage.type) heroStage.type.stop();
         if (heroStage.wave) heroStage.wave.stop();
         if (heroStage.bob) heroStage.bob.disarm();
@@ -859,6 +714,15 @@ const heroDirector = () => {
         const mine = ++token;
         const alive = () => mine === token;
 
+        /*
+         * The float keeps its own three seconds and is not part of the sequence
+         * below.
+         */
+        floatTimer = setTimeout(() => {
+            floatTimer = null;
+            if (alive() && heroStage.bob) heroStage.bob.arm();
+        }, FLOAT_IN);
+
         if (heroStage.type) heroStage.type.clear();
 
         if (!await wait(ARRIVE, alive)) return;
@@ -873,12 +737,10 @@ const heroDirector = () => {
 
             if (heroStage.wave) {
                 /*
-                 * The wave aims for one start every fifteen seconds, but it
-                 * is a target rather than a deadline: it will never cut into
-                 * typing to hit it, and the extra stillness that waiting
-                 * produces is the point rather than a cost. The first wave
-                 * skips the wait entirely — arriving on the page is its own
-                 * starting gun.
+                 * The wave aims for one start every fifteen seconds, but it is a
+                 * target rather than a deadline: it will never cut into typing
+                 * to hit it, and the extra stillness that waiting produces is
+                 * the point rather than a cost.
                  */
                 const due = lastWave + CADENCE - performance.now();
                 if (!first && due > 0 && !await wait(due, alive)) return;
@@ -890,10 +752,8 @@ const heroDirector = () => {
             }
 
             /*
-             * The buffers and the sweep have already held the finished
-             * phrase for QUIET + span + QUIET. This only waits if that came
-             * to less than the five seconds a phrase is owed — so the hold
-             * is a floor, not another delay stacked on top of one.
+             * The buffers and the sweep have already held the finished phrase
+             * for QUIET + span + QUIET.
              */
             if (heroStage.wave) {
                 const held = QUIET * 2 + heroStage.wave.span;
@@ -902,8 +762,6 @@ const heroDirector = () => {
                 return;
             }
 
-            // the opening sequence has landed; the button may start nodding
-            if (first && heroStage.bob) heroStage.bob.arm();
             first = false;
 
             if (heroStage.type) {
@@ -936,43 +794,26 @@ if (heroShow) {
 }
 
 
-/* ---------- the View Work bob ---------- */
+/* Hero interactions: View Work float */
 
 /*
- * The primary action nods, once every five and a half seconds, by three
- * pixels. Get in touch does not, which is the whole point: two buttons that
- * both moved would rank neither.
- *
- * The bob is a custom property rather than a transform, because .button
- * already transforms on hover. Composed in CSS, the two add up; written to
- * the same property they would take turns erasing each other, and a hover
- * that landed mid-bob would drop the button 3px.
+ * The primary action hovers, continuously, by five pixels. Get in touch does
+ * not, which is the whole point: two buttons that both moved would rank neither.
  */
-const heroBob = document.querySelector('.hero-actions .button:not(.button-ghost)');
+const heroFloat = document.querySelector('.hero-actions .button:not(.button-ghost)');
 
-if (heroBob) {
+if (heroFloat) {
     heroStage.bob = {
         arm: () => {
             if (reduceMotion.matches) return;
-            heroBob.classList.add('is-bobbing');
+            heroFloat.classList.add('is-floating');
         },
-        disarm: () => heroBob.classList.remove('is-bobbing')
+        disarm: () => heroFloat.classList.remove('is-floating')
     };
 }
 
 
-/* ==========================================================================
- * MEDIA RENDERING
- *
- * Reads media.js and builds the markup for whatever is configured there.
- * Nothing configured means nothing is inserted — no empty frames, no
- * "image coming soon" labels, no broken-image icons. The cards and project
- * pages are laid out to look finished with type alone, so an unconfigured
- * site is a complete site rather than a half-built one.
- *
- * With JavaScript off the text, links and navigation all still work; only
- * the photographs are missing. That is the right way round.
- * ======================================================================== */
+/* Project media rendering */
 
 const siteMedia = window.SITE_MEDIA || null;
 
@@ -983,9 +824,8 @@ if (siteMedia) {
     const hasText = (v) => typeof v === 'string' && v.trim() !== '';
 
     /*
-     * A config entry only counts as real if it can actually produce a
-     * rendered element. Anything half-filled is skipped rather than
-     * rendered as a broken reference.
+     * A config entry only counts as real if it can actually produce a rendered
+     * element.
      */
     const isPlayable = (m) =>
         (Array.isArray(m.sources) && m.sources.some((s) => hasText(s && s.src))) || hasText(m.src);
@@ -1003,14 +843,10 @@ if (siteMedia) {
         if (hasText(m.ratio)) el.style.aspectRatio = m.ratio;
 
         /*
-         * Upright media gets flagged so CSS can cap its width. A landscape
-         * lead image run across the full measure is a hero; the same rule
-         * applied to a 3:4 photograph is 1400px of vertical scroll for one
-         * picture, and to a 9:16 phone clip it is worse.
-         *
-         * Read from the configured dimensions rather than measured ones so
-         * the class is on the element before it lays out — deciding this
-         * after the file loads would mean a visible reflow.
+         * Upright media gets flagged so CSS can cap its width. A landscape lead
+         * image run across the full measure is a hero; the same rule applied to
+         * a 3:4 photograph is 1400px of vertical scroll for one picture, and to
+         * a 9:16 phone clip it is worse.
          */
         if (Number(m.height) > Number(m.width)) el.classList.add('is-portrait');
     };
@@ -1034,9 +870,6 @@ if (siteMedia) {
          * Optional responsive set. Skipped when the caller has overridden the
          * source — that only happens for a video's poster frame under reduced
          * motion, and the set describes the video, not the still.
-         *
-         * Each candidate is resolved the same way `src` is, so the config can
-         * keep writing every path from the site root.
          */
         if (!o.src && Array.isArray(m.srcset)) {
             const set = m.srcset
@@ -1055,23 +888,8 @@ if (siteMedia) {
     };
 
     /*
-     * VIDEO MODES.
-     *
-     *   preview  a short silent loop used as imagery — a card loop, a few
-     *            seconds of a machine running. Muted, looping, no controls,
-     *            plays only while on screen.
-     *
-     *   player   a film someone chooses to watch — a full process film, the
-     *            Blender animation. Controls, no autoplay, no loop, audio
-     *            allowed, and nothing downloads past the metadata until play
-     *            is pressed.
-     *
-     * A complete film is not wallpaper, and a decorative loop is not a media
-     * player. Conflating them either starts audio nobody asked for or buries
-     * a ten-minute film behind a silent three-second cut.
-     *
-     * Entries with no `mode` are treated as previews, which is exactly what
-     * this file did before the modes existed.
+     * VIDEO MODES. preview a short silent loop used as imagery — a card loop, a
+     * few seconds of a machine running.
      */
     const videoMode = (m) => (m.mode === 'player' ? 'player' : 'preview');
 
@@ -1090,9 +908,9 @@ if (siteMedia) {
     };
 
     /*
-     * Preview. Never carries the autoplay attribute — playback is driven by
-     * the IntersectionObserver below, so a clip that is never scrolled to is
-     * never fetched and never decoded.
+     * Preview. Never carries the autoplay attribute — playback is driven by the
+     * IntersectionObserver below, so a clip that is never scrolled to is never
+     * fetched and never decoded.
      */
     const buildPreviewVideo = (m) => {
         const video = document.createElement('video');
@@ -1118,14 +936,6 @@ if (siteMedia) {
     /*
      * Player. Deliberately the opposite of the preview in every respect that
      * matters: it waits to be asked.
-     *
-     * No autoplayInView flag, so the observer below never touches it — it
-     * stays paused when scrolled past and is not stopped mid-sentence when
-     * the tab is hidden. preload='metadata' fetches the header only, so a
-     * film costs a few kilobytes until someone presses play.
-     *
-     * It stays in the accessibility tree and keeps native controls, which are
-     * keyboard operable as they come: tab to the video, space to play.
      */
     const buildPlayerVideo = (m) => {
         const video = document.createElement('video');
@@ -1147,13 +957,9 @@ if (siteMedia) {
     };
 
     /*
-     * Reduced motion applies to the preview only. A player never moves until
-     * it is asked to, so there is nothing to reduce — silently swapping a
-     * film someone chose to watch for a still would be the bug, not the fix.
-     *
-     * A preview becomes its poster frame. With no poster to fall back to the
-     * video is still rendered, but given controls and left paused, so the
-     * content stays reachable without anything moving on its own.
+     * Reduced motion applies to the preview only. A player never moves until it
+     * is asked to, so there is nothing to reduce — silently swapping a film
+     * someone chose to watch for a still would be the bug, not the fix.
      */
     const buildMediaElement = (m, opts) => {
         if (m.type === 'image') return buildImage(m, opts);
@@ -1186,12 +992,10 @@ if (siteMedia) {
         if (!isValidMedia(m)) continue;
 
         /*
-         * A card is entirely one link, so its media can only ever be a
-         * preview. Native controls inside an anchor are interactive content
-         * nested in a link — invalid markup, and in practice a keyboard trap
-         * where the play button and the card fight over the same Enter press.
-         * `mode` is therefore ignored here rather than obeyed; a full film
-         * belongs on the project page, which is where the card leads.
+         * A card is entirely one link, so its media can only ever be a preview.
+         * Native controls inside an anchor are interactive content nested in a
+         * link — invalid markup, and in practice a keyboard trap where the play
+         * button and the card fight over the same Enter press.
          */
         const forPreview = m.mode === 'player' ? Object.assign({}, m, { mode: 'preview' }) : m;
 
@@ -1208,13 +1012,8 @@ if (siteMedia) {
 
     /*
      * Inserted rather than filled in: an empty slot element would still be a
-     * grid item and would still hold a column open, which is the one thing
-     * the About section must not do while there is no photograph. So the
-     * figure and the class that reflows the grid arrive together, or neither
-     * does, and the two-column layout in the markup stands on its own.
-     *
-     * Images only. A portrait is a still by definition, and a looping clip
-     * here would pull attention off the work.
+     * grid item and would still hold a column open, which is the one thing the
+     * About section must not do while there is no photograph.
      */
     const aboutGrid = document.querySelector('.about-grid');
     const aboutSide = aboutGrid && aboutGrid.querySelector('.about-side');
@@ -1223,6 +1022,11 @@ if (siteMedia) {
     if (aboutGrid && aboutSide && portrait && portrait.type === 'image' && isValidMedia(portrait)) {
         const figure = document.createElement('figure');
         figure.className = 'about-portrait';
+        /*
+         * One reveal for the photograph, set here rather than in the markup
+         * because the figure does not exist until this runs.
+         */
+        figure.setAttribute('data-reveal', '');
         figure.appendChild(buildImage(portrait));
 
         // between the introduction and the capabilities, so the rendered
@@ -1260,17 +1064,9 @@ if (siteMedia) {
         const pad = (n) => String(n).padStart(2, '0');
 
         /*
-         * Optional prose.
-         *
-         * Returns null unless the field holds real text, and every caller
-         * checks before appending — so an unfilled string in media.js leaves
-         * no element, no margin and no gap behind. That is the whole
-         * difference between an optional field and an empty box on the page.
-         *
-         * A blank line in the source starts a new paragraph, which is the one
-         * piece of formatting these fields need and the only one they get:
-         * the text is set with textContent, so nothing written in media.js
-         * can inject markup into the page.
+         * Optional prose. Returns null unless the field holds real text, and
+         * every caller checks before appending — so an unfilled string in
+         * media.js leaves no element, no margin and no gap behind.
          */
         const buildProse = (text, cls) => {
             if (!hasText(text)) return null;
@@ -1281,14 +1077,7 @@ if (siteMedia) {
             return wrap.children.length ? wrap : null;
         };
 
-        /* =================================================================
-         * SECTIONED LAYOUT
-         *
-         * Opt-in: a project that defines `sections` gets the editorial
-         * composition below, one that defines hero/gallery keeps the plain
-         * stacked gallery. Both paths live here so adding the first does not
-         * disturb the second.
-         * ================================================================= */
+        /* Sectioned layout */
 
         const sectionHead = (section, index) => {
             if (!hasText(section.label)) return null;
@@ -1301,18 +1090,8 @@ if (siteMedia) {
         /* --- 1. one frame: the finished object, motion on request --- */
 
         /*
-         * The photograph and the loop used to stand side by side. They show
-         * the same object from the same angle, so the widest row on the page
-         * spent itself saying one thing twice, and because the two files are
-         * different shapes the stagger that separated them read as an
-         * accident rather than a composition.
-         *
-         * One frame instead: the still at rest, the clip layered over it and
-         * faded in only when asked. The <img> is ordinary markup with nothing
-         * between it and the screen \u2014 no script, no play() promise, no decode
-         * to wait on \u2014 so every way this can fail (video unsupported, file
-         * missing, playback refused, JavaScript off) lands on the photograph
-         * instead of on an empty box.
+         * One frame, not two: the still and the loop show the same object
+         * from the same angle.
          */
         const buildHero = (section) => {
             if (!isValidMedia(section.image)) return null;
@@ -1321,9 +1100,9 @@ if (siteMedia) {
             const frame = el('div', 'pm-hero-frame');
 
             /*
-             * The ratio belongs to the frame, not to either file. The still
-             * and the clip then swap inside a box that was already the right
-             * size, so nothing on the page moves when they do.
+             * The ratio belongs to the frame, not to either file. The still and
+             * the clip then swap inside a box that was already the right size,
+             * so nothing on the page moves when they do.
              */
             if (hasText(section.ratio)) frame.style.aspectRatio = section.ratio;
 
@@ -1338,10 +1117,8 @@ if (siteMedia) {
             clip.classList.add('pm-hero-clip');
 
             /*
-             * The page-wide "play whatever is on screen" observer must not
-             * have this one. Scrolling past a frame is not a request for
-             * motion; here the only things that start it are a pointer over
-             * the frame, or the button.
+             * The page-wide "play whatever is on screen" observer must not have
+             * this one.
              */
             delete clip.dataset.autoplayInView;
             frame.appendChild(clip);
@@ -1355,8 +1132,8 @@ if (siteMedia) {
             let playing = false;
             /*
              * Whether this run was asked for or merely hovered into. A run the
-             * visitor started on purpose must survive the pointer wandering
-             * off the frame; a hover run must not.
+             * visitor started on purpose must survive the pointer wandering off
+             * the frame; a hover run must not.
              */
             let deliberate = false;
 
@@ -1406,9 +1183,9 @@ if (siteMedia) {
             /*
              * Hover is an extra, never the only way in. It is skipped for a
              * touch pointer (where "enter" only ever means "tap"), on devices
-             * that cannot really hover, and under reduced motion \u2014 where the
-             * button still works, because asking for motion is different from
-             * having it happen at you.
+             * that cannot really hover, and under reduced motion \u2014 where
+             * the button still works, because asking for motion is different
+             * from having it happen at you.
              */
             const hoverCapable = window.matchMedia('(hover: hover)');
 
@@ -1504,17 +1281,7 @@ if (siteMedia) {
             pause: 'M6 4h4.2v16H6zM13.8 4H18v16h-4.2z'
         };
 
-        /* =================================================================
-         * 3. PROCESS VIEWER
-         *
-         * One stage, one slide visible. Rotation is a convenience that yields
-         * to the visitor at the first sign of attention: hover, focus, a tap,
-         * a hidden tab, or scrolling away all stop it, and it never resumes
-         * on its own after a deliberate interaction.
-         *
-         * A clip advances when it ENDS rather than on a timer, so nothing is
-         * ever cut off mid-shot. Stills get a fixed dwell.
-         * ================================================================= */
+        /* 3. process viewer */
         const buildViewer = (section) => {
             const slides = (section.slides || []).filter((s) => s && isValidMedia(s.media));
             if (!slides.length) return null;
@@ -1540,9 +1307,8 @@ if (siteMedia) {
 
                 const media = buildMediaElement(slide.media);
                 /*
-                 * The page-wide "play what is on screen" observer must not
-                 * touch these — the viewer decides which single clip runs.
-                 * Looping is off so `ended` can fire and drive the advance.
+                 * The page-wide "play what is on screen" observer must not touch
+                 * these — the viewer decides which single clip runs.
                  */
                 delete media.dataset.autoplayInView;
                 if (media.tagName === 'VIDEO') media.loop = false;
@@ -1562,21 +1328,14 @@ if (siteMedia) {
             /*
              * The count is spoken, not shown. On screen the lit segment in the
              * rail below already says which stage this is, so printing "01 / 04"
-             * beside the title said it twice. A screen reader has no rail to
-             * look at, and "Scan result" on its own gives no sense of position
-             * — so the number survives here, read out and clipped away.
-             *
-             * position:absolute takes it out of the flex flow entirely, so it
-             * contributes no gap and leaves no space where it used to sit.
+             * beside the title said it twice.
              */
             const count = el('span', 'visually-hidden');
             const title = el('span', 'pm-title');
             /*
              * Inside .pm-step rather than beside it, so the description is
-             * carried by the live region that already announces the stage
-             * change \u2014 one announcement per slide, not two. It is emptied
-             * for a slide that has none, and :empty takes it out of the flex
-             * flow entirely so an undescribed stage leaves no gap.
+             * carried by the live region that already announces the stage change
+             * \u2014 one announcement per slide, not two.
              */
             const desc = el('p', 'pm-desc');
             step.append(count, title, desc);
@@ -1596,12 +1355,8 @@ if (siteMedia) {
 
             /*
              * One control, not three. The arrows duplicated what the numbered
-             * rail does and did it worse — a rail entry names its stage and
-             * goes straight there, an arrow only steps. Rotation is the one
-             * thing the rail cannot express, so it is the one thing left here.
-             *
-             * Nothing is lost by removing them: the arrow keys and the swipe
-             * below are bound to the viewer itself, never to these buttons.
+             * rail does and did it worse — a rail entry names its stage and goes
+             * straight there, an arrow only steps.
              */
             const toggleBtn = mkBtn('pause', 'Pause automatic rotation');
             bar.append(step, controls);
@@ -1613,11 +1368,8 @@ if (siteMedia) {
                 const b = el('button', 'pm-thumb');
                 b.type = 'button';
                 /*
-                 * The number is the whole visible button. The stage name was
-                 * printed here too and again in the status row above, so the
-                 * active stage was named twice on screen; the aria-label is
-                 * where the name belongs for anyone who needs it read out,
-                 * and it still carries it in full.
+                 * The number is the whole visible button; the stage name is
+                 * carried by the aria-label for anyone who needs it read out.
                  */
                 b.setAttribute('aria-label', 'Stage ' + (i + 1) + ': ' + n.title);
                 b.appendChild(el('span', 'pm-thumb-num', pad(i + 1)));
@@ -1635,8 +1387,6 @@ if (siteMedia) {
             /*
              * One flag, and the control is the only thing that sets it: the
              * stage's clip runs and the stages advance, or neither happens.
-             * It starts off under reduced motion, so nothing autoplays for
-             * anyone who asked not to be moved.
              */
             let playing = !reduceMotion.matches;
             let onScreen = false;
@@ -1646,22 +1396,20 @@ if (siteMedia) {
             };
 
             /*
-             * Playing and advancing are now the same question asked twice.
-             *
-             * A clip runs when the visitor has asked for playback and the
-             * stage is really in front of them — paused means paused, and a
-             * clip in a background tab or scrolled out of view is not being
-             * watched either. onScreen and document.hidden never touch
-             * `playing` itself, so scrolling away and back cannot overturn a
-             * deliberate pause; they only decide whether the chosen state is
-             * currently in effect.
+             * Playing and advancing are now the same question asked twice. A
+             * clip runs when the visitor has asked for playback and the stage is
+             * really in front of them — paused means paused, and a clip in a
+             * background tab or scrolled out of view is not being watched
+             * either. onScreen and document.hidden never touch `playing` itself,
+             * so scrolling away and back cannot overturn a deliberate pause;
+             * they only decide whether the chosen state is currently in effect.
              */
             const canPlay = () => playing && onScreen && !document.hidden;
 
             /*
-             * Advancing needs all of that and one thing more. Reduced motion
-             * can still watch a clip on request — that is a deliberate press,
-             * not autoplay — but the stage never changes underneath them.
+             * Advancing needs all of that and one thing more. Reduced motion can
+             * still watch a clip on request — that is a deliberate press, not
+             * autoplay — but the stage never changes underneath them.
              */
             const canAdvance = () => canPlay() && !reduceMotion.matches;
 
@@ -1703,18 +1451,6 @@ if (siteMedia) {
                     : '';
                 thumbs.forEach((b, i) => b.setAttribute('aria-current', i === index ? 'true' : 'false'));
 
-                /*
-                 * Choosing a stage no longer stops playback. It used to: any
-                 * manual move surrendered rotation, on the reasoning that
-                 * nobody should have to race a carousel back to the slide
-                 * they were reading. With an explicit control that reasoning
-                 * is served better by the button — and the old rule would
-                 * now also silence the video, so picking stage 3 while
-                 * watching would freeze it on its first frame.
-                 *
-                 * So a stage change inherits the current state: paused shows
-                 * the new stage stopped on its poster, playing starts it.
-                 */
                 schedule();
             };
 
@@ -1738,14 +1474,8 @@ if (siteMedia) {
                         /*
                          * play() and nothing else. currentTime is deliberately
                          * untouched here, which is what makes resuming resume:
-                         * the only place it is rewound is show(), and only for
-                         * a slide that is actually changing. A clip paused at
-                         * 4.2s comes back at 4.2s.
-                         *
-                         * One exception handled by the browser rather than by
-                         * us: play() on a clip that reached its end starts it
-                         * over, which is the right answer for "genuinely
-                         * finished" without a flag to track it.
+                         * the only place it is rewound is show(), and only for a
+                         * slide that is actually changing.
                          */
                         const p = current.play();
                         // a refused autoplay is not an error to recover from;
@@ -1782,9 +1512,7 @@ if (siteMedia) {
             /*
              * The whole of the behaviour: flip the intent, redraw the button,
              * and let schedule() work out what that means for the clip on the
-             * stage. Pausing pauses it where it stands; playing resumes it
-             * there. Keyboard activation arrives here too — it is a <button>,
-             * so Enter and Space fire this same click.
+             * stage.
              */
             toggleBtn.addEventListener('click', () => {
                 playing = !playing;
@@ -1798,12 +1526,9 @@ if (siteMedia) {
             });
 
             /*
-             * Hover and focus used to hold rotation. They cannot now: pressing
-             * Play leaves focus on the button, which is inside the viewer, so
-             * the hold would stop the clip the press just started from ever
-             * advancing — and a visitor watching with the pointer resting on
-             * the stage would see the same. An explicit control makes the
-             * implicit one both redundant and wrong.
+             * Rotation must not be held by hover or focus: Play leaves focus
+             * on a button inside the viewer, so the hold would stop the clip
+             * the press had just started.
              */
 
             /* swipe: a horizontal drag past a threshold moves one stage */
@@ -1849,17 +1574,7 @@ if (siteMedia) {
             return wrap;
         };
 
-        /* =================================================================
-         * 5. FULL FILM — click to load
-         *
-         * Nothing third-party is requested until the visitor asks for it: the
-         * frame holds a poster, and the iframe is created on activation. That
-         * keeps the page's weight and its outbound requests honest, and means
-         * the film costs nothing to anyone who does not watch it.
-         *
-         * The Drive link below is not a fallback bolted on — it is always
-         * visible, so a blocked iframe still leaves a way through.
-         * ================================================================= */
+        /* 5. full film — click to load */
         const buildFilm = (section) => {
             if (!hasText(section.src)) return null;
 
@@ -1870,9 +1585,8 @@ if (siteMedia) {
             if (hasText(section.text)) text.appendChild(el('p', null, section.text));
 
             /*
-             * Between the overview and the link, deliberately: the reflection
-             * is the last thing read and the Drive link stays the last thing
-             * done. Absent unless the field holds text.
+             * Between the overview and the link, deliberately: the reflection is
+             * the last thing read and the Drive link stays the last thing done.
              */
             const reflection = buildProse(section.reflection, 'pm-film-reflection');
             if (reflection) {
@@ -1959,10 +1673,10 @@ if (siteMedia) {
                 else n--;                    // unlabelled sections are not numbered
 
                 /*
-                 * Optional commentary, either side of the media. Both are
-                 * null unless their field in media.js holds real text, so a
-                 * section that has not been written about renders exactly as
-                 * it did before these existed.
+                 * Optional commentary, either side of the media. Both are null
+                 * unless their field in media.js holds real text, so a section
+                 * that has not been written about renders exactly as it did
+                 * before these existed.
                  */
                 const intro = buildProse(section.intro, 'pm-prose pm-prose-intro');
                 if (intro) wrap.appendChild(intro);
@@ -1973,19 +1687,10 @@ if (siteMedia) {
                 if (outro) wrap.appendChild(outro);
 
                 /*
-                 * REVEAL HOOKS.
-                 *
-                 * Marked on the parts of a section, never on the section
-                 * itself: a reveal on the wrapper would move its children
-                 * too, and any child that also revealed would then be riding
-                 * two transforms at once.
-                 *
-                 * The heading, the commentary and the media each arrive on
-                 * their own, which is the order they are read in. Everything
-                 * inside the media block travels with it — so the process
-                 * viewer reveals once, as a viewer, and its slides are never
-                 * touched; changing stage is the carousel's own motion and
-                 * has nothing to do with the page scrolling.
+                 * REVEAL HOOKS. Marked on the parts of a section, never on the
+                 * section itself: a reveal on the wrapper would move its
+                 * children too, and any child that also revealed would then be
+                 * riding two transforms at once.
                  */
                 if (head) head.setAttribute('data-reveal', '');
                 if (intro) intro.setAttribute('data-reveal', '');
@@ -1993,10 +1698,8 @@ if (siteMedia) {
 
                 /*
                  * The prototype grid is the one place a section is a list of
-                 * comparable things rather than one composition, so its
-                 * blocks come in one after another. Everywhere else — the
-                 * viewer, the film, the closing frame — the media is a single
-                 * object and reveals as one.
+                 * comparable things rather than one composition, so its blocks
+                 * come in one after another.
                  */
                 const blocks = body.classList && body.classList.contains('pm-editorial')
                     ? body.querySelectorAll(':scope > .pm-block')
@@ -2042,8 +1745,8 @@ if (siteMedia) {
     /* ---------- play only what is on screen ---------- */
 
     /*
-     * Anything offscreen is paused, and anything in a hidden tab is paused,
-     * so no decoding work happens for a clip nobody is looking at.
+     * Anything offscreen is paused, and anything in a hidden tab is paused, so
+     * no decoding work happens for a clip nobody is looking at.
      */
     const clips = [...document.querySelectorAll('video[data-autoplay-in-view]')];
 
@@ -2083,20 +1786,7 @@ if (siteMedia) {
 }
 
 
-/* ==========================================================================
- * HERO COMETS
- *
- * A restrained reimplementation of the comet idea from the Particle World
- * sketch — written directly against canvas 2d rather than importing p5, and
- * cut down to a handful of slow, dim, monochrome streaks so it reads as
- * texture behind the headline rather than as animation competing with it.
- *
- * TO DISABLE: remove `has-comets` from the hero element in index.html.
- * No canvas is created and this whole block exits immediately.
- *
- * TO TUNE: the COMETS object below. `maxAlpha` is the one to lower if the
- * effect ever feels loud.
- * ======================================================================== */
+/* Decorative canvas */
 
 const COMETS = {
     count: 14,           // desktop
@@ -2106,17 +1796,15 @@ const COMETS = {
 
     /*
      * One shared heading for every comet — they fall as a single field rather
-     * than scattering, the way a meteor shower reads from the ground.
-     * 0.22π is about 40° below horizontal, travelling down and to the right.
+     * than scattering, the way a meteor shower reads from the ground. 0.22π is
+     * about 40° below horizontal, travelling down and to the right.
      */
     angle: Math.PI * 0.22,
 
     /*
-     * Depth. Each comet is assigned a value from 0 (far) to 1 (near), and
-     * every property below is interpolated between its far and near end from
-     * that single number. Size alone would look like arbitrary line weights;
-     * moving size, speed, tail length and brightness together is what makes
-     * the big ones read as closer rather than merely thicker.
+     * Depth. Each comet is assigned a value from 0 (far) to 1 (near), and every
+     * property below is interpolated between its far and near end from that
+     * single number.
      */
     sizeFar: 0.45,
     sizeNear: 1.9,
@@ -2132,10 +1820,10 @@ const COMETS = {
     alphaNear: 0.22,
 
     /*
-     * Independent speed variation on top of depth. Without this every comet
-     * at a given size moves at exactly one speed and the field looks
-     * mechanical; this lets two comets the same size still travel at
-     * noticeably different rates, so some clearly outrun others.
+     * Independent speed variation on top of depth. Without this every comet at a
+     * given size moves at exactly one speed and the field looks mechanical; this
+     * lets two comets the same size still travel at noticeably different rates,
+     * so some clearly outrun others.
      */
     speedJitterMin: 0.65,
     speedJitterMax: 1.45,
@@ -2189,11 +1877,7 @@ if (heroWithComets && !reduceMotion.matches && window.innerWidth > COMETS.disabl
             comet.x = rand(0, cometWidth);
             comet.y = rand(0, cometHeight);
         } else {
-            /*
-             * Re-enter from the top or left edge, matching travel direction.
-             * The margin is the longest tail any comet can have, so one never
-             * appears already part-way across the hero.
-             */
+            /* Re-enter from the top or left edge, matching travel direction. */
             const margin = COMETS.tailNear;
             if (Math.random() < 0.5) {
                 comet.x = rand(-margin, cometWidth);
@@ -2244,10 +1928,7 @@ if (heroWithComets && !reduceMotion.matches && window.innerWidth > COMETS.disabl
 
             /*
              * Every comet shares one heading, so the tail is just the unit
-             * direction scaled by this comet's length. The earlier version
-             * normalised each velocity here, which divided by speed on every
-             * comet every frame — needless now, and it was the division that
-             * could hand createLinearGradient a non-finite value.
+             * direction scaled by this comet's length.
              */
             const tailX = c.x - dirX * c.tail;
             const tailY = c.y - dirY * c.tail;
@@ -2312,26 +1993,7 @@ if (heroWithComets && !reduceMotion.matches && window.innerWidth > COMETS.disabl
 }
 
 
-/* ==========================================================================
- * SCROLL REVEAL
- *
- * Last in the file on purpose: the project pages build their sections from
- * media.js above, and an observer that ran before that would find nothing to
- * watch on exactly the pages with the most to reveal.
- *
- * TWO OBSERVERS, ONE HYSTERESIS BAND.
- *
- * The reveal and the reset deliberately do not share a boundary. If they
- * did, an element resting exactly on it would reveal and reset and reveal
- * again on every few pixels of trackpad drift — the classic flicker. So the
- * line an element must cross to appear sits well inside the viewport, and
- * the line it must cross to be put back sits well outside it, and the gap
- * between them is dead space where nothing happens at all.
- *
- * At a 900px viewport that gap is 315px below the fold and 180px above it.
- * Nothing short of a deliberate scroll can traverse it, which is what makes
- * the effect repeatable without making it twitchy.
- * ========================================================================== */
+/* Scroll reveal */
 
 {
     const revealables = document.querySelectorAll('[data-reveal]');
@@ -2340,24 +2002,18 @@ if (heroWithComets && !reduceMotion.matches && window.innerWidth > COMETS.disabl
         && typeof IntersectionObserver === 'function';
 
     /*
-     * The hidden state is added HERE and nowhere else. Until this class
-     * lands every [data-reveal] is an ordinary element, so a browser with no
-     * IntersectionObserver, a blocked script, or someone who asked for
-     * reduced motion all get the finished page rather than a blank one.
+     * The hidden state is added HERE and nowhere else. Until this class lands
+     * every [data-reveal] is an ordinary element, so a browser with no
+     * IntersectionObserver, a blocked script, or someone who asked for reduced
+     * motion all get the finished page rather than a blank one.
      */
     if (canReveal) {
         document.documentElement.classList.add('js-reveal');
 
         /*
          * Stagger, assigned once. A container carrying data-reveal-stagger
-         * numbers its own revealable children, so the delay lives with the
-         * group that wants one instead of being repeated on every child.
-         *
-         * The index is capped rather than the step shortened: past a few
-         * items a stagger stops reading as sequence and starts reading as
-         * lag, and on a phone — where the whole group may be taller than the
-         * screen — a long tail means waiting for content that is already
-         * where it belongs.
+         * numbers its own revealable children, so the delay lives with the group
+         * that wants one instead of being repeated on every child.
          */
         const narrow = window.matchMedia('(max-width: 700px)').matches;
         const cap = narrow ? 2 : 5;
@@ -2370,20 +2026,7 @@ if (heroWithComets && !reduceMotion.matches && window.innerWidth > COMETS.disabl
             });
         }
 
-        /*
-         * ONE direction, read by every element, written by one listener.
-         *
-         * Forty elements each watching the scroll position would be forty
-         * handlers computing the same number; this computes it once and the
-         * observers below just read it. Passive, because it never calls
-         * preventDefault and saying so keeps it off the scrolling critical
-         * path.
-         *
-         * The 4px deadband is the other half of the anti-flicker story: a
-         * trackpad resting under a hand emits a stream of one- and two-pixel
-         * deltas that alternate in sign, and without this the "direction"
-         * would invert several times a second while the page stood still.
-         */
+        /* ONE direction, read by every element, written by one listener. */
         let scrollDir = 'down';
         let lastY = window.scrollY;
 
@@ -2400,23 +2043,6 @@ if (heroWithComets && !reduceMotion.matches && window.innerWidth > COMETS.disabl
         /*
          * Which edge an element is arriving over — and it is the scroll
          * direction that answers this, not the element's geometry.
-         *
-         * Geometry looks like the better signal and is not. entry
-         * .boundingClientRect is sampled when the observation was TAKEN, and
-         * the browser coalesces observations: on a fast scroll an element
-         * can travel from below the fold to well above it between one
-         * delivery and the next, so by the time the rect is read it says
-         * "above" for something that arrived from below. Measured on this
-         * page — one flick down past the featured grid reported four of
-         * fourteen elements as arriving from above while the page had only
-         * ever moved down.
-         *
-         * The direction cannot be wrong in that way, because in a scrolling
-         * document it IS the answer: the viewport moving down is the only
-         * thing that brings content in over the bottom edge, and moving up
-         * the only thing that brings it back in over the top. An element
-         * revealed while off-screen entirely gets whichever offset the
-         * direction implies, and nobody sees the difference.
          */
         const arrivesFromAbove = () => scrollDir === 'up';
 
@@ -2433,46 +2059,26 @@ if (heroWithComets && !reduceMotion.matches && window.innerWidth > COMETS.disabl
 
             if (!arriving.length) return;
 
-            /*
-             * One forced layout for the whole batch, and it is load-bearing.
-             *
-             * Setting the direction and asking for the reveal in the same
-             * task means the browser only ever computes the final style, and
-             * the transition then runs from whatever the element's offset
-             * was BEFORE — so something arriving from above would rise
-             * through its resting place instead of falling into it. Reading
-             * a layout property in between forces the starting offset to be
-             * computed, which is what gives the transition its true origin.
-             *
-             * Free of charge visually: every element in this list is at
-             * opacity 0, so moving one from +24px to -20px is not something
-             * anyone can see. Read once for the batch rather than per
-             * element, so a screenful of arrivals costs one layout, not ten.
-             */
+            /* One forced layout for the whole batch, and it is load-bearing. */
             void document.documentElement.offsetHeight;
 
             for (const el of arriving) el.classList.add('is-revealed');
         }, {
             /*
              * threshold 0 with the bottom of the root pulled up: the reveal
-             * starts when an element is genuinely on its way in rather than
-             * when some fraction of it is showing — which for a section
-             * taller than the viewport would never be reached at all.
-             *
-             * Anything already past this line when the page loads fires on
-             * the observer's first callback, so a deep-linked anchor or a
-             * restored scroll position never leaves content invisible, and a
-             * fast scroll cannot outrun it.
+             * starts when an element is genuinely on its way in rather than when
+             * some fraction of it is showing — which for a section taller than
+             * the viewport would never be reached at all.
              */
             rootMargin: '0px 0px -10% 0px',
             threshold: 0
         });
 
         /*
-         * The far boundary. This observer only ever hears about an element
-         * that has left the viewport AND kept going for another fifth of a
-         * screen — so "no meaningful portion of it remains visible" is not a
-         * judgement call made in here, it is the shape of the root box.
+         * The far boundary. This observer only ever hears about an element that
+         * has left the viewport AND kept going for another fifth of a screen —
+         * so "no meaningful portion of it remains visible" is not a judgement
+         * call made in here, it is the shape of the root box.
          */
         const resetObserver = new IntersectionObserver((entries) => {
             const leaving = [];
@@ -2508,10 +2114,10 @@ if (heroWithComets && !reduceMotion.matches && window.innerWidth > COMETS.disabl
         }
 
         /*
-         * will-change is a promise to the compositor, and one that has been
-         * kept should be withdrawn. Capture phase because transitionend does
-         * bubble but the target is what matters, and one listener on the
-         * document is cheaper than one on each of forty elements.
+         * will-change is a promise to the compositor, and one that has been kept
+         * should be withdrawn. Capture phase because transitionend does bubble
+         * but the target is what matters, and one listener on the document is
+         * cheaper than one on each of forty elements.
          */
         document.addEventListener('transitionend', (event) => {
             const el = event.target;
@@ -2523,8 +2129,7 @@ if (heroWithComets && !reduceMotion.matches && window.innerWidth > COMETS.disabl
         /*
          * Turning the setting on mid-session stops the whole mechanism: the
          * observers are dropped so nothing can be hidden again, and anything
-         * currently hidden is shown. The media query in style.css covers the
-         * paint; this covers the state, so a later scroll cannot undo it.
+         * currently hidden is shown.
          */
         reduceMotion.addEventListener('change', () => {
             if (!reduceMotion.matches) return;

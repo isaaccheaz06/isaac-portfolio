@@ -20,37 +20,26 @@
 <body>
 
     <header class="navbar">
-        <a href="#top" class="logo">Isaac Cheaz</a>
+        <a href="#top" class="logo" data-cursor-label="Home">Isaac Cheaz</a>
 
-        <nav class="nav-links">
+        <nav class="nav-links" aria-label="Primary">
             <a href="#work">Work</a>
             <a href="#about">About</a>
-            <a href="#contact">Contact</a>
+            <a href="https://docs.google.com/document/d/11qATXeMCFB1Io2WauJywyM81skCrmu7SGtFiiL8NM3w/view"
+                class="nav-resume" target="_blank" rel="noopener noreferrer"
+                aria-label="Resume preview, opens in a new tab">Resume</a>
         </nav>
-
-        <a href="https://docs.google.com/document/d/11qATXeMCFB1Io2WauJywyM81skCrmu7SGtFiiL8NM3w/view"
-            class="nav-resume" target="_blank" rel="noopener noreferrer"
-            aria-label="Resume preview, opens in a new tab">Resume</a>
     </header>
 
     <main id="top">
 
         <section class="hero has-comets">
             <!--
-              The opening line types itself between two phrases. Three parts:
-
-                .typewriter-sizer   holds the longest phrase, hidden but laid
-                                    out, so the box is already as wide and as
-                                    tall as it will ever need to be and
-                                    nothing below it moves while typing
-                .typewriter-line    the visible one, stacked in the same grid
-                                    cell as the sizer
-                .visually-hidden    one static sentence, which is the whole of
-                                    what a screen reader gets
-
-              The visible half is aria-hidden and there is no live region, so
-              nothing is announced letter by letter. With JavaScript off the
-              first phrase is already in the markup and simply stays.
+              .typewriter-sizer holds the longest phrase, laid out but hidden, so
+              the box never resizes while typing. The visible half is aria-hidden
+              and there is no live region, so nothing is announced letter by
+              letter; the .visually-hidden sentence is what a screen reader gets.
+              With JavaScript off the first phrase is already in the markup.
             -->
             <p class="eyebrow" data-typewriter data-reveal>
                 <span class="typewriter" aria-hidden="true">
@@ -61,13 +50,16 @@
                 <span class="visually-hidden">Hi, I&rsquo;m Isaac Welcome to my portfolio...</span>
             </p>
             <h1 class="hero-title magnetic-text">
-                <span class="line-mask"><span class="line-inner">I want to design</span></span>
-                <span class="line-mask"><span class="line-inner">and build digital and</span></span>
-                <span class="line-mask"><span class="line-inner">physical products</span></span>
+                <span class="line-mask"><span class="line-inner">I design and prototype</span></span>
+                <span class="line-mask"><span class="line-inner">useful products and</span></span>
+                <span class="line-mask"><span class="line-inner">interactive experiences.</span></span>
             </h1>
 
             <div class="hero-actions" data-reveal>
-                <a href="#work" class="button">View Work</a>
+                <!-- The wrapper stays put; .button-float moves the button inside it. -->
+                <span class="button-float">
+                    <a href="#work" class="button">View Work</a>
+                </span>
                 <a href="#contact" class="button button-ghost">Get in touch</a>
             </div>
         </section>
@@ -75,31 +67,12 @@
         <section id="work" class="section section-work">
             <div class="section-head" data-reveal>
                 <h2 class="section-title">Selected Work</h2>
-                <p class="section-note">Featured projects</p>
             </div>
 
-            <!--
-              FEATURED PROJECTS.
-              Four cards, each linking straight to its case study. The whole
-              card is the anchor, so title, descriptor and tools are spans
-              rather than block elements.
-
-              MEDIA: do not paste image markup here. Each card carries a
-              data-project attribute, and media.js maps that name to an
-              optional image or video. Fill the entry in media.js and the
-              picture appears above the title; leave it null and the card
-              renders as type alone, which is how it is designed to look.
-              That keeps the four cards from ever showing an empty frame.
-
-              An optional year can be added inside .feature-top as
-              <span class="feature-year">2025</span> if you want one.
-
-              The order here also drives the "next project" link at the foot
-              of each case study. If you reorder these, update those to match.
-            -->
+            <!-- Featured projects -->
             <div class="featured" id="featured" data-reveal-stagger="80">
 
-                <a class="feature feature-1" data-reveal href="projects/digital-kintsugi.html"
+                <a class="feature feature-1" data-reveal data-cursor-label="VIEW" href="projects/digital-kintsugi.html"
                     data-project="digital-kintsugi" data-depth="1.2">
                     <span class="feature-body">
                         <span class="feature-top">
@@ -112,19 +85,19 @@
                     </span>
                 </a>
 
-                <a class="feature feature-2" data-reveal href="projects/museum-npc.html" data-project="museum-npc"
-                    data-depth="0.8">
+                <a class="feature feature-2" data-reveal data-cursor-label="VIEW" href="projects/museum-npc.html"
+                    data-project="museum-npc" data-depth="0.8">
                     <span class="feature-body">
                         <span class="feature-top">
                             <span class="feature-index" aria-hidden="true">02</span>
                             <span class="feature-descriptor">Interactive Systems</span>
                         </span>
-                        <span class="feature-title">如是觀</span>
+                        <span class="feature-title">如是觀 – "This Way of Seeing It"</span>
                         <span class="feature-tools">Unity · Ollama · Local LLMs</span>
                     </span>
                 </a>
 
-                <a class="feature feature-3" data-reveal href="projects/suzume-cnc-stool.html"
+                <a class="feature feature-3" data-reveal data-cursor-label="VIEW" href="projects/suzume-cnc-stool.html"
                     data-project="suzume-cnc-stool" data-depth="1.1">
                     <span class="feature-body">
                         <span class="feature-top">
@@ -136,8 +109,8 @@
                     </span>
                 </a>
 
-                <a class="feature feature-4" data-reveal href="projects/butterfly-pavilion.html"
-                    data-project="butterfly-pavilion" data-depth="0.9">
+                <a class="feature feature-4" data-reveal data-cursor-label="VIEW"
+                    href="projects/butterfly-pavilion.html" data-project="butterfly-pavilion" data-depth="0.9">
                     <span class="feature-body">
                         <span class="feature-top">
                             <span class="feature-index" aria-hidden="true">04</span>
@@ -150,21 +123,28 @@
 
             </div>
 
-            <!--
-              EXPLORE BY DISCIPLINE.
-              Restrained text links rather than cards: these pages are secondary
-              to the four featured projects above. Each is currently a stub whose
-              former content is preserved in a comment on the page itself.
-            -->
+            <!-- Explore by discipline -->
             <nav class="disciplines" aria-labelledby="disciplines-title" data-reveal>
                 <h3 class="disciplines-title" id="disciplines-title">Explore by discipline</h3>
                 <ul class="disciplines-list">
-                    <li><a href="projects/product-fabrication.html">Product &amp; Fabrication<span class="link-view"
-                                aria-hidden="true">View</span></a></li>
-                    <li><a href="projects/creative-technology.html">Creative Technology<span class="link-view"
-                                aria-hidden="true">View</span></a></li>
-                    <li><a href="projects/ux-product.html">UX &amp; Product Experience<span class="link-view"
-                                aria-hidden="true">View</span></a></li>
+                    <li>
+                        <div class="discipline-row" data-cursor-label="IN PROGRESS">
+                            <span class="discipline-name">Product &amp; Fabrication</span>
+                            <span class="visually-hidden">In progress</span>
+                        </div>
+                    </li>
+                    <li>
+                        <div class="discipline-row" data-cursor-label="IN PROGRESS">
+                            <span class="discipline-name">Creative Technology</span>
+                            <span class="visually-hidden">In progress</span>
+                        </div>
+                    </li>
+                    <li>
+                        <div class="discipline-row" data-cursor-label="IN PROGRESS">
+                            <span class="discipline-name">UX &amp; Product Experience</span>
+                            <span class="visually-hidden">In progress</span>
+                        </div>
+                    </li>
                 </ul>
             </nav>
 
@@ -175,94 +155,57 @@
                 <h2 class="section-title">About</h2>
             </div>
 
-            <!--
-              The previous Focus / Tools / Also definition list is preserved here
-              word for word so none of its wording is lost:
-
-                Focus   Interactive media, web development, data analytics
-                Tools   Excel, SQL, Tableau, Unity, Arduino, HTML/CSS/JS
-                Also    Content design and student leadership
-
-              Those three fragments are replaced below by one introduction, one
-              capability list, and education / location metadata.
-            -->
             <div class="about-grid" data-reveal-stagger="90">
 
                 <div class="about-intro" data-reveal>
                     <p class="about-lead">
-                        I&rsquo;m an Interactive Media Business student at NYU Shanghai who builds
-                        physical products, interactive systems, and digital experiences through
-                        fabrication, creative coding, and prototyping.
+                        I&rsquo;m a product-oriented designer interested in making practical and
+                        enjoyable products.
                     </p>
+
+                    <p class="about-support">
+                        I use 3D CAD, prototyping, fabrication, and interaction design to turn
+                        everyday problems into things people can use, test, and refine. I&rsquo;m
+                        especially interested in industrial design and UX.
+                    </p>
+
+                    <h3 class="about-subhead about-subhead-inline">Selected coursework</h3>
+
+                    <ul class="coursework-list">
+                        <li>Design for Digital Fabrication</li>
+                        <li>Introduction to 3D</li>
+                        <li>Innovation Lab</li>
+                        <li>Interaction Lab</li>
+                        <li>Creative Coding Lab</li>
+                        <li>Live Simulation and Agents</li>
+                    </ul>
                 </div>
 
                 <!--
-                  SELF-PORTRAIT — nothing to paste here.
-                  There is deliberately no <img> at this point. script.js reads
-                  window.SITE_MEDIA.portrait from media.js and, only once a real
-                  file is configured there, inserts a <figure class="about-portrait">
-                  in this gap and switches .about-grid into its three-column
-                  layout: introduction, portrait, capabilities.
-
-                  Leave the config null and the section stays exactly the
-                  balanced two-column composition it is now. No reserved column,
-                  no grey box, no "portrait coming soon", no broken image.
-
-                  TO ADD YOURS
-                    1. Save the file as   assets/images/isaac-portrait.webp
-                    2. Fill in the `portrait` block in media.js — the worked
-                       example there lists every field, including the alt text
-                       you need to confirm once you have chosen the photograph.
-
-                  A 4:5 upright crop is what the layout is built around; the
-                  frame is plain and rectangular by design.
-
-                  Because the portrait is inserted by script.js, like every
-                  other image on this site, it does not appear with JavaScript
-                  disabled. The introduction, capabilities and metadata do, and
-                  they carry the section on their own.
+                  No <img> here on purpose. script.js reads
+                  window.SITE_MEDIA.portrait and, only once a real file is
+                  configured, inserts the figure and adds .has-portrait to the grid.
                 -->
 
                 <div class="about-side" data-reveal>
                     <h3 class="about-subhead">Capabilities</h3>
 
                     <ul class="capability-list">
+                        <li>3D CAD &amp; form development</li>
+                        <li>Product prototyping &amp; testing</li>
                         <li>Digital fabrication</li>
-                        <li>Physical computing</li>
-                        <li>Creative coding</li>
-                        <li>Interaction design</li>
-                        <li>Product prototyping</li>
-                        <li>Unity / web development</li>
+                        <li>Interaction &amp; experience design</li>
                     </ul>
 
                     <dl class="about-meta">
                         <div class="about-meta-row">
                             <dt>Education</dt>
                             <dd>
-                                <a class="meta-link"
-                                    href="https://shanghai.nyu.edu/content/interactive-media-and-business"
-                                    target="_blank" rel="noopener noreferrer">B.S. Interactive Media Business</a>
+                                <span class="edu-degree">B.S. Interactive Media Business</span>
+                                <span class="edu-school">NYU Shanghai · Expected 2028</span>
                             </dd>
                         </div>
-                        <!--
-                          LOCATIONS — edit these three rows directly.
-                          City on the first span, what that city actually is to
-                          you on the second. Add or remove an <li> and the
-                          layout follows; nothing else reads this list.
-
-                          The descriptions were supplied, not inferred, so
-                          correct them here if any of them is wrong. The label
-                          above was "Based in", which made three place names
-                          read as three simultaneous addresses; "Location" plus
-                          a stated role for each city removes that reading.
-
-                          Both halves of every row are always rendered, so this
-                          reads the same with JavaScript off, under a screen
-                          reader, and on a phone where there is no hover.
-                          Pointer hover and keyboard focus only brighten a row —
-                          they never reveal anything that was hidden, which is
-                          why none of this text is a tab stop.
-                        -->
+                    <!-- City, then what that city is to you. -->
                         <div class="about-meta-row">
                             <dt>Location</dt>
                             <dd>
@@ -273,7 +216,7 @@
                                     </li>
                                     <li class="location">
                                         <span class="location-city">Shanghai</span>
-                                        <span class="location-note">University</span>
+                                        <span class="location-note">Studying</span>
                                     </li>
                                     <li class="location">
                                         <span class="location-city">New York</span>
@@ -288,82 +231,50 @@
             </div>
         </section>
 
-        <section id="contact" class="section section-contact">
-            <div class="section-head" data-reveal>
-                <h2 class="section-title">Contact</h2>
-            </div>
-
-            <p class="contact-lead" data-reveal>
-                Open to internships and creative technology collaborations.
-            </p>
-
-            <!--
-              CONTACT ROWS.
-              Each mark is an inline SVG: no icon font, no sprite sheet, no
-              extra request, and it takes its colour from the link through
-              currentColor so it can never drift from the label beside it.
-
-              Every icon is aria-hidden with focusable="false", so a screen
-              reader announces each row as "Email", "LinkedIn" or "GitHub" and
-              never reads path data, and the SVG can never become a tab stop.
-              The whole row remains one link.
-
-              TO SWAP AN ICON: replace the <path> and set the viewBox that
-              frames it. Nothing else needs touching — .contact-icon renders
-              every mark into the same 1em x 0.8em box and lets each viewBox
-              letterbox itself inside it, which is what keeps the three labels
-              aligned even though an envelope is landscape and the two brand
-              marks are square.
-            -->
-            <div class="contact-links" data-reveal>
-                <a href="https://mail.google.com/mail/?view=cm&fs=1&to=icheaz06@gmail.com&su=Portfolio%20Inquiry"
-                    class="contact-link" target="_blank" rel="noopener noreferrer">
-                    <span class="contact-label">
-                        <svg class="contact-icon" viewBox="2 5 20 14" aria-hidden="true" focusable="false">
-                            <path fill="currentColor"
-                                d="M3 5h18a1 1 0 0 1 1 1v12a1 1 0 0 1-1 1H3a1 1 0 0 1-1-1V6a1 1 0 0 1 1-1Zm.8 2.1L12 12.7l8.2-5.6H3.8Z" />
-                        </svg>
-                        <span>Email</span>
-                    </span>
-                    <span class="contact-arrow" aria-hidden="true">↗</span>
-                </a>
-                <a href="https://www.linkedin.com/in/isaac-cheaz-235302365/" class="contact-link" target="_blank"
-                    rel="noopener noreferrer">
-                    <span class="contact-label">
-                        <svg class="contact-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
-                            <path fill="currentColor"
-                                d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433a2.062 2.062 0 0 1-2.063-2.065 2.064 2.064 0 1 1 2.063 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z" />
-                        </svg>
-                        <span>LinkedIn</span>
-                    </span>
-                    <span class="contact-arrow" aria-hidden="true">↗</span>
-                </a>
-                <a href="https://github.com/isaaccheaz06" class="contact-link" target="_blank"
-                    rel="noopener noreferrer">
-                    <span class="contact-label">
-                        <svg class="contact-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
-                            <path fill="currentColor"
-                                d="M12 .297c-6.63 0-12 5.373-12 12 0 5.303 3.438 9.8 8.205 11.385.6.113.82-.258.82-.577 0-.285-.01-1.04-.015-2.04-3.338.724-4.042-1.61-4.042-1.61C4.422 18.07 3.633 17.7 3.633 17.7c-1.087-.744.084-.729.084-.729 1.205.084 1.838 1.236 1.838 1.236 1.07 1.835 2.809 1.305 3.495.998.108-.776.417-1.305.76-1.605-2.665-.3-5.466-1.332-5.466-5.93 0-1.31.465-2.38 1.235-3.22-.135-.303-.54-1.523.105-3.176 0 0 1.005-.322 3.3 1.23.96-.267 1.98-.399 3-.405 1.02.006 2.04.138 3 .405 2.28-1.552 3.285-1.23 3.285-1.23.645 1.653.24 2.873.12 3.176.765.84 1.23 1.91 1.23 3.22 0 4.61-2.805 5.625-5.475 5.92.42.36.81 1.096.81 2.22 0 1.606-.015 2.896-.015 3.286 0 .315.21.69.825.57C20.565 22.092 24 17.592 24 12.297c0-6.627-5.373-12-12-12" />
-                        </svg>
-                        <span>GitHub</span>
-                    </span>
-                    <span class="contact-arrow" aria-hidden="true">↗</span>
-                </a>
-            </div>
-        </section>
-
     </main>
 
-    <footer class="footer">
-        <!--
-          Utility only. The Contact section directly above already carries
-          the three links; repeating them here would say the same thing
-          twice on the same screen.
-        -->
-        <div class="footer-bar">
-            <p class="footer-copy">&copy; 2026 Isaac Cheaz</p>
-            <a class="footer-top" href="#top">Back to top <span aria-hidden="true">&uarr;</span></a>
+    <!--
+      The same block on every page. It carries id="contact", which is what
+      the hero's "Get in touch" resolves to.
+
+      Markup in each file rather than injected by script.js: an address
+      nobody can read with JavaScript off is not a contact detail.
+    -->
+    <footer class="footer" id="contact">
+        <div class="footer-grid">
+
+            <div class="footer-contact" data-reveal>
+                <p class="footer-invite">want to have a coffee chat?</p>
+
+                <a class="footer-email" href="mailto:icheaz06@gmail.com">ICHEAZ06@GMAIL.COM</a>
+
+                <p class="footer-availability">
+                    Internships, collaborations, and conversations about product,
+                    industrial, and UX design.
+                </p>
+            </div>
+
+            <!-- Back to top is the one link here the navbar cannot offer. -->
+            <nav class="footer-aside" aria-label="Footer" data-reveal>
+                <div class="footer-col">
+                    <h3 class="footer-col-label">Elsewhere</h3>
+                    <ul>
+                        <li><a href="https://www.linkedin.com/in/isaac-cheaz-235302365/" target="_blank"
+                                rel="noopener noreferrer">LinkedIn</a></li>
+                        <li><a href="https://github.com/isaaccheaz06" target="_blank"
+                                rel="noopener noreferrer">GitHub</a></li>
+                        <li><a href="https://docs.google.com/document/d/11qATXeMCFB1Io2WauJywyM81skCrmu7SGtFiiL8NM3w/view"
+                                target="_blank" rel="noopener noreferrer"
+                                aria-label="Resume preview, opens in a new tab">Resume</a></li>
+                    </ul>
+                </div>
+
+                <a class="footer-top-link" href="#top">Back to top</a>
+            </nav>
+
         </div>
+
+        <p class="footer-copy">&copy; 2026 Isaac Cheaz</p>
     </footer>
 
     <!-- media paths live in media.js; it must load first -->

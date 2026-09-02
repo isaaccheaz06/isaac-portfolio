@@ -1,13 +1,20 @@
+/* Design tokens */
+
 :root {
     --bg: #0a0a0a;
     --surface: #141414;
+
+    /*
+     * THE CHROME. One value for the navbar and the footer, defined once here
+     * rather than typed slightly differently into two rules.
+     */
+    --chrome-bg: #121212;
     --text: #f2f2f2;
     --muted: #a1a1a1;
     --faint: #7a7a7a;
     /*
-     * --faint is tuned against --bg and clears WCAG AA there (4.61:1), but
-     * drops to 4.29:1 on the lighter --surface used by cards. This is the
-     * same grey lifted just enough to pass on --surface (5.34:1).
+     * --faint is tuned against --bg and clears WCAG AA there (4.61:1), but drops
+     * to 4.29:1 on the lighter --surface used by cards.
      */
     --faint-on-surface: #8a8a8a;
     --border: rgba(255, 255, 255, 0.11);
@@ -15,10 +22,9 @@
 
     /*
      * The veil over a card that has a picture. Measured rather than picked:
-     * against the brightest place text lands in the one real card image
-     * (p98 rgb(202,196,187) — it is a bright photograph, not a dark one)
-     * 0.55 puts --text at 5.78:1 and 0.64 at 7.52:1. Hover darkens rather
-     * than lightens, so contrast can only ever improve under the pointer.
+     * against the brightest place text lands in the one real card image (p98
+     * rgb(202,196,187) — it is a bright photograph, not a dark one) 0.55 puts
+     * --text at 5.78:1 and 0.64 at 7.52:1.
      */
     --card-veil: rgba(10, 10, 10, 0.55);
     --card-veil-hover: rgba(10, 10, 10, 0.64);
@@ -26,8 +32,7 @@
     /*
      * The card greys do not survive a photograph. Over the veiled image
      * --faint-on-surface measures 1.87:1 and --muted 2.50:1, and no honest
-     * overlay rescues either. This is the dimmest grey that still clears AA
-     * there, at 4.72:1.
+     * overlay rescues either.
      */
     --on-card-media: #dcdcdc;
 
@@ -37,16 +42,16 @@
     --gutter: 7vw;
     --ease: cubic-bezier(0.22, 1, 0.36, 1);
     /*
-     * Fallback for the instant before script.js measures the real sticky
-     * navbar, and the value that stands permanently if JavaScript is off.
-     * Set to the measured desktop height so anchor jumps land correctly
-     * without scripting rather than leaving a 21px gap, as the old 93px did.
+     * Fallback for the instant before script.js measures the real sticky navbar,
+     * and the value that stands permanently if JavaScript is off.
      */
-    --navbar-height: 72px;
+    --navbar-height: 71px;
     /* easeOutBack — a slight overshoot, used where something should feel
        physically nudged (the magnetic letters) rather than just eased in */
     --ease-spring: cubic-bezier(0.34, 1.56, 0.64, 1);
 }
+
+/* Reset */
 
 * {
     box-sizing: border-box;
@@ -55,41 +60,12 @@
 }
 
 
-/* ==========================================================================
- * SCROLL REVEAL
- *
- * Everything here hangs off .js-reveal on <html>, which script.js adds and
- * only after it has an IntersectionObserver and permission to move things.
- * That is the whole of the no-JavaScript story: without the class not one of
- * these rules matches, so nothing is ever hidden by a script that failed to
- * load, and the page reads exactly as it does now.
- *
- * opacity and transform only, so a reveal cannot move anything but itself —
- * no heights animate, no space appears or disappears, and the scrollbar is
- * the same length before the first reveal as after the last.
- *
- * will-change is on while an element is waiting and removed the moment its
- * fade finishes. Left on, four cards and a dozen sections would each hold a
- * compositor layer for the life of the page to pay for one 700ms transition.
- * ========================================================================== */
+
+/* Scroll reveal */
 
 /*
- * WHICH EDGE IT IS ARRIVING OVER.
- *
- * One signed length, and the only thing that varies between the two
- * directions. Coming up the page from below the fold an element starts under
- * its resting place and rises into it; coming back down to something already
- * passed, it starts above and falls into it. Both are "it moves the short
- * way towards where it belongs", which is why the same duration and easing
- * suit both and only the sign changes.
- *
- * The fall is shorter than the rise on purpose. Downward motion reads as
- * heavier than the same distance upward, and content re-entering from above
- * is content being returned to rather than met for the first time — it
- * should announce itself less.
- *
- * A variable rather than two transform declarations, so the card path (which
- * composes rather than replaces its transform) reads the same number.
+ * WHICH EDGE IT IS ARRIVING OVER. One signed length, and the only thing that
+ * varies between the two directions.
  */
 .js-reveal [data-reveal] {
     --reveal-offset: var(--reveal-rise, 24px);
@@ -121,14 +97,10 @@
 }
 
 /*
- * The cards are the one exception, because they already own their transform
- * (see .feature). The generic rule would replace it and take the tilt with
- * it — .is-revealed sets `transform: none`, which on a card means "and stop
- * being rotated". So they get the same two offsets delivered as variables
- * that .feature's own transform composes.
- *
- * 700ms while the reveal is in flight; .is-settled hands the card back its
- * original 0.5s, which is the pointer drift's timing and should stay that.
+ * The cards are the one exception, because they already own their transform (see
+ * .feature). The generic rule would replace it and take the tilt with it —
+ * .is-revealed sets `transform: none`, which on a card means "and stop being
+ * rotated".
  */
 .js-reveal .feature[data-reveal] {
     --reveal-scale: 0.985;
@@ -150,20 +122,7 @@
     transition: transform 0.5s var(--ease), opacity 0.4s ease, border-color 0.3s ease;
 }
 
-/*
- * GOING BACK TO HIDDEN IS NOT AN ANIMATION.
- *
- * An element is only ever reset once it is well clear of the viewport, so
- * the return to opacity 0 is not something anyone is looking at — but left
- * transitioned it would still be running, and scrolling back before it
- * finished would catch it mid-fade and read as a flicker. This drops the
- * transition and its stagger delay for the single frame the reset takes, so
- * the hidden state is simply where the element is, never somewhere it is
- * travelling to.
- *
- * Last of the reveal rules and at matching specificity, so it beats both the
- * 700ms reveal transition and the card's restored 0.5s one.
- */
+/* GOING BACK TO HIDDEN IS NOT AN ANIMATION. */
 .js-reveal [data-reveal].is-resetting {
     transition: none;
 }
@@ -173,8 +132,8 @@
 }
 
 /*
- * Less travel on a phone, where the same 24px is a larger share of the
- * screen and the whole page is scrolled faster.
+ * Less travel on a phone, where the same 24px is a larger share of the screen
+ * and the whole page is scrolled faster.
  */
 @media (max-width: 700px) {
     .js-reveal [data-reveal] {
@@ -184,10 +143,10 @@
 }
 
 /*
- * Reduced motion: everything present, nothing moving. script.js also
- * declines to add .js-reveal in that case, so this is the backstop for
- * someone who turns the setting on after the page has loaded — the elements
- * already hidden must not stay hidden.
+ * Reduced motion: everything present, nothing moving. script.js also declines to
+ * add .js-reveal in that case, so this is the backstop for someone who turns the
+ * setting on after the page has loaded — the elements already hidden must not
+ * stay hidden.
  */
 @media (prefers-reduced-motion: reduce) {
 
@@ -204,10 +163,9 @@
     }
 
     /*
-     * No `transform: none` for a card: that is not "stop being offset", it
-     * is "stop being rotated", and the tilt is the composition rather than
-     * an animation. Resting the two offsets leaves .feature's own transform
-     * holding the tilt alone, which is exactly the still state wanted here.
+     * No `transform: none` for a card: that is not "stop being offset", it is
+     * "stop being rotated", and the tilt is the composition rather than an
+     * animation.
      */
     .js-reveal .feature[data-reveal],
     .js-reveal .feature[data-reveal].is-revealed {
@@ -222,13 +180,6 @@ html {
     scroll-behavior: smooth;
 }
 
-/*
- * Flex column so the footer is pushed to the bottom of short pages by the
- * main element growing, rather than by a min-height guess on the content.
- * .project-page used to carry min-height:80vh for this; on a page with only
- * a title, summary and metadata that reserved several hundred pixels of
- * empty space it had no way to justify.
- */
 body {
     background-color: var(--bg);
     color: var(--text);
@@ -240,7 +191,7 @@ body {
     -webkit-font-smoothing: antialiased;
 }
 
-body > main {
+body>main {
     flex: 1 0 auto;
 }
 
@@ -249,16 +200,9 @@ body > main {
     color: var(--bg);
 }
 
-/*
- * Text for screen readers only. Used to spell out "(opens in a new tab)"
- * beside the ↗ glyph on external links: the glyph carries that meaning to
- * anyone who can see it, and is aria-hidden precisely so it is not read out
- * as a character name, which leaves nothing for a screen reader without this.
- *
- * Not display:none and not visibility:hidden — both remove it from the
- * accessibility tree too, which defeats the point. A 1px clipped box stays
- * in the tree while occupying no visible space.
- */
+/* Accessibility utilities */
+
+/* Text for screen readers only. */
 .visually-hidden {
     border: 0;
     clip-path: inset(50%);
@@ -270,29 +214,25 @@ body > main {
     width: 1px;
 }
 
-/* ---------- nav ---------- */
+/* Navbar */
 
+/* NO BOTTOM BORDER. */
 .navbar {
     align-items: center;
     /*
-     * Solid, not a translucent blur layer. Over a flat near-black page the
-     * blur resolved to almost nothing visually while still forcing a
-     * compositing layer on every scroll frame — cost with no payoff.
+     * Solid, not a translucent blur layer. Over a flat near-black page the blur
+     * resolved to almost nothing visually while still forcing a compositing
+     * layer on every scroll frame — cost with no payoff.
      */
-    background-color: var(--bg);
-    border-bottom: 1px solid transparent;
+    background-color: var(--chrome-bg);
     display: flex;
     justify-content: space-between;
     padding: 22px var(--gutter);
     position: sticky;
     top: 0;
-    transition: transform 0.45s var(--ease), border-color 0.3s ease;
+    transition: transform 0.45s var(--ease);
     will-change: transform;
     z-index: 100;
-}
-
-.navbar:hover {
-    border-bottom-color: var(--border);
 }
 
 .navbar-hidden {
@@ -326,7 +266,7 @@ body > main {
     color: var(--text);
 }
 
-/* ---------- hero ---------- */
+/* Homepage hero */
 
 .hero {
     display: flex;
@@ -347,25 +287,15 @@ body > main {
 }
 
 /*
- * THE TYPING LINE
- *
- * A grid of one cell with two things in it. The sizer carries the longest
- * phrase and is hidden with `visibility`, not `display: none` — it still
- * takes part in layout, so the cell is permanently the width and height of
+ * THE TYPING LINE A grid of one cell with two things in it. The sizer carries
+ * the longest phrase and is hidden with `visibility`, not `display: none` — it
+ * still takes part in layout, so the cell is permanently the width and height of
  * the longest state and the line below never reflows as characters arrive.
- * `visibility: hidden` also takes it out of the accessibility tree, so the
- * phrase is not read twice.
- *
- * Everything else about this line — size, colour, tracking, the 28px below
- * it — is .eyebrow's, unchanged.
  */
 .typewriter {
     /*
-     * The caret's own footprint, shared by the rule that draws it and the
-     * sizer that has to leave room for it. Stated once so the two cannot
-     * drift apart: measured, the line ran 3px past the sizer without this,
-     * because the sizer held the longest phrase and the line held the
-     * longest phrase AND a caret.
+     * The caret's own footprint, shared by the rule that draws it and the sizer
+     * that has to leave room for it.
      */
     --caret-gap: 2px;
     --caret-width: 1px;
@@ -384,19 +314,17 @@ body > main {
 }
 
 /*
- * pre-wrap, so a phrase that ends mid-word keeps the space it has just
- * typed instead of having it collapsed away and the caret jumping back a
- * character.
+ * pre-wrap, so a phrase that ends mid-word keeps the space it has just typed
+ * instead of having it collapsed away and the caret jumping back a character.
  */
 .typewriter-line {
     white-space: pre-wrap;
 }
 
 /*
- * A rule, not a block. 1px at the line's own height, sitting on the text
- * colour rather than the muted one so it stays legible against copy that is
- * already faint. It keeps its width when it blinks — opacity only — so the
- * line never shifts by the caret's own width.
+ * A rule, not a block. 1px at the line's own height, sitting on the text colour
+ * rather than the muted one so it stays legible against copy that is already
+ * faint.
  */
 .typewriter-caret {
     animation: typewriter-blink 1s steps(1, end) infinite;
@@ -423,8 +351,8 @@ body > main {
 
 /*
  * Reduced motion gets the whole sentence at once and a caret that does not
- * blink. script.js writes the text; this stops the animation, and does it
- * here rather than in JS so it holds even if the script never runs.
+ * blink. script.js writes the text; this stops the animation, and does it here
+ * rather than in JS so it holds even if the script never runs.
  */
 @media (prefers-reduced-motion: reduce) {
     .typewriter-caret {
@@ -442,8 +370,8 @@ body > main {
 }
 
 /*
- * Mask-reveal on load: each line's outer span clips, the inner span slides
- * up from below it. Add a matching nth-child rule if a line is added.
+ * Mask-reveal on load: each line's outer span clips, the inner span slides up
+ * from below it.
  */
 .hero-title .line-mask {
     display: block;
@@ -484,63 +412,27 @@ body > main {
 
 /*
  * Runtime-split into <span class="word"> containing one <span class="letter">
- * per character, by script.js (only for elements carrying this class —
- * currently just .hero-title). Kept out of the HTML source so project copy
- * stays plain, editable text.
- *
- * Two nested inline-blocks, not one level: `transform` silently does not
- * apply to plain `display: inline` elements, so the letters need
- * inline-block to move at all. But inline-block also makes an element
- * atomic, and atomic inlines get a line-break opportunity between them even
- * with no whitespace — letters-only inline-block broke words mid-letter
- * ("des|ign") at narrower widths. Wrapping each word in its own inline-block
- * first fixes that: the word moves as one atomic unit against the rest of
- * the line, and the letters inside it never see a line-break opportunity
- * between them because the word box doesn't wrap internally under normal
- * circumstances.
+ * per character, by script.js (only for elements carrying this class — currently
+ * just .hero-title).
  */
 .magnetic-text .word {
     display: inline-block;
     /*
-     * Without this, shrink-to-fit sizing caps the word's own width at
-     * whatever space is left on the line, and since its letters are also
-     * atomic inline-blocks they then wrap internally to fit that shrunk
-     * box — splitting a single long word onto two lines. nowrap forces
-     * the box to size to its full natural width instead, so an overlong
-     * word overflows the container edge, matching how plain unsplit text
-     * already handles the same case by default.
+     * Without this, shrink-to-fit sizing caps the word's own width at whatever
+     * space is left on the line, and since its letters are also atomic
+     * inline-blocks they then wrap internally to fit that shrunk box — splitting
+     * a single long word onto two lines. nowrap forces the box to size to its
+     * full natural width instead, so an overlong word overflows the container
+     * edge, matching how plain unsplit text already handles the same case by
+     * default.
      */
     white-space: nowrap;
 }
 
 /*
- * TWO OFFSETS, ONE TRANSFORM.
- *
- * A letter is moved by two independent things: the pointer passing near it,
- * and the wave that crosses the sentence on its own every fifteen seconds.
- * Written as inline transforms they would overwrite each other — whichever
- * ran last would win, so the wave would erase the lift mid-sweep and the
- * pointer would flatten the wave.
- *
- * So neither writes `transform`. Each owns one registered custom property,
- * and this rule is the only place the two are combined. They cannot collide
- * because they are not the same property, and neither has to know the other
- * exists.
- *
- * Registered with @property rather than left as plain variables for two
- * reasons: an <length> that the browser understands as a length can be
- * transitioned and keyframed (a plain custom property can only be swapped),
- * and it gives each an initial value so the calc below is valid before
- * either has ever been set.
- *
- * `max()` is the clamp, and it reads the way it does because both offsets
- * are negative: -15px of lift under -12px of wave is -27px, which is a lunge
- * rather than a nudge, and max() holds the pair at -18px however they stack.
- * The cap is on the sum, so no combination of the two can exceed it.
- *
- * Only --letter-lift is transitioned. The wave is a keyframe animation with
- * its own timing, and transitioning the composite as well would have the
- * transition chasing the animation frame by frame and smearing both.
+ * TWO OFFSETS, ONE TRANSFORM. A letter is moved by two independent things: the
+ * pointer passing near it, and the wave that crosses the sentence on its own
+ * every fifteen seconds.
  */
 @property --letter-lift {
     inherits: false;
@@ -562,17 +454,12 @@ body > main {
 }
 
 /*
- * One pulse per letter: up briskly, home slowly. The 18% split puts the rise
- * at about 125ms and the settle at about 575ms, so the letter leaves quickly
- * enough to read as a jump and returns slowly enough to read as weight.
- *
- * --wave-delay is written once per letter when the title is split, and
- * accumulates across all three lines, so the sweep crosses the line breaks
- * as one continuous movement instead of restarting on each.
- *
- * The animation is named only under .is-waving. That is the whole trigger:
- * with the class off there is no animation on these elements at all, so
- * between waves the letters are not merely at zero, they are inert.
+ * One pulse per letter: up briskly, home slowly. The 18% split puts the rise at
+ * about 125ms and the settle at about 575ms, so the letter leaves quickly enough
+ * to read as a jump and returns slowly enough to read as weight. --wave-delay is
+ * written once per letter when the title is split, and accumulates across all
+ * three lines, so the sweep crosses the line breaks as one continuous movement
+ * instead of restarting on each.
  */
 @keyframes letter-wave {
     0% {
@@ -584,8 +471,7 @@ body > main {
      * --ease on the way home rather than --ease-spring. The spring curve
      * overshoots by design (its third control point is past 1), which on a
      * return to zero means dipping below the baseline before settling — a
-     * bounce, on a motion that is supposed to end. The pointer lift keeps
-     * the spring, where the overshoot is the point; the wave decelerates.
+     * bounce, on a motion that is supposed to end.
      */
     18% {
         --letter-wave: -12px;
@@ -603,11 +489,9 @@ body > main {
 }
 
 /*
- * Measuring pose. A letter that is currently lifted reports a centre that is
- * up to 15px above where it rests, and a measure taken mid-interaction would
- * cache that. This drops the displacement and its transition together for
- * the length of the read, so every measure lands on the resting layout
- * whatever the cursor is doing.
+ * Measuring pose. A letter that is currently lifted reports a centre that is up
+ * to 15px above where it rests, and a measure taken mid-interaction would cache
+ * that.
  */
 .magnetic-text.is-measuring .letter {
     animation: none;
@@ -623,16 +507,9 @@ body > main {
 }
 
 /*
- * Two offsets again, and the same reasoning as the title's letters: the
- * hover lift and the idle bob are different intentions on the same axis, so
- * each gets its own property and this rule is the only place they meet.
- * Written both to `transform`, a hover landing mid-bob would drop the button
- * to -2px from -3px — a visible twitch on the one control the page most
- * wants you to press.
- *
- * Only --lift-y is transitioned. The bob is a keyframe animation with its
- * own long, mostly-still cycle, and transitioning the composite would have
- * the 0.25s ease chasing it frame by frame.
+ * Two offsets again, and the same reasoning as the title's letters: the hover
+ * lift and the idle bob are different intentions on the same axis, so each gets
+ * its own property and this rule is the only place they meet.
  */
 @property --lift-y {
     inherits: false;
@@ -666,41 +543,59 @@ body > main {
 }
 
 /*
- * Mostly rest. The movement occupies the last fifth of the cycle — about
- * 0.3s up and 0.65s back out of five and a half seconds — so what the eye
- * registers is a button that is still, and occasionally is not.
+ * A STATIONARY BOX AROUND A MOVING BUTTON. The button floats, which means its
+ * hit area floats with it — transforms move what the pointer can touch.
  */
-@keyframes hero-bob {
-
-    0%,
-    82%,
-    100% {
-        --bob-y: 0px;
-    }
-
-    88% {
-        --bob-y: -3px;
-    }
-}
-
-.button.is-bobbing {
-    animation: hero-bob 5.5s var(--ease) infinite;
+.button-float {
+    display: inline-flex;
 }
 
 /*
- * A control being used does not need to advertise itself. Paused rather
- * than removed, so the bob resumes from where it was instead of snapping —
- * and since 82% of the cycle is the resting position, a pause almost always
- * catches it at rest anyway.
+ * Hovering, not bobbing. Two keyframes and `alternate`, so the button eases up
+ * over 1.6s and eases back down over the next — a 3.2s round trip with no pause
+ * and no repeated landing. ease-in-out is what makes it read as floating rather
+ * than as motion: it is slowest at both extremes, which is where a hovering
+ * object spends its time.
  */
-.button.is-bobbing:hover,
-.button.is-bobbing:focus-visible,
-.button.is-bobbing:active {
+@keyframes hero-float {
+    from {
+        --bob-y: 0px;
+    }
+
+    to {
+        --bob-y: var(--float-rise, -5px);
+    }
+}
+
+.button.is-floating {
+    animation: hero-float 1.6s ease-in-out infinite alternate;
+}
+
+/*
+ * A control being used does not need to advertise itself. Paused rather than
+ * removed, so it holds where it is and eases on from there when the pointer
+ * leaves, instead of snapping to the resting position and starting the cycle
+ * again.
+ */
+.button-float:hover .button.is-floating,
+.button.is-floating:hover,
+.button.is-floating:focus-visible,
+.button.is-floating:active {
     animation-play-state: paused;
 }
 
+/*
+ * Less travel on a small screen, where the button is a larger share of what is
+ * on show and 5px of drift reads as instability rather than as air.
+ */
+@media (max-width: 900px) {
+    .button.is-floating {
+        --float-rise: -3px;
+    }
+}
+
 @media (prefers-reduced-motion: reduce) {
-    .button.is-bobbing {
+    .button.is-floating {
         animation: none;
     }
 }
@@ -716,16 +611,15 @@ body > main {
     opacity: 1;
 }
 
-/* ---------- hero comets ---------- */
+/* Hero comets */
 
 /*
  * Canvas for the comet background, created by script.js only when the hero
- * carries `has-comets`. Remove that class from index.html and no canvas is
- * ever inserted, so these rules simply stop applying.
- *
- * pointer-events:none is the important one: the canvas covers the whole hero,
- * including both buttons, and without it every click in the hero would land
- * on the canvas instead of the link underneath.
+ * carries `has-comets`. Remove that class from index.html and no canvas is ever
+ * inserted, so these rules simply stop applying. pointer-events:none is the
+ * important one: the canvas covers the whole hero, including both buttons, and
+ * without it every click in the hero would land on the canvas instead of the
+ * link underneath.
  */
 .hero-comet-canvas {
     inset: 0;
@@ -735,31 +629,25 @@ body > main {
 }
 
 /*
- * Everything the hero actually says sits above the comets. Written as
- * "every hero child except the canvas" so adding another element to the hero
- * later cannot accidentally end up behind the effect.
+ * Everything the hero actually says sits above the comets. Written as "every
+ * hero child except the canvas" so adding another element to the hero later
+ * cannot accidentally end up behind the effect.
  */
-.hero > *:not(.hero-comet-canvas) {
+.hero>*:not(.hero-comet-canvas) {
     position: relative;
     z-index: 1;
 }
 
-/* ---------- section shell ---------- */
+/* Section shell */
 
 .section {
     padding: 110px var(--gutter);
 }
 
 /*
- * Sticky-navbar clearance for anchor jumps.
- *
- * Without this, #work/#about/#contact scroll their target's top edge to
- * viewport 0 — directly under the bar — so the heading lands behind it.
- *
- * Scoped to any id inside main rather than to .section, because the anchor
- * target is not always the section element: #contact currently sits on a
- * heading. Tying the clearance to the id itself means it keeps working
- * wherever that id is moved, instead of silently reverting to 0.
+ * Sticky-navbar clearance for anchor jumps. Without this, #work/#about/#contact
+ * scroll their target's top edge to viewport 0 — directly under the bar — so the
+ * heading lands behind it.
  */
 main[id],
 main [id] {
@@ -790,17 +678,11 @@ main [id] {
     max-width: 42ch;
 }
 
-/* ---------- featured work ---------- */
+/* Featured work */
 
 /*
- * Content-driven grid, not a fixed-height canvas.
- *
- * This section was once `height: 640px` with every tile absolutely positioned
- * at a top%. When the artwork block and the decorative labels were removed,
- * the remaining tiles all landed in the upper half and 321px stood empty —
- * the container had no way to know its contents had shrunk. A grid derives
- * its height from what is actually in it, so that cannot recur: add a card,
- * remove one, add an image, and the section still ends where content ends.
+ * Content-driven grid, not a fixed-height canvas. This section was once `height:
+ * 640px` with every tile absolutely positioned at a top%.
  */
 .featured {
     display: grid;
@@ -811,8 +693,8 @@ main [id] {
 }
 
 /*
- * The whole card is the link. Its children are spans, so the anchor stays
- * valid however the card is laid out.
+ * The whole card is the link. Its children are spans, so the anchor stays valid
+ * however the card is laid out.
  */
 .feature {
     background-color: var(--surface);
@@ -826,34 +708,20 @@ main [id] {
     position: relative;
     text-decoration: none;
     /*
-     * THREE THINGS MOVE THIS CARD and they are all in this one function:
-     * the pointer drift (script.js, per frame), the scroll reveal, and the
-     * static tilt each card carries. The drift used to be written straight
-     * to style.transform, which meant it had to re-state the tilt every
-     * frame to avoid dropping it — and it would have erased a reveal offset
-     * outright, since an inline transform beats any rule.
-     *
-     * As variables the three simply add up, in a fixed order, and none of
-     * them needs to know the others exist.
+     * THREE THINGS MOVE THIS CARD and they are all in this one function: the
+     * pointer drift (script.js, per frame), the scroll reveal, and the static
+     * tilt each card carries.
      */
     transform:
-        translate(var(--drift-x, 0px), calc(var(--drift-y, 0px) + var(--reveal-y, 0px)))
-        rotate(var(--card-tilt, 0deg))
-        scale(var(--reveal-scale, 1));
+        translate(var(--drift-x, 0px), calc(var(--drift-y, 0px) + var(--reveal-y, 0px))) rotate(var(--card-tilt, 0deg)) scale(var(--reveal-scale, 1));
     transition: transform 0.5s var(--ease), opacity 0.4s ease, border-color 0.3s ease;
     will-change: transform;
 }
 
 /*
  * Optional media. Absent by default — the card is typographic and reads as
- * finished with no image, so nothing here reserves empty space until a real
- * file is dropped in.
- *
- * When one IS dropped in, script.js adds .has-media and the card changes
- * character rather than gaining a band: the picture becomes the whole
- * surface and the type sits on it. Nothing below is keyed to a project name,
- * so a card gets this the moment its media.js entry stops being null — there
- * is no second edit to remember.
+ * finished with no image, so nothing here reserves empty space until a real file
+ * is dropped in.
  */
 .feature-media {
     display: block;
@@ -869,9 +737,9 @@ main [id] {
     height: 100%;
     object-fit: cover;
     /*
-     * Deliberate, not inherited. cover crops whichever axis is long, and
-     * centre is only the right answer when the subject is centred — see the
-     * per-project overrides further down.
+     * Deliberate, not inherited. cover crops whichever axis is long, and centre
+     * is only the right answer when the subject is centred — see the per-project
+     * overrides further down.
      */
     object-position: center;
     transition: transform 0.45s var(--ease);
@@ -879,9 +747,9 @@ main [id] {
 }
 
 /*
- * One flat wash, never a gradient. A gradient would be doing the same job at
- * the bottom while quietly restyling the top of every photograph; a uniform
- * veil treats the picture as one surface and leaves its composition alone.
+ * One flat wash, never a gradient. A gradient would be doing the same job at the
+ * bottom while quietly restyling the top of every photograph; a uniform veil
+ * treats the picture as one surface and leaves its composition alone.
  */
 .feature-media::after {
     background-color: var(--card-veil);
@@ -893,12 +761,7 @@ main [id] {
 
 /*
  * A fixed 4:3, so cards keep a common shape however long their titles run.
- *
- * max-width, not min-height. A floor on the height fed back through the
- * aspect-ratio into the WIDTH — a 260px minimum asked for a 347px box in a
- * 343px column, and the picture card sat 4px proud of the three beside it on
- * a phone. The ratio alone is enough: even at the narrowest column this grid
- * allows, the card is taller than the two lines of type it has to hold.
+ * max-width, not min-height.
  */
 .feature.has-media {
     aspect-ratio: 4 / 3;
@@ -928,32 +791,29 @@ main [id] {
 }
 
 /*
- * The tools line comes off a picture card. At 13px in --muted it measures
- * 2.5:1 over the veiled image and there is no weight it can take that would
- * both pass and stay secondary to the title — and a wall of tool names is
- * the "competing interface element" this treatment is meant to remove. It
- * still appears on the project page, in the Tools row of the metadata.
+ * The tools line comes off a picture card. At 13px in --muted it measures 2.5:1
+ * over the veiled image and there is no weight it can take that would both pass
+ * and stay secondary to the title — and a wall of tool names is the "competing
+ * interface element" this treatment is meant to remove.
  */
 .feature.has-media .feature-tools {
     display: none;
 }
 
 /*
- * Per-image framing. The default above is centre and a project only needs a
- * line here when its subject is not — but state it either way, so a later
- * re-crop cannot silently move the object out of frame.
- *
- * digital-kintsugi: the card file is 1200x900, exactly the card's own 4:3,
- * so cover has nothing to crop and centre is exact. Add one of these beside
- * it when another project gets a picture.
+ * Per-image framing. The default above is centre and a project only needs a line
+ * here when its subject is not — but state it either way, so a later re-crop
+ * cannot silently move the object out of frame. digital-kintsugi: the card file
+ * is 1200x900, exactly the card's own 4:3, so cover has nothing to crop and
+ * centre is exact.
  */
 .feature[data-project="digital-kintsugi"] .feature-media img {
     object-position: 50% 50%;
 }
 
 /*
- * Generous padding is what makes an image-less card look deliberate rather
- * than unfinished: the type gets room instead of sitting in a thin strip.
+ * Generous padding is what makes an image-less card look deliberate rather than
+ * unfinished: the type gets room instead of sitting in a thin strip.
  */
 .feature-body {
     display: flex;
@@ -962,11 +822,7 @@ main [id] {
     padding: clamp(22px, 2.6vw, 34px);
 }
 
-/*
- * With a picture above it the type no longer has to carry the card on its
- * own, so it can sit closer to the image than the empty card's generous
- * top padding allows.
- */
+/* With a picture above it, the type can sit closer to the image. */
 .feature.has-media .feature-body {
     padding-top: clamp(18px, 2vw, 24px);
 }
@@ -983,9 +839,8 @@ main [id] {
 }
 
 /*
- * A running number gives each card a fixed visual anchor in the corner,
- * which is what an image would otherwise provide. Marked aria-hidden: it is
- * ordering, not information a screen reader needs read aloud.
+ * A running number gives each card a fixed visual anchor in the corner, which is
+ * what an image would otherwise provide.
  */
 .feature-index {
     font-variant-numeric: tabular-nums;
@@ -1025,9 +880,9 @@ main [id] {
 }
 
 /*
- * Subtle rotation, carried over from the previous collage. Offsets are
- * margins rather than absolute tops, so they push the grid's own height
- * instead of floating free of it.
+ * Subtle rotation, carried over from the previous collage. Offsets are margins
+ * rather than absolute tops, so they push the grid's own height instead of
+ * floating free of it.
  */
 .feature-1 {
     --card-tilt: -1.4deg;
@@ -1062,8 +917,8 @@ main [id] {
 }
 
 /*
- * Declared after the hover rules so a keyboard-focused card stays legible
- * even while the pointer is dimming the rest of the grid.
+ * Declared after the hover rules so a keyboard-focused card stays legible even
+ * while the pointer is dimming the rest of the grid.
  */
 .featured .feature:focus-visible {
     border-color: var(--border-strong);
@@ -1074,14 +929,9 @@ main [id] {
 }
 
 /*
- * Restrained on purpose: a 1.04 push on the picture and one step of veil.
- * Two things already move on this grid — the pointer parallax and the
- * sibling dimming — so a third, larger motion would be noise. The card is
- * still one link and nothing here is information: the title, the category
- * and the destination are all readable without a pointer ever arriving.
- *
- * Focus-visible gets the identical treatment, so a keyboard lands on a card
- * that reads exactly as a hovered one does, plus the outline above.
+ * Restrained on purpose: a 1.04 push on the picture and one step of veil. Two
+ * things already move on this grid — the pointer parallax and the sibling
+ * dimming — so a third, larger motion would be noise.
  */
 .featured .feature.has-media:hover .feature-media img,
 .featured .feature.has-media:hover .feature-media video,
@@ -1095,21 +945,17 @@ main [id] {
     background-color: var(--card-veil-hover);
 }
 
-/* ---------- explore by discipline ---------- */
+/* Explore by discipline */
 
 /*
  * Secondary to the featured cards by construction: text links on a hairline
- * rule, no card, no thumbnail, no button. The pages they point at are stubs
- * whose former content is preserved in a comment on each page.
+ * rule, no card, no thumbnail, no button.
  */
+/* A LIST, NOT A LINE. */
 .disciplines {
     border-top: 1px solid var(--border);
-    display: flex;
-    flex-wrap: wrap;
-    gap: 16px 48px;
-    justify-content: space-between;
     margin-top: clamp(64px, 8vw, 104px);
-    padding-top: 22px;
+    padding-top: clamp(48px, 5vw, 64px);
 }
 
 .disciplines-title {
@@ -1118,108 +964,77 @@ main [id] {
     font-size: 14px;
     font-weight: 500;
     letter-spacing: 0.14em;
+    margin-bottom: clamp(24px, 2.6vw, 32px);
     text-transform: uppercase;
 }
 
+/* NO RULE PER ROW. */
 .disciplines-list {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 12px 36px;
     list-style: none;
 }
 
-.disciplines-list a {
+/*
+ * THE ROW IS NOT A LINK. These three disciplines are in progress and have
+ * nowhere to go yet, so they are divs rather than anchors.
+ */
+.discipline-row {
     color: var(--muted);
-    font-size: 15px;
+    display: block;
+    padding-block: clamp(18px, 2vw, 26px);
     text-decoration: none;
-    text-decoration-color: transparent;
-    text-underline-offset: 5px;
-    transition: color 0.25s ease, text-decoration-color 0.25s ease;
+    transition: color 0.3s ease;
 }
 
-.disciplines-list a:hover {
+/*
+ * The display face the headings use, at a size that makes these read as
+ * destinations. 3.4vw between the bounds, so the type grows with the column
+ * rather than stepping at a breakpoint.
+ */
+.discipline-name {
+    /* block, and load-bearing. */
+    display: block;
+    font-family: var(--font-display);
+    font-size: clamp(30px, 3.4vw, 48px);
+    font-weight: 500;
+    letter-spacing: -0.025em;
+    line-height: 1.1;
+    /* a long name breaks across lines rather than being squeezed against
+       VIEW; balance keeps the two lines close in length */
+    text-wrap: balance;
+    transition: transform 0.35s var(--ease);
+}
+
+.discipline-row:hover {
     color: var(--text);
-    text-decoration: underline;
-    text-decoration-color: var(--border-strong);
-}
-
-.disciplines-list a:focus-visible {
-    color: var(--text);
-    outline: 2px solid var(--text);
-    outline-offset: 4px;
 }
 
 /*
- * VIEW — the affordance on the category links.
- *
- * The cards had this too, and now have the pointer-following block instead:
- * a card is a big target with room for a cursor to live in, a one-line text
- * link is not. The whole link is already the anchor, so this adds nothing to
- * the hit area and takes nothing from it. It is a signal, not a control:
- * aria-hidden, because a screen reader is already being told this is a link
- * to Creative Technology and does not need the word "view" after it.
- *
- * The size, tracking and case are the card eyebrow's, so the two affordances
- * still read as the same family.
- *
- * It occupies its space at all times and only opacity and transform change,
- * so nothing reflows when it appears: the card is the same size hovered as
- * at rest. The travel is 6px, and it ends at the resting position rather
- * than starting there, so the label arrives rather than drifting off.
+ * The name moves, not the row. Shifting the anchor would carry the right edge
+ * with it and push VIEW past the column; shifting the name alone reads as the
+ * row leaning towards where it goes, which is the whole gesture.
  */
-.link-view {
-    font-size: 11px;
-    letter-spacing: 0.13em;
-    opacity: 0;
-    text-transform: uppercase;
-    transform: translateX(-6px);
-    transition: opacity 0.3s ease, transform 0.3s var(--ease);
-    white-space: nowrap;
+.discipline-row:hover .discipline-name {
+    transform: translateX(7px);
 }
 
 /*
- * Dimmer than the link it sits beside, and it stays dimmer on hover while
- * the label itself goes to full strength — so the label leads and this
- * stays a marker.
+ * Smaller on a phone, and a floor of 24px so "UX & Product Experience" wraps to
+ * two comfortable lines rather than four cramped ones.
  */
-.disciplines-list .link-view {
-    color: var(--faint);
-    display: inline-block;
-    margin-left: 10px;
+@media (max-width: 700px) {
+    .discipline-name {
+        font-size: clamp(24px, 7vw, 30px);
+    }
 }
 
-.disciplines-list a:hover .link-view,
-.disciplines-list a:focus-visible .link-view {
-    opacity: 1;
-    transform: none;
-}
+@media (prefers-reduced-motion: reduce) {
 
-/*
- * There is no hover on a touch screen, so the label cannot be something that
- * appears on one. It rests visible instead, at an opacity low enough that it
- * still reads as secondary to the title above it.
- */
-@media (pointer: coarse) {
-    .link-view {
-        opacity: 0.55;
+    .discipline-row:hover .discipline-name {
         transform: none;
     }
 }
 
-
-/*
- * THE CARD CURSOR
- *
- * Two elements, because they answer to two different clocks. The outer one
- * carries the position and is written every animation frame, so it must not
- * be transitioned or it would lag the pointer it is supposed to be. The
- * inner one carries the appearance — opacity and scale — and is transitioned,
- * because that IS a motion rather than a position. Splitting them is what
- * lets the block arrive softly and still track exactly.
- *
- * pointer-events: none on the outer element, so the thing sitting under the
- * cursor never swallows the click the cursor is there to invite.
- */
+/* THE CARD CURSOR Two elements, because they answer to two different clocks. */
 .card-cursor {
     left: 0;
     pointer-events: none;
@@ -1230,24 +1045,11 @@ main [id] {
 
 .card-cursor-box {
     /*
-     * The page's own palette rather than an inversion of it: --text on a
-     * veiled --bg, which is the same pairing the cards use, at the size of a
-     * caption rather than a button.
-     *
-     * 0.62 is the one number here that was chosen by measurement instead of
-     * taste, because this box floats over photographs and has to hold at
-     * both ends of them. Composited over white it resolves to rgb(103) and
-     * puts --text at 4.87:1; over black it is effectively opaque and runs to
-     * 18:1. Lighter than 0.62 fails AA on a bright image, darker than it
-     * stops reading as translucent at all.
-     *
-     * The border does the work the background cannot: against a dark
-     * photograph the veil is nearly the same value as the picture, and a
-     * 1px light edge is all that separates the two. No shadow and no blur —
-     * the edge is the whole of the separation.
-     *
-     * No width or height: the padding sizes it, so the box is 52x29 for
-     * VIEW and would still fit a longer word if one were ever used.
+     * The page's own palette rather than an inversion of it: --text on a veiled
+     * --bg, which is the same pairing the cards use, at the size of a caption
+     * rather than a button. 0.62 is the one number here that was chosen by
+     * measurement instead of taste, because this box floats over photographs and
+     * has to hold at both ends of them.
      */
     background-color: rgba(10, 10, 10, 0.62);
     border: 1px solid var(--border-strong);
@@ -1261,12 +1063,15 @@ main [id] {
     line-height: 1.4;
     opacity: 0;
     padding: 7px 10px;
-    text-transform: uppercase;
+    /*
+     * No text-transform: each data-cursor-label carries its own casing, so
+     * VIEW and IN PROGRESS stay caps because they are written that way and
+     * the navbar's Home reads as a word.
+     */
     /*
      * The box hangs from its own top-left corner and the parent carries the
-     * offset, so the system pointer is never underneath it — the arrow stays
-     * the arrow and this reads as a label attached to it. Scale only here;
-     * the position is the parent's, written per frame and untransitioned.
+     * offset, so the system pointer is never underneath it — the arrow stays the
+     * arrow and this reads as a label attached to it.
      */
     transform: scale(0.86);
     transition: opacity 0.18s ease, transform 0.18s var(--ease);
@@ -1278,14 +1083,7 @@ main [id] {
     transform: scale(1);
 }
 
-/* ---------- about ---------- */
-
-/*
- * The .fact rules that used to live here styled the Focus / Tools / Also
- * definition list. That markup is gone; its wording is preserved in a comment
- * in index.html and in git history. Replaced by one intro, one capability
- * list, and compact education / location metadata.
- */
+/* About */
 
 .about-grid {
     display: grid;
@@ -1295,27 +1093,13 @@ main [id] {
 }
 
 /*
- * SELF-PORTRAIT.
- * .has-portrait is added by script.js at the same moment it inserts the
- * figure, and only when media.js actually points at a file. So the two
- * columns above are the resting composition rather than a fallback with a
- * hole in it: with no portrait configured there is no third track, no
- * reserved space and nothing to collapse.
- *
- * Measured at 1440px the three tracks take 35 / 26 / 28 percent of the
- * section, the two 56px gaps accounting for the rest — introduction,
- * portrait, capabilities. The fr values are weighted rather than round
- * because the gaps are a fixed 9 percent of the measure, so equal-looking
- * numbers would not divide the remainder the way the composition needs.
- *
- * Held back to wide viewports: below about 1200px a third track squeezes
- * the capability list into two cramped columns, so it folds instead. See
- * the pair of rules in the responsive section.
+ * SELF-PORTRAIT. .has-portrait is added by script.js at the same moment it
+ * inserts the figure, and only when media.js actually points at a file.
  */
 @media (min-width: 1201px) {
     .about-grid.has-portrait {
         column-gap: 56px;
-        grid-template-columns: minmax(0, 1.5fr) minmax(0, 1.1fr) minmax(0, 1.2fr);
+        grid-template-columns: minmax(0, 1.15fr) minmax(0, 1.35fr) minmax(0, 1fr);
     }
 }
 
@@ -1324,17 +1108,20 @@ main [id] {
 }
 
 /*
- * Rectangular and unadorned: no radius, no frame, no overlay, no crop to a
- * circle. 4:5 upright is the default shape; a `ratio` in the media config
- * writes an inline aspect-ratio that overrides this if the file is cut
- * differently. object-fit means an off-ratio file is cropped rather than
- * stretched, so the layout never distorts a face.
+ * 4:5 by default; a `ratio` in the media config writes an inline
+ * aspect-ratio that overrides it. object-fit crops an off-ratio file
+ * rather than stretching it, so the layout never distorts a face.
  */
 .about-portrait img {
     aspect-ratio: 4 / 5;
     display: block;
     height: auto;
     object-fit: cover;
+    /*
+     * Bottom-anchored, and chosen by looking at the photograph rather than left
+     * at centre.
+     */
+    object-position: 50% 100%;
     width: 100%;
 }
 
@@ -1344,6 +1131,16 @@ main [id] {
     font-weight: 500;
     letter-spacing: -0.02em;
     line-height: 1.35;
+    text-wrap: pretty;
+}
+
+/* Hierarchy by family, size and colour together, not size alone. */
+.about-support {
+    color: var(--muted);
+    font-size: 15px;
+    line-height: 1.7;
+    margin-top: 20px;
+    max-width: 46ch;
     text-wrap: pretty;
 }
 
@@ -1357,9 +1154,8 @@ main [id] {
 }
 
 /*
- * Two columns so six short items read as a compact block rather than a long
- * ragged list. Each item sits on its own hairline, matching the rule under
- * every .section-head.
+ * Two columns so four short items read as a compact block rather than a long
+ * ragged list.
  */
 .capability-list {
     display: grid;
@@ -1369,11 +1165,50 @@ main [id] {
     margin-top: 20px;
 }
 
+/* One column in the narrow sidebar. */
+@media (min-width: 1201px) {
+    .about-grid.has-portrait .capability-list {
+        grid-template-columns: minmax(0, 1fr);
+    }
+}
+
 .capability-list li {
     border-top: 1px solid var(--border);
     color: var(--muted);
     font-size: 15px;
     padding: 12px 0;
+}
+
+/*
+ * A modifier rather than a change to .about-subhead: only a second block
+ * inside a column needs the gap above.
+ */
+.about-subhead-inline {
+    border-top: 1px solid var(--border);
+    display: block;
+    margin-top: clamp(28px, 3vw, 40px);
+    padding-top: 22px;
+}
+
+/*
+ * SIX COURSES, TWO COLUMNS, THREE ROWS. Flowed across rather than placed, so the
+ * pairing is whatever the markup says: 1-2, 3-4, 5-6.
+ */
+.coursework-list {
+    align-items: start;
+    column-gap: 32px;
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    list-style: none;
+    margin-top: 18px;
+    row-gap: 14px;
+}
+
+.coursework-list li {
+    color: var(--muted);
+    font-size: 14px;
+    line-height: 1.5;
+    text-wrap: pretty;
 }
 
 .about-meta {
@@ -1401,9 +1236,26 @@ main [id] {
 }
 
 /*
+ * Degree first at the row's own size, school and year under it at the smaller,
+ * dimmer setting .location-note uses — so the two lines are read as one entry
+ * with a clear primary and secondary, not as two facts of equal weight.
+ */
+.edu-degree {
+    display: block;
+}
+
+.edu-school {
+    color: var(--faint);
+    display: block;
+    font-size: 13px;
+    letter-spacing: 0.03em;
+    margin-top: 3px;
+}
+
+/*
  * An outbound link inside the metadata list. Underlined rather than
- * colour-shifted so it is identifiable as a link without a second accent
- * colour entering the palette; the underline is a hairline until hover.
+ * colour-shifted so it is identifiable as a link without a second accent colour
+ * entering the palette; the underline is a hairline until hover.
  */
 .meta-link {
     color: var(--muted);
@@ -1424,18 +1276,7 @@ main [id] {
     outline-offset: 3px;
 }
 
-/*
- * LOCATIONS.
- * Each city carries what it actually is, so three place names can no longer
- * be read as three simultaneous addresses.
- *
- * Both halves are always visible and both clear WCAG AA at rest on --bg:
- * --muted is 7.66:1 and --faint 4.61:1. Nothing is hidden and then revealed,
- * which is what makes this work identically for a mouse, a screen reader, a
- * touch screen with no hover, and a browser with JavaScript off. Hover only
- * lifts the colour, so the descriptions never had to become tab stops to
- * stay reachable by keyboard — they are simply already on the page.
- */
+/* LOCATIONS. */
 .location-list {
     display: grid;
     gap: 7px;
@@ -1455,8 +1296,18 @@ main [id] {
 }
 
 /*
- * Set in the smaller metadata size so the pairing reads as city-then-gloss
- * at a glance, rather than as two equal columns of place names.
+ * The dash belongs to the pair, not to either half, so it is drawn here rather
+ * than typed into three list items. --faint keeps it quieter than the city it
+ * follows, which is what stops "Boston — Home" reading as one proper noun.
+ */
+.location-city::after {
+    color: var(--faint);
+    content: " \2014";
+}
+
+/*
+ * Set in the smaller metadata size so the pairing reads as city-then-gloss at a
+ * glance, rather than as two equal columns of place names.
  */
 .location-note {
     color: var(--faint);
@@ -1465,25 +1316,12 @@ main [id] {
     transition: color 0.25s ease;
     /*
      * A city and what it is to you are one statement, so the description is
-     * never broken across two lines beside a one-line city name. The rules
-     * below guarantee the room this needs before it is asked to hold.
+     * never broken across two lines beside a one-line city name.
      */
     white-space: nowrap;
 }
 
-/*
- * NARROW METADATA COLUMN.
- * Label beside value costs 124px of the row, which is affordable in the
- * two-column About and is not once a third column exists: with the portrait
- * in, .about-side is about 350px and the descriptions are left roughly
- * 227px, which "Open to opportunities" overruns. The label moves above its
- * value instead, handing the row its full width — around 110px more than
- * the longest description needs, so it holds even as the typeface renders
- * wider than the fallback used to measure it.
- *
- * Both rows move together; a stacked Location beside an inline Education
- * would read as a mistake.
- */
+/* NARROW METADATA COLUMN. */
 .about-grid.has-portrait .about-meta-row {
     gap: 6px;
     grid-template-columns: minmax(0, 1fr);
@@ -1494,194 +1332,196 @@ main [id] {
     color: var(--text);
 }
 
-/* ---------- contact ---------- */
+/* Footer */
 
-.contact-lead {
-    font-family: var(--font-display);
-    font-size: clamp(24px, 3.4vw, 46px);
-    font-weight: 500;
-    letter-spacing: -0.025em;
-    line-height: 1.25;
-    margin: 48px 0 56px;
-    max-width: 20ch;
-}
-
-.contact-links {
+/* One footer on every page, and the only contact block on the site. */
+.footer {
+    background-color: var(--chrome-bg);
     border-top: 1px solid var(--border);
-}
-
-.contact-link {
-    align-items: center;
-    border-bottom: 1px solid var(--border);
-    color: var(--text);
-    display: flex;
-    font-family: var(--font-display);
-    font-size: clamp(19px, 2vw, 26px);
-    font-weight: 500;
-    justify-content: space-between;
-    letter-spacing: -0.01em;
-    padding: 22px 0;
-    text-decoration: none;
-    transition: padding 0.35s var(--ease), color 0.25s ease;
-}
-
-.contact-link:hover {
-    padding-left: 18px;
+    color: var(--faint-on-surface);
+    padding: clamp(36px, 3.4vw, 52px) var(--gutter) clamp(22px, 1.8vw, 28px);
+    scroll-margin-top: var(--navbar-height);
 }
 
 /*
- * The row had no focus style of its own and was relying on the browser
- * default. This matches the outline already used by .feature and by the
- * discipline links, so every focusable thing on the page rings the same way.
+ * Invitation left, links right, both hanging from the same line. auto for the
+ * second track rather than a fraction.
  */
-.contact-link:focus-visible {
+.footer-grid {
+    align-items: start;
+    column-gap: clamp(32px, 4vw, 64px);
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    row-gap: clamp(28px, 2.8vw, 36px);
+}
+
+/* NOT A HEADING. A line of text that happens to be an invitation. */
+.footer-invite {
+    color: var(--text);
+    font-family: var(--font-body);
+    font-size: clamp(16px, 1.25vw, 18px);
+}
+
+/*
+ * The one thing here worth pressing, so it is the only line at full --text
+ * strength below the invitation and is set well above the link column.
+ */
+.footer-email {
+    color: var(--text);
+    display: inline-block;
+    font-family: var(--font-body);
+    /*
+     * A sixth smaller than it was, and still a step above the invitation at
+     * every width — 20 against 18 at 1440, 17 against 16 below 1280.
+     */
+    font-size: clamp(17px, 1.4vw, 20px);
+    font-weight: 500;
+    /* caps want a little air; -0.015em was a mixed-case figure */
+    letter-spacing: 0.02em;
+    /*
+     * 1.25, not the 1.6 it inherited from body. There are no ascenders or
+     * descenders in an address set in capitals except the tail of the @, so the
+     * line box can close right up on the type.
+     */
+    line-height: 1.25;
+    margin-top: clamp(14px, 1.4vw, 20px);
+    overflow-wrap: anywhere;
+    text-decoration: underline;
+    text-decoration-color: var(--border-strong);
+    text-decoration-thickness: 1px;
+    text-underline-offset: 0.3em;
+    transition:
+        text-decoration-color 0.2s ease,
+        text-decoration-thickness 0.2s ease;
+}
+
+.footer-email:hover,
+.footer-email:focus-visible {
+    text-decoration-color: var(--text);
+    text-decoration-thickness: 2px;
+}
+
+/* 14px and 1.6, against the address's 24. */
+.footer-availability {
+    color: var(--muted);
+    font-size: 14px;
+    line-height: 1.6;
+    margin-top: clamp(12px, 1.2vw, 16px);
+    max-width: 46ch;
+    text-wrap: pretty;
+}
+
+/*
+ * The right-hand column: three destinations and one utility link under them.
+ * start rather than stretch so both hang from the left edge of the track and
+ * Back to top lines up under LinkedIn, which is the alignment that makes the two
+ * read as one column rather than as a list and a stray.
+ */
+.footer-aside {
+    display: grid;
+    justify-items: start;
+    row-gap: clamp(22px, 2.2vw, 28px);
+}
+
+/* Held at 13px. */
+.footer-col-label {
+    color: var(--faint-on-surface);
+    font-family: var(--font-display);
+    font-size: 13px;
+    font-weight: 500;
+    letter-spacing: 0.14em;
+    margin-bottom: 12px;
+    text-transform: uppercase;
+}
+
+.footer-col ul {
+    display: grid;
+    list-style: none;
+    row-gap: 14px;
+}
+
+/*
+ * 14px, matching the supporting sentence. Secondary by construction: the address
+ * above them is 24px and carries an underline, so nothing here competes with it.
+ * --muted holds 7.25:1 on the chrome grey at this size.
+ */
+.footer-col a,
+.footer-top-link,
+.footer-copy {
+    font-size: 14px;
+}
+
+/*
+ * A 40px touch target on a 22px line: the padding is vertical only and the
+ * negative margin hands the space back to the layout, so the list occupies what
+ * a 14px-gapped list of 14px type occupies and behaves like something built for
+ * a thumb.
+ */
+.footer-col a,
+.footer-top-link {
+    color: var(--muted);
+    display: inline-block;
+    margin-block: -9px;
+    padding-block: 9px;
+    text-decoration: none;
+    transition: transform 0.3s var(--ease), color 0.25s ease;
+}
+
+.footer-col a:hover,
+.footer-top-link:hover {
+    color: var(--text);
+    transform: translateX(5px);
+}
+
+/*
+ * Quieter than the three above it, because it is the only link here that goes
+ * nowhere new. --faint-on-surface rather than --faint: 5.43:1 on the chrome grey
+ * against --faint's 4.36, which does not clear AA there.
+ */
+.footer-top-link {
+    color: var(--faint-on-surface);
+}
+
+/* No rule above it: the footer's border-top is the block's one boundary. */
+.footer-copy {
+    color: var(--faint-on-surface);
+    margin-top: clamp(28px, 2.8vw, 36px);
+}
+
+.footer a:focus-visible {
+    color: var(--text);
     outline: 2px solid var(--text);
     outline-offset: 4px;
 }
 
 /*
- * Icon and label as one unit, so the gap between them stays fixed while
- * justify-content pushes the arrow to the far edge of the row.
+ * Stacked below 900px, in the order the brief asks for: invitation, email,
+ * availability, Elsewhere, Back to top, copyright.
  */
-.contact-label {
-    align-items: center;
-    display: inline-flex;
-    gap: 0.55em;
+@media (max-width: 900px) {
+    .footer-grid {
+        grid-template-columns: minmax(0, 1fr);
+    }
 }
+
+/* No phone rule for the invitation any more. */
+
+@media (prefers-reduced-motion: reduce) {
+
+    .footer-col a:hover,
+    .footer-top-link:hover {
+        transform: none;
+    }
+}
+
+
+/* Responsive and reduced motion */
 
 /*
- * Every mark renders into the same 1em x 0.8em box, sized in em so it tracks
- * the row's clamped type instead of being pinned to a pixel size that only
- * looks right at one viewport.
- *
- * The box is deliberately wider than it is tall, and each icon letterboxes
- * itself inside it through the default preserveAspectRatio. The landscape
- * envelope therefore fills the width at 0.7em tall, while the two square
- * brand marks centre at 0.8em — optically the same weight, and, because the
- * box itself never changes size, the three labels start at the same x
- * however differently the next icon is drawn.
- *
- * flex: none keeps that box from being squeezed by a long label on a narrow
- * screen. Colour comes from currentColor via the fill on each path.
- */
-.contact-icon {
-    color: var(--faint);
-    flex: none;
-    height: 0.8em;
-    transition: transform 0.35s var(--ease), color 0.25s ease;
-    width: 1em;
-}
-
-/*
- * A 2px lead on top of the 18px the whole row already travels: enough for
- * the icon to read as pulling the row rather than riding along with it.
- */
-.contact-link:hover .contact-icon,
-.contact-link:focus-visible .contact-icon {
-    color: var(--text);
-    transform: translateX(2px);
-}
-
-.contact-arrow {
-    color: var(--faint);
-    transition: transform 0.35s var(--ease), color 0.25s ease;
-}
-
-.contact-link:hover .contact-arrow,
-.contact-link:focus-visible .contact-arrow {
-    color: var(--text);
-    transform: translate(4px, -4px);
-}
-
-/* ---------- footer ---------- */
-
-/*
- * Two variants, one rule set. The difference is which children are present,
- * not a second block of CSS.
- *
- *   homepage        .footer-bar [ copyright | back to top ]
- *   everywhere else .footer-bar [ email · linkedin · github | back to top ]
- *                   .footer-copy
- *
- * The homepage has a full Contact section directly above, so repeating the
- * three links under it would be saying the same thing twice; every other page
- * has no Contact section, so the footer is where those links live. The URLs
- * are the homepage's own, copied rather than invented.
- *
- * A column, so .footer-bar is one row of it and the copyright can be another
- * on the pages that carry links above it.
- */
-.footer {
-    border-top: 1px solid var(--border);
-    color: var(--faint);
-    display: flex;
-    flex-direction: column;
-    gap: 18px;
-    padding: 32px var(--gutter);
-}
-
-/*
- * One row, whatever is on it: left item first, back-to-top last. Wrapping is
- * the mobile behaviour — below about 380px the two simply stack, each at the
- * start of its own line, with the row gap between them.
- */
-.footer-bar {
-    align-items: baseline;
-    display: flex;
-    flex-wrap: wrap;
-    gap: 12px 24px;
-    justify-content: space-between;
-}
-
-.footer-links {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 0 10px;
-}
-
-/* separators drawn rather than typed, so the markup stays three plain links */
-.footer-links a::after {
-    color: var(--border-strong);
-    content: "\00b7";
-    margin-left: 10px;
-}
-
-.footer-links a:last-child::after {
-    content: none;
-}
-
-.footer-copy,
-.footer-links,
-.footer-top {
-    font-size: 13px;
-    letter-spacing: 0.06em;
-    text-transform: uppercase;
-}
-
-.footer a {
-    color: var(--faint);
-    text-decoration: none;
-    transition: color 0.25s ease;
-}
-
-.footer a:hover {
-    color: var(--text);
-}
-
-/* the same outline the discipline links, meta links and contact rows use */
-.footer a:focus-visible {
-    color: var(--text);
-    outline: 2px solid var(--text);
-    outline-offset: 3px;
-}
-
-/* ---------- responsive ---------- */
-
-/*
- * Portrait, middle widths. A third track here would leave the capability
- * list about 260px wide and break "Unity / web development" over two lines,
- * so introduction and portrait pair up and the capabilities take the full
- * measure underneath. Only applies when a portrait exists.
+ * Portrait, middle widths. A third track here would leave the capability list
+ * about 260px wide and break "Unity / web development" over two lines, so
+ * introduction and portrait pair up and the capabilities take the full measure
+ * underneath.
  */
 @media (min-width: 901px) and (max-width: 1200px) {
     .about-grid.has-portrait {
@@ -1705,9 +1545,7 @@ main [id] {
 
     /*
      * Stated at equal specificity to .about-grid.has-portrait, which would
-     * otherwise keep its multi-column tracks inside this breakpoint. One
-     * column puts the source order on screen unchanged: introduction,
-     * portrait, capabilities, then education and location.
+     * otherwise keep its multi-column tracks inside this breakpoint.
      */
     .about-grid.has-portrait {
         column-gap: 0;
@@ -1715,9 +1553,9 @@ main [id] {
     }
 
     /*
-     * Left-aligned rather than centred, and capped, because a 4:5 crop run
-     * to the full width of a phone is close to a full screen of photograph
-     * between two blocks of text.
+     * Left-aligned rather than centred, and capped, because a 4:5 crop run to
+     * the full width of a phone is close to a full screen of photograph between
+     * two blocks of text.
      */
     .about-portrait img {
         max-width: 320px;
@@ -1739,25 +1577,18 @@ main [id] {
     }
 
     /*
-     * Dimming the siblings needs a pointer to undim them again. On touch
-     * there is no hover-off, so a tapped card can leave the rest stuck
-     * faded.
+     * Dimming the siblings needs a pointer to undim them again. On touch there
+     * is no hover-off, so a tapped card can leave the rest stuck faded.
      */
     .featured:hover .feature {
         opacity: 1;
     }
 
-    .disciplines {
-        gap: 14px;
-        justify-content: flex-start;
-    }
 }
 
 /*
- * Same reasoning as .has-portrait above, for the other case where the
- * metadata column gets tight. On a phone the row is about 343px, which
- * leaves the descriptions roughly 219px once the label has taken its
- * share — not enough. Stacked, they get the whole row.
+ * Same reasoning as .has-portrait above, for the other case where the metadata
+ * column gets tight.
  */
 @media (max-width: 1000px) {
     .about-meta-row {
@@ -1767,6 +1598,13 @@ main [id] {
 }
 
 @media (max-width: 620px) {
+
+    /* 153px tracks at 390px, against labels needing up to 224px */
+    .capability-list,
+    .coursework-list {
+        grid-template-columns: minmax(0, 1fr);
+    }
+
     .navbar {
         gap: 14px;
         padding-inline: 5vw;
@@ -1786,11 +1624,9 @@ main [id] {
     }
 
     /*
-     * The hero is the whole first screen on a phone, and at the desktop
-     * clamp floor (52px) three lines plus the eyebrow and buttons pushed
-     * everything else well below the fold. Lowering only the floor leaves
-     * the desktop composition untouched: the clamp still resolves to the
-     * same size at every width above this breakpoint.
+     * The hero is the whole first screen on a phone, and at the desktop clamp
+     * floor (52px) three lines plus the eyebrow and buttons pushed everything
+     * else well below the fold.
      */
     .hero {
         min-height: 0;
@@ -1820,9 +1656,9 @@ main [id] {
 }
 
 /*
- * Narrow phones (320px and similar). The longest single word in the hero
- * cannot wrap — .magnetic-text .word is nowrap by design — so below this
- * width the type has to come down or it overflows the gutter.
+ * Narrow phones (320px and similar). The longest single word in the hero cannot
+ * wrap — .magnetic-text .word is nowrap by design — so below this width the type
+ * has to come down or it overflows the gutter.
  */
 @media (max-width: 380px) {
     .hero-title {
@@ -1835,24 +1671,9 @@ main [id] {
 }
 
 /*
- * Below 354px "Isaac Cheaz" wraps onto two lines.
- *
- * The navbar is space-between with five text items across it, and the logo
- * is the only one that CAN wrap — the others are single words. At 320px the
- * row needs 318px and has 288px, so flex shrank the logo to 62px and broke
- * it in half, taking the header from 65px tall to 93px.
- *
- * Measured, not guessed: the break is between 352px (two lines) and 356px
- * (one), which is the 353.6px the arithmetic gives. So the bound is 359px —
- * above the whole failing range and below every ordinary phone width. 360,
- * 375 and 390 are all untouched, and nothing on this page changes above it.
- *
- * 30px has to come from somewhere and it is taken from spacing first: 8px
- * off the two outer gaps, 12px off the two inside the link run, 6px off the
- * gutter. The logo gives up the last point of type, which at 15px is the
- * difference between wrapping and not. Link size stays at 13px, and the
- * links keep the header's own 22px of block padding, so nothing here makes a
- * touch target smaller or a label harder to read.
+ * Below 354px "Isaac Cheaz" wraps onto two lines. The navbar is space-between
+ * with five text items across it, and the logo is the only one that CAN wrap —
+ * the others are single words.
  */
 @media (max-width: 359px) {
     .navbar {
@@ -1871,15 +1692,6 @@ main [id] {
 
 @media (prefers-reduced-motion: reduce) {
 
-    /*
-     * The label still fades in — that is the affordance, and it is
-     * comprehension rather than decoration. Only the travel goes, which the
-     * global duration collapse would otherwise deliver as a jump.
-     */
-    .link-view {
-        transform: none;
-    }
-
     html {
         scroll-behavior: auto;
     }
@@ -1890,23 +1702,8 @@ main [id] {
     }
 
     /*
-     * The rule above only collapses the duration, so a transform still
-     * arrives — instantly, which is a jump rather than a motion. The contact
-     * icons drop the travel altogether and keep the colour lift, so hover and
-     * focus still read as a state change with nothing moving on the page.
-     */
-    .contact-link:hover .contact-icon,
-    .contact-link:focus-visible .contact-icon,
-    .contact-link:hover .contact-arrow,
-    .contact-link:focus-visible .contact-arrow {
-        transform: none;
-    }
-
-    /*
      * Same again for the card picture: collapsing the duration still delivers
-     * the scale, just instantly, which is a jump rather than a motion. The
-     * veil step stays — it is a colour change, it moves nothing, and it is
-     * the part that carries the state.
+     * the scale, just instantly, which is a jump rather than a motion.
      */
     .featured .feature.has-media:hover .feature-media img,
     .featured .feature.has-media:hover .feature-media video,

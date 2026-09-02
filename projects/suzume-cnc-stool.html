@@ -5,7 +5,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-    <title>Suzume-Inspired CNC Stool | Isaac Cheaz</title>
+    <title>Suzume-Inspired Stool | Isaac Cheaz</title>
     <meta name="description"
         content="A three-legged wooden stool inspired by the chair character from Suzume, developed through cardboard prototyping, CAD and CNC fabrication.">
 
@@ -21,17 +21,14 @@
 <body>
 
     <header class="navbar">
-        <a href="../index.html" class="logo">Isaac Cheaz</a>
+        <a href="../index.html" class="logo" data-cursor-label="Home">Isaac Cheaz</a>
 
-        <nav class="nav-links">
+        <nav class="nav-links" aria-label="Primary">
             <a href="../index.html#work">Work</a>
             <a href="../index.html#about">About</a>
-            <a href="../index.html#contact">Contact</a>
+            <a href="https://docs.google.com/document/d/11qATXeMCFB1Io2WauJywyM81skCrmu7SGtFiiL8NM3w/view" class="nav-resume" target="_blank" rel="noopener noreferrer"
+                aria-label="Resume preview, opens in a new tab">Resume</a>
         </nav>
-
-        <a href="https://docs.google.com/document/d/11qATXeMCFB1Io2WauJywyM81skCrmu7SGtFiiL8NM3w/view"
-            class="nav-resume" target="_blank" rel="noopener noreferrer"
-            aria-label="Resume preview, opens in a new tab">Resume</a>
     </header>
 
     <main id="top" class="project-page" data-project="suzume-cnc-stool">
@@ -40,34 +37,14 @@
 
         <p class="project-label" data-reveal>Product &amp; Fabrication</p>
 
-        <h1 data-reveal>Suzume-Inspired CNC Stool</h1>
+        <h1 data-reveal>Suzume-Inspired Stool</h1>
 
         <p class="project-summary" data-reveal>
             A small three-legged wooden stool inspired by the chair character from Suzume,
             developed through cardboard prototyping, CAD, CNC fabrication, and physical assembly.
         </p>
 
-        <!--
-          PROJECT METADATA.
-          A row is left out rather than filled with a guess, so nothing here
-          states a fact that has not been supplied. To add one, copy the Tools
-          row and change the dt and dd:
-
-              <div class="project-meta-row">
-                  <dt>Role</dt>
-                  <dd>What you actually did</dd>
-              </div>
-
-              <div class="project-meta-row">
-                  <dt>Year</dt>
-                  <dd>2025</dd>
-              </div>
-
-              <div class="project-meta-row">
-                  <dt>Context</dt>
-                  <dd>Course, brief or client this was made for</dd>
-              </div>
-        -->
+            <!-- A row is left out rather than filled with a guess. -->
         <dl class="project-meta" data-reveal>
             <div class="project-meta-row">
                 <dt>Tools</dt>
@@ -75,68 +52,54 @@
             </div>
         </dl>
 
-        <!--
-          OPTIONAL EXTERNAL LINKS — a devlog, a repository, a running build.
-          Delete this comment and uncomment the list to add them. It holds one
-          link or several and wraps on a phone. See museum-npc.html for a live
-          example.
-
-          These live in the page markup, not in media.js: a link is content and
-          has to survive JavaScript being off. Only media is JS-injected here.
-
-          Each link needs all three parts — the rel keeps the new tab from
-          reaching back into this page, the ↗ marks it outbound for people who
-          can see it, and the hidden span says so for people who cannot.
-
-          <ul class="project-links">
-              <li>
-                  <a class="project-link" href="https://example.com" target="_blank" rel="noopener noreferrer">
-                      View live project<span class="project-link-external" aria-hidden="true">&#8599;</span>
-                      <span class="visually-hidden">(opens in a new tab)</span>
-                  </a>
-              </li>
-          </ul>
-        -->
-
-        <!--
-          MEDIA.
-          This slot stays empty until media.js has an entry for
-          "suzume-cnc-stool". Fill in `hero` and `gallery` there and the
-          lead image and gallery appear here, in that order. Nothing is
-          rendered while it is empty, so the page never shows a hollow frame.
-
-          Images lazy load below the fold, videos play muted and looped only
-          while on screen, and both fall back to a poster still under
-          prefers-reduced-motion. None of that needs configuring.
-        -->
+            <!-- Media comes from media.js; nothing renders until it has an entry. -->
         <div data-media-slot></div>
 
         <nav class="project-nav" aria-label="More work">
             <a class="project-nav-link" href="butterfly-pavilion.html">
                 <span class="project-nav-label">Next project</span>
-                <span class="project-nav-title">Parametric Butterfly Pavilion</span>
+                <span class="project-nav-title">Butterfly Pavilion</span>
             </a>
         </nav>
 
     </main>
 
-    <footer class="footer">
-        <!--
-          These pages have no Contact section, so the footer is where the
-          three destinations live. Same URLs, same target and rel as the
-          homepage's Contact rows.
-        -->
-        <div class="footer-bar">
-            <nav class="footer-links" aria-label="Contact">
-                <a href="https://mail.google.com/mail/?view=cm&fs=1&to=icheaz06@gmail.com&su=Portfolio%20Inquiry"
-                    target="_blank" rel="noopener noreferrer">Email</a>
-                <a href="https://www.linkedin.com/in/isaac-cheaz-235302365/" target="_blank"
-                    rel="noopener noreferrer">LinkedIn</a>
-                <a href="https://github.com/isaaccheaz06" target="_blank"
-                    rel="noopener noreferrer">GitHub</a>
+    <!--
+      The same block on every page. It carries id="contact", which is what
+      the hero's "Get in touch" resolves to.
+
+      Markup in each file rather than injected by script.js: an address
+      nobody can read with JavaScript off is not a contact detail.
+    -->
+    <footer class="footer" id="contact">
+        <div class="footer-grid">
+
+            <div class="footer-contact" data-reveal>
+                <p class="footer-invite">want to have a coffee chat?</p>
+
+                <a class="footer-email" href="mailto:icheaz06@gmail.com">ICHEAZ06@GMAIL.COM</a>
+
+                <p class="footer-availability">
+                    Internships, collaborations, and conversations about product,
+                    industrial, and UX design.
+                </p>
+            </div>
+
+            <!-- Back to top is the one link here the navbar cannot offer. -->
+            <nav class="footer-aside" aria-label="Footer" data-reveal>
+                <div class="footer-col">
+                    <h3 class="footer-col-label">Elsewhere</h3>
+                    <ul>
+                        <li><a href="https://www.linkedin.com/in/isaac-cheaz-235302365/" target="_blank" rel="noopener noreferrer">LinkedIn</a></li>
+                        <li><a href="https://github.com/isaaccheaz06" target="_blank" rel="noopener noreferrer">GitHub</a></li>
+                        <li><a href="https://docs.google.com/document/d/11qATXeMCFB1Io2WauJywyM81skCrmu7SGtFiiL8NM3w/view" target="_blank" rel="noopener noreferrer"
+                                aria-label="Resume preview, opens in a new tab">Resume</a></li>
+                    </ul>
+                </div>
+
+                <a class="footer-top-link" href="#top">Back to top</a>
             </nav>
 
-            <a class="footer-top" href="#top">Back to top <span aria-hidden="true">&uarr;</span></a>
         </div>
 
         <p class="footer-copy">&copy; 2026 Isaac Cheaz</p>
