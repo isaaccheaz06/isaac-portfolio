@@ -331,7 +331,7 @@
     font-size: 15px;
     line-height: 1.55;
     margin-top: 6px;
-    max-width: 42ch;
+    max-width: 46ch;
 }
 
 
@@ -630,6 +630,20 @@
 /* Media breaks out of the 820px reading measure; prose does not. */
 .pm-section {
     margin-block: clamp(72px, 9vw, 132px);
+
+    /*
+     * ONE SIZE FOR EVERY UPRIGHT FRAME on this page, so the lead preview and
+     * the process viewer are the same object at the same scale rather than two
+     * boxes that happen to look alike.
+     *
+     * The cap is a height cap expressed as a width: a max-height on a box with
+     * an aspect-ratio does not scale the box, it squashes it and lets
+     * object-fit crop the difference, so the limit has to be applied on the
+     * axis the ratio is derived from. The 100% wins on a narrow column and the
+     * cap wins on a short one, at every width, with no breakpoint needed.
+     */
+    --pm-upright-cap: 78vh;
+    --pm-upright-width: min(100%, calc(var(--pm-upright-cap) * 3 / 4));
 }
 
 /* One exception: the film's two-column composition keeps the breakout. */
@@ -709,22 +723,10 @@
  * is the whole reason swapping the still for the clip costs no layout.
  */
 .pm-hero {
-    /*
-     * The cap is a height cap expressed as a width. A max-height on a box with
-     * an aspect-ratio does not scale the box — it squashes it and lets
-     * object-fit crop the difference — so the limit has to be applied on the
-     * axis the ratio is derived from. 78vh matches the cap every other upright
-     * frame on this page uses.
-     */
+    /* the shared upright sizing; see --pm-upright-width on .pm-section */
     margin-inline: auto;
-    max-width: min(100%, calc(78vh * 3 / 4));
+    max-width: var(--pm-upright-width);
 }
-
-/*
- * No breakpoint override for the above, deliberately. The min() already picks
- * the right constraint at every width: on a phone the column is narrower than
- * the cap and wins, on a tablet the cap is narrower and wins.
- */
 
 .pm-hero-frame {
     background-color: var(--surface);
@@ -1403,6 +1405,114 @@
 }
 
 
+/* Process media: carousel with the copy inside the frame */
+
+/*
+ * A NAMED VARIANT, opted into by the section in media.js -- not every carousel,
+ * and not this one because of where it sits or what it is called.
+ *
+ * The frame becomes the same object as the lead preview: same 3:4, same
+ * viewport-aware cap, same centring, same 2px corner. The four clips are 9:16,
+ * so `cover` fills it and each slide names the part of itself worth keeping
+ * (see `focus` in media.js). The copy moves inside, over a gradient, and the
+ * numbered rail stays where it was, under the frame.
+ */
+.pm-viewer.is-overlay-copy {
+    max-width: var(--pm-upright-width);
+}
+
+.pm-viewer.is-overlay-copy .pm-stage {
+    aspect-ratio: 3 / 4;
+    height: auto;
+}
+
+/*
+ * Filled, not fitted. The generic viewer contains its slides because it shows
+ * mixed ratios whole; here the frame is fixed and the crop is deliberate.
+ */
+.pm-viewer.is-overlay-copy .pm-slide img,
+.pm-viewer.is-overlay-copy .pm-slide video {
+    object-fit: cover;
+}
+
+/*
+ * The gradient spans the whole frame and is transparent for the first third of
+ * it, so the picture is not sitting behind a panel -- only the foot of it is
+ * darkened, and only as far as the words need. The box takes no pointer events,
+ * so the swipe still belongs to the stage underneath.
+ */
+.pm-viewer.is-overlay-copy .pm-overlay {
+    align-items: flex-end;
+    background: linear-gradient(to bottom,
+            rgba(8, 8, 8, 0) 0%,
+            rgba(8, 8, 8, 0.06) 34%,
+            rgba(8, 8, 8, 0.34) 56%,
+            rgba(8, 8, 8, 0.66) 76%,
+            rgba(8, 8, 8, 0.86) 100%);
+    display: flex;
+    inset: 0;
+    padding: clamp(16px, 2.2vw, 28px);
+    pointer-events: none;
+    position: absolute;
+}
+
+.pm-viewer.is-overlay-copy .pm-step {
+    max-width: 46ch;
+    row-gap: clamp(6px, 0.7vw, 9px);
+}
+
+/* the metadata treatment the rest of the page uses for a number */
+.pm-count {
+    color: rgba(255, 255, 255, 0.66);
+    font-family: var(--font-display);
+    font-size: clamp(10px, 0.85vw, 11px);
+    font-variant-numeric: tabular-nums;
+    letter-spacing: 0.14em;
+    display: none;
+}
+
+/*
+ * Over moving pictures, so both lines are set on white rather than on the
+ * page's greys: --muted is a value chosen against #0a0a0a, and the gradient
+ * under this is never quite that dark.
+ */
+.pm-viewer.is-overlay-copy .pm-title {
+    color: #fff;
+    font-size: clamp(16px, 1.45vw, 20px);
+    /* no room to reserve for the control any more; it is in the top corner */
+    padding-right: 0;
+}
+
+.pm-viewer.is-overlay-copy .pm-desc {
+    color: rgba(255, 255, 255, 0.84);
+    font-size: clamp(12px, 1vw, 13.5px);
+    line-height: 1.62;
+    max-width: none;
+}
+
+/*
+ * The upper corner, clear of every line of the copy. A disc rather than the
+ * bare glyph: the four clips run from near-black to bright plywood, and an icon
+ * that survives one of them disappears into another.
+ */
+.pm-viewer.is-overlay-copy .pm-controls {
+    left: auto;
+    right: clamp(6px, 0.9vw, 12px);
+    top: clamp(6px, 0.9vw, 12px);
+    z-index: 2;
+}
+
+.pm-viewer.is-overlay-copy .pm-controls .pm-btn {
+    background-color: rgba(8, 8, 8, 0.5);
+    border-radius: 50%;
+    color: #fff;
+}
+
+.pm-viewer.is-overlay-copy .pm-controls .pm-btn:hover {
+    background-color: rgba(8, 8, 8, 0.72);
+}
+
+
 /* Process media: commentary */
 
 /*
@@ -1619,6 +1729,30 @@ p.pm-film-reflection-label {
 
     .pm-support {
         grid-template-columns: minmax(0, 1fr);
+    }
+
+    /*
+     * The frame is 282x376 at its narrowest and the longest description is 298
+     * characters, which at the desktop setting takes half of it. A smaller,
+     * tighter setting and less padding buys the picture back roughly five
+     * points of its own height without the copy becoming small print, and
+     * every line still fits: nothing here scrolls inside the frame.
+     */
+    .pm-viewer.is-overlay-copy .pm-overlay {
+        padding: 13px;
+    }
+
+    .pm-viewer.is-overlay-copy .pm-step {
+        row-gap: 5px;
+    }
+
+    .pm-viewer.is-overlay-copy .pm-title {
+        font-size: 15px;
+    }
+
+    .pm-viewer.is-overlay-copy .pm-desc {
+        font-size: 11.5px;
+        line-height: 1.5;
     }
 
     /* Nothing here for the rail any more. */

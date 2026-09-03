@@ -46,6 +46,13 @@
             if (hasText(m.ratio)) el.style.aspectRatio = m.ratio;
 
             /*
+             * Which part of itself a frame keeps when a ratio crops it. Only
+             * meaningful alongside object-fit: cover, and only written when the
+             * entry names one, so nothing gains an inline style by default.
+             */
+            if (hasText(m.focus)) el.style.objectPosition = m.focus;
+
+            /*
              * Upright media gets flagged so CSS can cap its width. A landscape lead
              * image run across the full measure is a hero; the same rule applied to
              * a 3:4 photograph is 1400px of vertical scroll for one picture, and to
@@ -457,13 +464,28 @@
             };
 
             /* 3. process viewer */
+
+            /*
+             * Named viewer compositions, opted into by the section itself. A
+             * name that is not listed here is ignored, so a typo in media.js
+             * cannot invent a class, and no carousel changes shape because of
+             * where it happens to sit on the page.
+             */
+            const VIEWER_VARIANTS = {
+                /* copy inside the frame, numbered rail still below it */
+                'overlay-copy': 'is-overlay-copy'
+            };
+
             const buildViewer = (section) => {
                 const slides = (section.slides || []).filter((s) => s && isValidMedia(s.media));
                 if (!slides.length) return null;
 
                 const IMAGE_DWELL = 5600;
 
-                const wrap = el('div', 'pm-viewer');
+                const variant = VIEWER_VARIANTS[section.variant] || '';
+                const overlayCopy = variant === 'is-overlay-copy';
+
+                const wrap = el('div', 'pm-viewer' + (variant ? ' ' + variant : ''));
                 wrap.setAttribute('role', 'group');
                 wrap.setAttribute('aria-roledescription', 'carousel');
                 wrap.setAttribute('aria-label', section.label || 'Process viewer');
@@ -501,11 +523,15 @@
                 const step = el('div', 'pm-step');
 
                 /*
-                 * The count is spoken, not shown. On screen the lit segment in the
-                 * rail below already says which stage this is, so printing "01 / 04"
-                 * beside the title said it twice.
+                 * Two counts, one of them spoken. "Stage 2 of 4." reads as a
+                 * sentence where "02 / 04" is read as punctuation, so the live
+                 * region keeps the sentence and the printed pair is hidden from
+                 * it. The pair is printed only inside the frame, where the rail
+                 * is no longer beside the title saying the same thing twice.
                  */
                 const count = el('span', 'visually-hidden');
+                const shown = el('span', 'pm-count');
+                shown.setAttribute('aria-hidden', 'true');
                 const title = el('span', 'pm-title');
                 /*
                  * Inside .pm-step rather than beside it, so the description is
@@ -513,7 +539,8 @@
                  * \u2014 one announcement per slide, not two.
                  */
                 const desc = el('p', 'pm-desc');
-                step.append(count, title, desc);
+                if (overlayCopy) step.append(shown, count, title, desc);
+                else step.append(count, title, desc);
                 // announced politely so a screen reader hears the stage change
                 step.setAttribute('aria-live', 'polite');
                 step.setAttribute('aria-atomic', 'true');
@@ -534,7 +561,7 @@
                  * straight there, an arrow only steps.
                  */
                 const toggleBtn = mkBtn('pause', 'Pause automatic rotation');
-                bar.append(step, controls);
+                if (!overlayCopy) bar.append(step, controls);
 
                 const rail = el('ul', 'pm-thumbs');
                 rail.style.setProperty('--pm-thumbs', String(slides.length));
@@ -553,7 +580,21 @@
                     return b;
                 });
 
-                wrap.append(stage, bar, rail);
+                if (overlayCopy) {
+                    /*
+                     * The copy moves inside the frame and the control to its top
+                     * corner, so neither sits on the other. The overlay takes no
+                     * pointer events, so a swipe still reaches the stage under
+                     * it, and the bar is not built at all -- there is no second
+                     * copy of the title and description below the picture.
+                     */
+                    const overlay = el('div', 'pm-overlay');
+                    overlay.appendChild(step);
+                    stage.append(overlay, controls);
+                    wrap.append(stage, rail);
+                } else {
+                    wrap.append(stage, bar, rail);
+                }
 
                 /* ---------------- state ---------------- */
 
@@ -619,6 +660,7 @@
                     // spoken form, not the printed one: "Stage 2 of 4" reads as a
                     // sentence where "02 / 04" is read as punctuation
                     count.textContent = 'Stage ' + (index + 1) + ' of ' + nodes.length + '.';
+                    shown.textContent = pad(index + 1) + ' / ' + pad(nodes.length);
                     title.textContent = nodes[index].title;
                     // '' rather than a space: :empty is what hides the element
                     desc.textContent = hasText(nodes[index].description)

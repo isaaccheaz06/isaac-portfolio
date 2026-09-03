@@ -227,6 +227,13 @@ window.SITE_MEDIA = {
                     layout: 'carousel',
                     label: 'Final Design',
 
+                    /*
+                     * The copy sits inside the frame for this one. The four clips
+                     * are 9:16 in a 3:4 frame, so a quarter of each is cropped;
+                     * `focus` below says which quarter each one can spare.
+                     */
+                    variant: 'overlay-copy',
+
                     /* `description` is optional; an empty one prints nothing. */
                     slides: [
                         {
@@ -236,6 +243,9 @@ window.SITE_MEDIA = {
                                 type: 'video', mode: 'preview',
                                 src: 'assets/digital-kintsugi/scanning-loop.mp4',
                                 poster: 'assets/digital-kintsugi/scanning-loop-poster.webp',
+                                /* scanner at the top, vase just above the
+                                   middle; the bottom half is tablecloth */
+                                focus: '50% 8%',
                                 alt: 'A handheld 3D scanner passing over the fractured vessel, '
                                     + 'projected light on the table and the capture building on screen',
                                 width: 540, height: 960
@@ -249,6 +259,9 @@ window.SITE_MEDIA = {
                                 type: 'video', mode: 'preview',
                                 src: 'assets/digital-kintsugi/scan-result-loop.mp4',
                                 poster: 'assets/digital-kintsugi/scan-result-loop-poster.webp',
+                                /* the mesh starts at the very top of frame;
+                                   below it is monitor bezel and desk */
+                                focus: '50% 0%',
                                 alt: 'The raw scan mesh on screen, the vessel wall captured '
                                     + 'alongside a large flat artefact',
                                 width: 540, height: 960
@@ -262,6 +275,9 @@ window.SITE_MEDIA = {
                                 type: 'video', mode: 'preview',
                                 src: 'assets/digital-kintsugi/rhino-fit-loop.mp4',
                                 poster: 'assets/digital-kintsugi/rhino-fit-loop-poster.webp',
+                                /* keeps the toolbar and the whole model; the
+                                   status bar and taskbar are what go */
+                                focus: '50% 0%',
                                 alt: 'The scanned mesh open in Rhino with a wireframe '
                                     + 'replacement component positioned against the break',
                                 width: 540, height: 960
@@ -275,6 +291,9 @@ window.SITE_MEDIA = {
                                 type: 'video', mode: 'preview',
                                 src: 'assets/digital-kintsugi/gold-repair.mp4',
                                 poster: 'assets/digital-kintsugi/gold-repair-poster.webp',
+                                /* lifts the gold and the printed part clear of
+                                   the copy; the top is wall and cabling */
+                                focus: '50% 12%',
                                 alt: 'Mixing gold pigment into epoxy and working it into '
                                     + 'the breaks of the vessel',
                                 width: 720, height: 1280
