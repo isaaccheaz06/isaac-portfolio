@@ -377,21 +377,46 @@
             };
 
             /* --- 2. feature + supports, alternating sides --- */
+
+            /*
+             * Named compositions, so a block says what it is rather than the
+             * stylesheet counting children. A name not listed here is ignored,
+             * which keeps a typo in media.js from inventing a class.
+             */
+            const BLOCK_VARIANTS = {
+                /* the supports stack in one column, the feature is tall beside them */
+                'stacked-pair': 'is-stacked-pair'
+            };
+
             const buildEditorial = (section) => {
                 const wrap = el('div', 'pm-editorial');
                 for (const block of section.blocks || []) {
                     if (!isValidMedia(block.feature)) continue;
-                    const row = el('div', 'pm-block' + (block.flip ? ' is-flipped' : ''));
+                    const variant = BLOCK_VARIANTS[block.variant] || '';
+                    const row = el('div', 'pm-block' + (block.flip ? ' is-flipped' : '')
+                        + (variant ? ' ' + variant : ''));
 
                     const feature = el('div', 'pm-feature');
                     feature.appendChild(buildFigure(block.feature));
-                    row.appendChild(feature);
 
                     const items = (block.support || []).filter(isValidMedia);
+                    let support = null;
                     if (items.length) {
-                        const support = el('div', 'pm-support');
+                        support = el('div', 'pm-support');
                         for (const m of items) support.appendChild(buildFigure(m));
+                    }
+
+                    /*
+                     * Source order is the order these are read in, and on a phone
+                     * it is the order they stack in. The stacked pair leads because
+                     * it came first; every other block leads with its feature.
+                     */
+                    if (block.variant === 'stacked-pair' && support) {
                         row.appendChild(support);
+                        row.appendChild(feature);
+                    } else {
+                        row.appendChild(feature);
+                        if (support) row.appendChild(support);
                     }
                     wrap.appendChild(row);
                 }

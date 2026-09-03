@@ -1282,6 +1282,50 @@
 }
 
 /*
+ * STACKED PAIR: two frames in one column, one tall frame beside them.
+ *
+ * The pair sets the height here, not the viewport: each of its frames keeps the
+ * 3:4 the camera gave it, so neither is cropped at all, and the tall frame
+ * spans the same single row, which is what makes all four outer corners meet.
+ *
+ * The tall column is twice the width of the pair on purpose. The pair's column
+ * is w wide and 2 x (4w/3) + gap tall, so a frame beside it that is 2w wide
+ * lands at about 3:4 as well — `cover` is left with roughly 5% to take off the
+ * sides, and none off the top or bottom, at every width this layout is used at.
+ */
+.pm-block.is-stacked-pair {
+    grid-template-columns: minmax(0, 1fr) minmax(0, 2fr);
+    grid-template-rows: auto;
+    height: auto;
+}
+
+.pm-block.is-stacked-pair .pm-support {
+    /* the same figure between the two frames as between the two columns */
+    gap: clamp(16px, 2vw, 28px);
+    grid-column: 1;
+    grid-row: 1;
+    grid-template-rows: auto auto;
+}
+
+.pm-block.is-stacked-pair .pm-support figure {
+    aspect-ratio: 3 / 4;
+}
+
+.pm-block.is-stacked-pair .pm-feature {
+    grid-column: 2;
+    grid-row: 1;
+}
+
+/*
+ * The crop is horizontal, so only the horizontal half of this does anything:
+ * the vase and its broken wall sit right of centre, so the few percent that
+ * comes off is background at the left edge rather than the subject.
+ */
+.pm-block.is-stacked-pair .pm-feature img {
+    object-position: 55% 50%;
+}
+
+/*
  * height:auto, not 100%: a definite height beats aspect-ratio, so asking for
  * both left the ratio inert and the clip stretched to 1207px.
  */
@@ -1389,6 +1433,17 @@
 
 .pm-prose-outro {
     margin-top: clamp(28px, 3.4vw, 48px);
+}
+
+/*
+ * The editorial sections set their prose to the width of the composition under
+ * it rather than to a reading measure, so the two share a right edge. 58ch
+ * stops about 70px short of it, which reads as a column that failed to fill
+ * rather than as a measure. Left-aligned and ragged as before; only the ceiling
+ * moves, and the section is still inside the 820px page, so nothing overflows.
+ */
+.pm-editorial-section .pm-prose {
+    max-width: none;
 }
 
 /*
@@ -1521,6 +1576,31 @@ p.pm-film-reflection-label {
 
     .pm-block.is-flipped .pm-support {
         grid-column: auto;
+    }
+
+    /*
+     * The same specificity problem as the flipped block above: these rules are
+     * (0,3,0) and the one-column resets are (0,1,0), so the composition has to
+     * be undone by name or it keeps its desktop columns and its 3:4 boxes all
+     * the way down.
+     */
+    .pm-block.is-stacked-pair {
+        grid-template-columns: minmax(0, 1fr);
+    }
+
+    .pm-block.is-stacked-pair .pm-support,
+    .pm-block.is-stacked-pair .pm-feature {
+        grid-column: auto;
+        grid-row: auto;
+    }
+
+    /* stacked, each frame is its own shape again — no imposed ratio, no crop */
+    .pm-block.is-stacked-pair .pm-support figure {
+        aspect-ratio: auto;
+    }
+
+    .pm-block.is-stacked-pair .pm-feature img {
+        object-position: center;
     }
 
     .pm-viewer {
