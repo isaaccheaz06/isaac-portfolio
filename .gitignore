@@ -17,3 +17,8 @@ assets/images/Me3.JPG
 # project-page-img.jpg is what media.js actually loads.
 assets/butterfly-pavilion/project-page-img.jpg
 assets/suzume-cnc-stool/project-page-img.jpg
+
+# The Rhino source the GLB was exported from. 9.3MB, nothing references it,
+# and vase-repaired.glb is what the page actually loads -- same reason the
+# full-resolution photographs above are kept on disk rather than in git.
+assets/digital-kintsugi/mesh.3dm

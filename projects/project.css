@@ -244,7 +244,8 @@
     padding: 90px var(--gutter);
 }
 
-.project-page>.project-label {
+.project-page>.project-label,
+.kintsugi-intro-text>.project-label {
     color: var(--faint);
     font-size: 13px;
     letter-spacing: 0.14em;
@@ -252,7 +253,8 @@
     text-transform: uppercase;
 }
 
-.project-page>h1 {
+.project-page>h1,
+.kintsugi-intro-text>h1 {
     font-family: var(--font-display);
     font-size: clamp(38px, 6vw, 72px);
     font-weight: 600;
@@ -1653,5 +1655,200 @@ p.pm-film-reflection-label {
     .pm-viewer {
         --pm-stage: clamp(520px, 60vh, 560px);
         max-width: 520px;
+    }
+}
+
+
+/* Digital Kintsugi: point-cloud introduction */
+
+/*
+ * THIS PAGE ONLY. Every rule below is behind a .kintsugi- class, so no other
+ * project page is reached by any of it, and .project-page itself is untouched.
+ *
+ * THE COMPOSITION IS CENTRED, NOT EXTENDED.
+ *
+ * The introduction is wider than the 820px reading column, and it grows by the
+ * same amount on both sides: --k-bleed is one negative margin used on the left
+ * and the right, so whatever the composition gains it gains symmetrically and
+ * stays centred in the window. An earlier version reached only rightward, which
+ * is what made the whole block sit off to one side.
+ *
+ * 50% is half the reading column, --k-max/2 is half the composition, so the
+ * difference is exactly how far each edge has to move. It is a normal layout
+ * calculation at every width -- no transform, no fixed offset.
+ */
+.kintsugi-page {
+    --k-air: clamp(32px, 4.5vw, 80px);
+    --k-gap: clamp(24px, 2.6vw, 44px);
+    --k-max: min(990px, 100vw - 2 * var(--k-air));
+    --k-bleed: calc(50% - var(--k-max) / 2);
+
+    /* 35 of the 65/35 split, but never wider than the model has ever been */
+    --k-model: min(340px, calc((var(--k-max) - var(--k-gap)) * 0.35));
+}
+
+/* the link sits on the same left edge as the writing under it */
+.kintsugi-page>.back-link {
+    margin-left: var(--k-bleed);
+}
+
+/*
+ * THE FIRST SCREEN.
+ *
+ * A minimum height rather than one large margin: at 1440x900 the opening needs
+ * about 550px of it and at 1920x1080 about 740, and a single fixed figure that
+ * clears the taller screen leaves a hole in the shorter one.
+ *
+ * 340px is everything this box is not: the navbar and page padding above it,
+ * the Back link, and the media section's own ~130px of clearance below. The
+ * intro's bottom margin collapses out of this box, so the section's margin is
+ * what actually follows it -- measured, not assumed.
+ *
+ * Below about 830px of viewport the natural height already exceeds this, so the
+ * rule stops applying and the spacing is what it always was: no hole on a short
+ * laptop. Nothing is hidden, clipped, masked or taken out of flow -- the media
+ * is only further down the page.
+ */
+.kintsugi-opening {
+    min-height: calc(100vh - 340px);
+}
+
+.kintsugi-intro {
+    align-items: center;
+
+    /*
+     * The one line in the opening, and it is the composition's own bottom edge
+     * -- so it starts where the writing starts and ends where the model column
+     * ends, at every width, with nothing to keep in sync.
+     */
+    border-bottom: 1px solid var(--border);
+    column-gap: var(--k-gap);
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) var(--k-model);
+    margin-bottom: 64px;
+    margin-inline: var(--k-bleed);
+    padding-bottom: clamp(30px, 3.2vw, 46px);
+}
+
+/*
+ * Two rules inside one opening compete. The full-width line below now does the
+ * separating, so the short one over Tools goes -- its 20px of clearance stays,
+ * because that was holding Tools off the summary, not decorating the border.
+ */
+.kintsugi-intro .project-meta {
+    border-top: 0;
+}
+
+/* .project-meta carried the gap down to the media; the wrapper carries it now */
+.kintsugi-intro .project-meta {
+    margin-bottom: 0;
+}
+
+/*
+ * A reserved, portrait box. The height exists before the model does, so the
+ * column never collapses and nothing below it moves when the points arrive.
+ * touch-action keeps a drag on a phone from scrolling the page instead, and
+ * user-select keeps a drag from selecting the paragraph beside it.
+ */
+.kintsugi-stage {
+    aspect-ratio: 3 / 4;
+    position: relative;
+    touch-action: none;
+    user-select: none;
+    width: 100%;
+}
+
+/*
+ * No card, no border, no panel: the renderer clears to transparent and the
+ * page's own black is the background.
+ */
+.kintsugi-stage canvas {
+    cursor: grab;
+    display: block;
+    height: 100%;
+    width: 100%;
+}
+
+.kintsugi-stage canvas:active {
+    cursor: grabbing;
+}
+
+.kintsugi-loading {
+    color: var(--faint);
+    font-size: 11px;
+    left: 50%;
+    letter-spacing: 0.14em;
+    position: absolute;
+    text-transform: uppercase;
+    top: 50%;
+    transform: translate(-50%, -50%);
+}
+
+/*
+ * The photograph is the failure state and nothing else: no WebGL, a blocked
+ * CDN, a model that will not load. It is taken out of flow so it can never add
+ * to the stage's height, and [hidden] is restated because a class selector
+ * beats the user agent's own [hidden] rule -- without this it draws under the
+ * canvas and doubles the column.
+ */
+.kintsugi-fallback {
+    border-radius: 2px;
+    display: block;
+    height: 100%;
+    inset: 0;
+    object-fit: cover;
+    position: absolute;
+    width: 100%;
+}
+
+.kintsugi-fallback[hidden] {
+    display: none;
+}
+
+@media (max-width: 900px) {
+
+    /*
+     * One column, and the model follows the writing because that is the order
+     * it is written in. A controlled portrait box rather than a share of the
+     * viewport, so it cannot grow into a screen of its own.
+     */
+    /* one column, and every desktop centring calculation is undone by name */
+    .kintsugi-page>.back-link {
+        margin-left: 0;
+    }
+
+    /*
+     * No first-screen reservation on a phone: a viewport-tall gap there is most
+     * of a screen of nothing. The divider stays, spanning the content width,
+     * with ordinary spacing under it.
+     */
+    .kintsugi-opening {
+        min-height: 0;
+    }
+
+    .kintsugi-intro {
+        grid-template-columns: minmax(0, 1fr);
+        margin-bottom: clamp(30px, 6vw, 48px);
+        margin-inline: 0;
+        padding-bottom: clamp(24px, 5vw, 34px);
+        row-gap: clamp(26px, 5vw, 40px);
+    }
+
+    .kintsugi-stage {
+        aspect-ratio: auto;
+        height: min(56vh, 400px);
+        margin-inline: auto;
+        max-width: 320px;
+    }
+}
+
+/*
+ * Asked for less motion: the script skips the assembly, the drift and the
+ * rotation and draws the finished vase once. Nothing here needs to change for
+ * that — this only stops the pointer being invited to drag something still.
+ */
+@media (prefers-reduced-motion: reduce) {
+    .kintsugi-stage canvas {
+        cursor: default;
     }
 }

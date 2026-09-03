@@ -16,6 +16,21 @@
 
     <link rel="stylesheet" href="../style.css">
     <link rel="stylesheet" href="project.css">
+
+    <!--
+      One pinned version for the core library and both addons, so a loader
+      built against one release can never meet a core from another. Nothing
+      here is fetched on load: js/kintsugi-point-cloud.js imports it only when
+      the model is about to come into view, and only this page carries it.
+    -->
+    <script type="importmap">
+        {
+            "imports": {
+                "three": "https://cdn.jsdelivr.net/npm/three@0.170.0/build/three.module.js",
+                "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.170.0/examples/jsm/"
+            }
+        }
+    </script>
 </head>
 
 <body>
@@ -31,9 +46,21 @@
         </nav>
     </header>
 
-    <main id="top" class="project-page" data-project="digital-kintsugi">
+    <main id="top" class="project-page kintsugi-page" data-project="digital-kintsugi">
 
         <a href="../index.html#work" class="back-link">← Back</a>
+
+        <!--
+          Two columns on this page only: the writing on the left, the model in
+          the band of empty page to its right. The Back link stays above both.
+
+          The wrapper around them owns the first screen: it carries a minimum
+          height so the media below it begins under the fold, without anything
+          being hidden, clipped or lifted out of flow.
+        -->
+        <div class="kintsugi-opening">
+        <div class="kintsugi-intro">
+            <div class="kintsugi-intro-text">
 
         <p class="project-label" data-reveal>Digital Fabrication</p>
 
@@ -56,6 +83,30 @@
                 <dd>Rhino · 3D Scanning · Ceramic 3D Printing · FDM 3D Printing</dd>
             </div>
         </dl>
+
+            </div>
+
+            <div class="kintsugi-model" data-reveal>
+                <!--
+                  The canvas is added by the script once the model is built, so a
+                  visitor without WebGL or without the file gets the photograph
+                  rather than an empty box. The stage reserves its own height, so
+                  nothing on the page moves when either one arrives.
+                -->
+                <div class="kintsugi-stage" data-cursor-label="Drag"
+                    data-kintsugi-stage="../assets/digital-kintsugi/vase-repaired.glb"
+                    data-kintsugi-label="Interactive point-cloud model of the digitally repaired ceramic vase.">
+
+                    <p class="kintsugi-loading" aria-hidden="true">Loading model</p>
+
+                    <img class="kintsugi-fallback"
+                        src="../assets/digital-kintsugi/digital-kintsugi-final-hero.webp"
+                        alt="The finished vase, its fracture rejoined with a gold-finished 3D-printed component."
+                        width="1200" height="1600" loading="lazy" decoding="async" hidden>
+                </div>
+            </div>
+        </div>
+        </div>
 
             <!-- Media comes from media.js; nothing renders until it has an entry. -->
         <div data-media-slot></div>
@@ -114,6 +165,9 @@
     <script src="../media.js"></script>
     <script src="../js/project.js"></script>
     <script src="../js/site.js"></script>
+
+    <!-- this page only; see the import map in <head> -->
+    <script type="module" src="../js/kintsugi-point-cloud.js"></script>
 </body>
 
 </html>
