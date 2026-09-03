@@ -275,6 +275,15 @@ function setup(stage) {
         let pointerId = null;
 
         const onDown = (e) => {
+            /*
+             * A mouse drags; a finger scrolls. Touch and pen are ignored, so a
+             * touch beginning on the model still scrolls the page -- on a phone
+             * this box is a third of the screen, and catching those touches to
+             * spin a vase made the page feel stuck. Nothing is lost by it: the
+             * slow automatic turn already shows every side of the model.
+             */
+            if (e.pointerType !== 'mouse') return;
+
             dragging = true;
             autoBlend = 0;
             lastX = e.clientX;

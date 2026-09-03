@@ -1747,13 +1747,19 @@ p.pm-film-reflection-label {
 /*
  * A reserved, portrait box. The height exists before the model does, so the
  * column never collapses and nothing below it moves when the points arrive.
- * touch-action keeps a drag on a phone from scrolling the page instead, and
- * user-select keeps a drag from selecting the paragraph beside it.
+ *
+ * touch-action stays at auto ON PURPOSE. It was `none`, so that a touch-drag
+ * would spin the vase rather than scroll -- but this box is a third of a
+ * phone screen, and every touch that began on it was a touch that could not
+ * scroll the page. The rotation is a pointer affordance; a finger scrolls.
+ * Do not put `none` back without solving that.
+ *
+ * user-select still keeps a mouse drag from selecting the text beside it.
  */
 .kintsugi-stage {
     aspect-ratio: 3 / 4;
     position: relative;
-    touch-action: none;
+    touch-action: auto;
     user-select: none;
     width: 100%;
 }
