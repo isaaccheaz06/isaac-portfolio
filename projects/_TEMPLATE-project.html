@@ -11,7 +11,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-    <title>{{PROJECT TITLE}} | Isaac Cheaz</title>
+    <title>{{PROJECT TITLE}}</title>
     <meta name="description" content="{{ONE SENTENCE DESCRIPTION FOR SEARCH RESULTS}}">
 
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -31,7 +31,8 @@
         <nav class="nav-links" aria-label="Primary">
             <a href="../index.html#work">Work</a>
             <a href="../index.html#about">About</a>
-            <a href="https://docs.google.com/document/d/11qATXeMCFB1Io2WauJywyM81skCrmu7SGtFiiL8NM3w/view" class="nav-resume" target="_blank" rel="noopener noreferrer"
+            <a href="https://docs.google.com/document/d/11qATXeMCFB1Io2WauJywyM81skCrmu7SGtFiiL8NM3w/view"
+                class="nav-resume" target="_blank" rel="noopener noreferrer"
                 aria-label="Resume preview, opens in a new tab">Resume</a>
         </nav>
     </header>
@@ -68,7 +69,7 @@
             </div>
         </dl>
 
-            <!-- Optional. Delete the whole list if there is nothing to link. -->
+        <!-- Optional. Delete the whole list if there is nothing to link. -->
         <ul class="project-links">
             <li>
                 <a class="project-link" href="{{LIVE URL}}" target="_blank" rel="noopener noreferrer">
@@ -78,23 +79,36 @@
             </li>
         </ul>
 
-            <!--
+        <!--
               Do not paste image or video markup here. Add an entry for this
               project's slug in media.js and js/project.js renders it into this
               section. See assets/README.md for fields and filenames.
             -->
         <div data-media-slot></div>
 
-            <!-- Optional. Add only what the project needs. -->
+        <!-- Optional. Add only what the project needs. -->
         <section class="project-section">
             <h2>{{SECTION HEADING}}</h2>
             <p class="section-placeholder">{{WHAT THIS SECTION SHOULD COVER}}</p>
         </section>
 
+        <!--
+          Previous and next in the homepage's own order, wrapping at both ends.
+          Two sibling links, not one wrapping both: a single link would send a
+          press anywhere in the row to the same project.
+        -->
         <nav class="project-nav" aria-label="More work">
-            <a class="project-nav-link" href="{{NEXT PROJECT}}.html">
-                <span class="project-nav-label">Next project</span>
+            <a class="project-nav-link is-next" href="{{NEXT PROJECT}}.html" data-cursor-label="Next">
+                <span class="project-nav-label">
+                    Next project <span class="project-nav-arrow" aria-hidden="true">→</span>
+                </span>
                 <span class="project-nav-title">{{NEXT PROJECT TITLE}}</span>
+            </a>
+            <a class="project-nav-link is-prev" href="{{PREVIOUS PROJECT}}.html" data-cursor-label="Previous">
+                <span class="project-nav-label">
+                    <span class="project-nav-arrow" aria-hidden="true">←</span> Previous project
+                </span>
+                <span class="project-nav-title">{{PREVIOUS PROJECT TITLE}}</span>
             </a>
         </nav>
 
@@ -126,9 +140,12 @@
                 <div class="footer-col">
                     <h3 class="footer-col-label">Elsewhere</h3>
                     <ul>
-                        <li><a href="https://www.linkedin.com/in/isaac-cheaz-235302365/" target="_blank" rel="noopener noreferrer">LinkedIn</a></li>
-                        <li><a href="https://github.com/isaaccheaz06" target="_blank" rel="noopener noreferrer">GitHub</a></li>
-                        <li><a href="https://docs.google.com/document/d/11qATXeMCFB1Io2WauJywyM81skCrmu7SGtFiiL8NM3w/view" target="_blank" rel="noopener noreferrer"
+                        <li><a href="https://www.linkedin.com/in/isaac-cheaz-235302365/" target="_blank"
+                                rel="noopener noreferrer">LinkedIn</a></li>
+                        <li><a href="https://github.com/isaaccheaz06" target="_blank"
+                                rel="noopener noreferrer">GitHub</a></li>
+                        <li><a href="https://docs.google.com/document/d/11qATXeMCFB1Io2WauJywyM81skCrmu7SGtFiiL8NM3w/view"
+                                target="_blank" rel="noopener noreferrer"
                                 aria-label="Resume preview, opens in a new tab">Resume</a></li>
                     </ul>
                 </div>

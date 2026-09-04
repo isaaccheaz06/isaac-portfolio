@@ -522,12 +522,10 @@
                 const bar = el('div', 'pm-bar');
                 const step = el('div', 'pm-step');
 
-                /*
-                 * Two counts, one of them spoken. "Stage 2 of 4." reads as a
-                 * sentence where "02 / 04" is read as punctuation, so the live
-                 * region keeps the sentence and the printed pair is hidden from
-                 * it. The pair is printed only inside the frame, where the rail
-                 * is no longer beside the title saying the same thing twice.
+                                /*
+                 * Two counts, one spoken. "Stage 2 of 4." reads as a sentence where
+                 * "02 / 04" reads as punctuation, so the live region keeps the
+                 * sentence and the printed pair is hidden from it.
                  */
                 const count = el('span', 'visually-hidden');
                 const shown = el('span', 'pm-count');
@@ -563,6 +561,13 @@
                 const toggleBtn = mkBtn('pause', 'Pause automatic rotation');
                 if (!overlayCopy) bar.append(step, controls);
 
+                                /*
+                 * Where the glyph lives. Over the frame it is a span inside the
+                 * button, so the picture of the control can fade while the target,
+                 * its name and its focus ring do not.
+                 */
+                const iconHost = overlayCopy ? el('span', 'pm-stage-icon') : toggleBtn;
+
                 const rail = el('ul', 'pm-thumbs');
                 rail.style.setProperty('--pm-thumbs', String(slides.length));
                 const thumbs = nodes.map((n, i) => {
@@ -581,16 +586,19 @@
                 });
 
                 if (overlayCopy) {
-                    /*
-                     * The copy moves inside the frame and the control to its top
-                     * corner, so neither sits on the other. The overlay takes no
-                     * pointer events, so a swipe still reaches the stage under
-                     * it, and the bar is not built at all -- there is no second
-                     * copy of the title and description below the picture.
-                     */
                     const overlay = el('div', 'pm-overlay');
                     overlay.appendChild(step);
-                    stage.append(overlay, controls);
+
+                                        /*
+                     * The control becomes the frame: one transparent button over the
+                     * picture, with the overlay above it taking no pointer events, so
+                     * a press on the copy reaches the same button. Still the native
+                     * <button>, so keyboard and naming come free. replaceChildren
+                     * because mkBtn already put a glyph in it.
+                     */
+                    toggleBtn.classList.add('pm-stage-toggle');
+                    toggleBtn.replaceChildren(iconHost);
+                    stage.append(overlay, toggleBtn);
                     wrap.append(stage, rail);
                 } else {
                     wrap.append(stage, bar, rail);
@@ -628,6 +636,41 @@
                  * autoplay — but the stage never changes underneath them.
                  */
                 const canAdvance = () => canPlay() && !reduceMotion.matches;
+
+                                /*
+                 * Intent and reality, kept apart. `playing` is intent and only a
+                 * press changes it -- that is what makes a deliberate pause survive
+                 * scrolling away. This reads the clip instead, and the two part
+                 * company whenever play() is refused: the icon and the pointer label
+                 * follow this one, or they would describe a state the page is not in.
+                 */
+                const activeVideo = () => {
+                    const m = nodes[index].media;
+                    return m.tagName === 'VIDEO' ? m : null;
+                };
+
+                const isRunning = () => {
+                    const v = activeVideo();
+                    return v ? (!v.paused && !v.ended) : playing;
+                };
+
+                                /*
+                 * The centred glyph is a hint: shown when a press is likely, then out
+                 * of the way. One timer, cleared before it is set again, so fast
+                 * clicks cannot leave an earlier hide counting down.
+                 */
+                const HINT_MS = 1000;
+                let hintTimer = null;
+
+                const flashIcon = () => {
+                    if (!overlayCopy) return;
+                    if (hintTimer) clearTimeout(hintTimer);
+                    toggleBtn.classList.add('is-hinting');
+                    hintTimer = setTimeout(() => {
+                        hintTimer = null;
+                        toggleBtn.classList.remove('is-hinting');
+                    }, HINT_MS);
+                };
 
                 const show = (next) => {
                     const from = index;
@@ -672,10 +715,20 @@
                 };
 
                 const setToggle = () => {
-                    toggleBtn.replaceChildren(icon(playing ? ICON.pause : ICON.play));
+                    const running = isRunning();
+                    iconHost.replaceChildren(icon(running ? ICON.pause : ICON.play));
                     // the label names what the press will DO, not the current state
                     toggleBtn.setAttribute('aria-label',
-                        playing ? 'Pause process video' : 'Play process video');
+                        running ? 'Pause process video' : 'Play process video');
+
+                                        /*
+                     * Written here rather than on hover: site.js watches this
+                     * attribute, which is what lets the label change under a mouse
+                     * that is not moving.
+                     */
+                    if (overlayCopy) {
+                        stage.dataset.cursorLabel = running ? 'Pause' : 'Play';
+                    }
                 };
 
                 /*
@@ -695,9 +748,12 @@
                              * slide that is actually changing.
                              */
                             const p = current.play();
-                            // a refused autoplay is not an error to recover from;
-                            // the poster stays and nothing advances behind it
-                            if (p && p.catch) p.catch(() => { });
+                                                        /*
+                             * A refused autoplay is not an error to recover from, but
+                             * the control must stop offering to pause what never
+                             * started.
+                             */
+                            if (p && p.catch) p.catch(() => { setToggle(); });
                         } else {
                             current.pause();
                         }
@@ -711,6 +767,17 @@
 
                 nodes.forEach((n) => {
                     if (n.media.tagName !== 'VIDEO') return;
+
+                                        /*
+                     * The clip is the source of truth for the icon and the label.
+                     * NONE of these writes `playing`: a pause from scrolling offscreen
+                     * must never be mistaken later for a deliberate one.
+                     */
+                    ['play', 'playing', 'pause', 'ended', 'error', 'emptied']
+                        .forEach((type) => n.media.addEventListener(type, () => {
+                            if (nodes[index].media === n.media) setToggle();
+                        }));
+
                     n.media.addEventListener('ended', () => {
                         if (nodes[index].media !== n.media) return;
                         if (canAdvance()) { show(index + 1); return; }
@@ -731,10 +798,26 @@
                  * and let schedule() work out what that means for the clip on the
                  * stage.
                  */
-                toggleBtn.addEventListener('click', () => {
-                    playing = !playing;
-                    setToggle();
+                                /*
+                 * One toggle for the button, a tap, Enter and Space. The new intent
+                 * comes from what the clip is really doing, so a press after a refused
+                 * play() is another attempt at Play. schedule() runs before the icon
+                 * is read back; currentTime is untouched, so resuming resumes.
+                 */
+                const togglePlayback = () => {
+                    playing = !isRunning();
                     schedule();
+                    setToggle();
+                    flashIcon();
+                };
+
+                toggleBtn.addEventListener('click', () => {
+                                        /*
+                     * A swipe ends in a click on the same element in most touch
+                     * browsers; the stage flags it and it is spent here.
+                     */
+                    if (suppressClick) { suppressClick = false; return; }
+                    togglePlayback();
                 });
 
                 wrap.addEventListener('keydown', (e) => {
@@ -751,23 +834,54 @@
                 /* swipe: a horizontal drag past a threshold moves one stage */
                 let startX = null;
                 let startY = null;
+                let moved = false;
+                let suppressClick = false;
+
                 stage.addEventListener('pointerdown', (e) => {
+                    // whatever the last gesture left behind, this one starts clean
+                    suppressClick = false;
                     // a mouse drag across a picture is a selection or a stray
                     // gesture, not a swipe; a mouse navigates by the rail below
                     if (e.pointerType === 'mouse') return;
-                    startX = e.clientX; startY = e.clientY;
+                    startX = e.clientX; startY = e.clientY; moved = false;
                 });
+
+                                /*
+                 * Any real travel disqualifies the press from being a tap: sideways it
+                 * was a swipe, downwards the page was being scrolled.
+                 */
+                stage.addEventListener('pointermove', (e) => {
+                    if (startX === null || moved) return;
+                    if (Math.abs(e.clientX - startX) > 10
+                        || Math.abs(e.clientY - startY) > 10) moved = true;
+                }, { passive: true });
+
                 stage.addEventListener('pointerup', (e) => {
                     if (startX === null) return;
                     const dx = e.clientX - startX;
                     const dy = e.clientY - startY;
                     startX = startY = null;
+                    if (moved) suppressClick = true;
                     // must be clearly horizontal, or it was a scroll
                     if (Math.abs(dx) > 45 && Math.abs(dx) > Math.abs(dy) * 1.4) {
                         show(index + (dx < 0 ? 1 : -1));
                     }
                 });
-                stage.addEventListener('pointercancel', () => { startX = startY = null; });
+
+                stage.addEventListener('pointercancel', () => {
+                    // the browser took the gesture over to scroll the page; if a
+                    // click still follows it, it is not one that was aimed
+                    if (moved) suppressClick = true;
+                    startX = startY = null;
+                });
+
+                if (overlayCopy) {
+                                        /*
+                     * On arrival, once. Not on pointermove: a hint that reappears
+                     * under every twitch is a flicker.
+                     */
+                    stage.addEventListener('pointerenter', flashIcon);
+                }
 
                 document.addEventListener('visibilitychange', schedule);
                 reduceMotion.addEventListener('change', () => {
@@ -792,8 +906,15 @@
             };
 
             /* 5. full film — click to load */
+
+                        /*
+             * Two ways to hold a film, chosen by the field the section carries:
+             * `video` for a file in this repository, `src` for an embed. Only what
+             * replaces the poster on the press differs.
+             */
             const buildFilm = (section) => {
-                if (!hasText(section.src)) return null;
+                const local = isValidMedia(section.video) ? section.video : null;
+                if (!local && !hasText(section.src)) return null;
 
                 const wrap = el('div', 'pm-film');
 
@@ -818,20 +939,37 @@
                 if (hasText(section.href)) {
                     const note = el('p', 'pm-film-note');
                     const a = el('a', 'project-link');
-                    a.href = section.href;
+
+                                        /*
+                     * Through the site's resolver, so a film kept beside the page
+                     * works under the sub-path GitHub Pages serves from. An absolute
+                     * URL passes through unchanged.
+                     */
+                    a.href = resolveURL(section.href);
                     a.target = '_blank';
                     a.rel = 'noopener noreferrer';
-                    a.appendChild(document.createTextNode(section.linkLabel || 'Open film'));
+                    const label = section.linkLabel || 'Open film';
+                    a.appendChild(document.createTextNode(label));
                     const mark = el('span', 'project-link-external', '↗');
                     mark.setAttribute('aria-hidden', 'true');
                     a.appendChild(mark);
-                    a.appendChild(el('span', 'visually-hidden', '(opens in a new tab)'));
+                    // not said twice: a label that already names the new tab does
+                    // not need the note that used to supply it
+                    if (!/new tab/i.test(label)) {
+                        a.appendChild(el('span', 'visually-hidden', '(opens in a new tab)'));
+                    }
                     note.appendChild(a);
                     text.appendChild(note);
                 }
 
                 const frame = el('div', 'pm-film-frame');
                 if (hasText(section.ratio)) frame.style.aspectRatio = section.ratio;
+
+                                /*
+                 * No sizing of its own: deliberately the same box the embedded film
+                 * uses, with the player keeping its proportions inside it. See
+                 * object-fit on .pm-film-frame video.
+                 */
 
                 if (isValidMedia(section.poster)) {
                     const poster = buildImage(section.poster);
@@ -849,7 +987,60 @@
                 ring.appendChild(icon(ICON.play));
                 play.append(ring, el('span', 'pm-film-play-text', label));
 
+                                /*
+                 * A file that will not decode leaves the frame holding a way out
+                 * rather than a black rectangle. The link is the optimised file the
+                 * player was handed, not the several-hundred-megabyte master.
+                 */
+                const showFailure = () => {
+                    const note = el('div', 'pm-film-failed');
+                    note.appendChild(el('p', null,
+                        'This film could not be played in your browser.'));
+                    const a = el('a', 'project-link');
+                    a.href = resolveURL(local.src);
+                    a.target = '_blank';
+                    a.rel = 'noopener noreferrer';
+                    a.appendChild(document.createTextNode('Open the film file'));
+                    const mark = el('span', 'project-link-external', '\u2197');
+                    mark.setAttribute('aria-hidden', 'true');
+                    a.appendChild(mark);
+                    a.appendChild(el('span', 'visually-hidden', '(opens in a new tab)'));
+                    note.appendChild(a);
+                    frame.replaceChildren(note);
+                };
+
+                                /*
+                 * Nothing of the film is fetched before this runs: the poster is an
+                 * ordinary image and the <video> does not exist until the press.
+                 */
+                const startLocal = () => {
+                    const video = buildPlayerVideo(local);
+                    video.classList.add('pm-film-video');
+                    // asked for by name, so it may now fetch in earnest
+                    video.preload = 'auto';
+
+                                        /*
+                     * The page-wide "play what is on screen" observer takes its list
+                     * once, before this element exists, and only looks at clips
+                     * carrying this flag. Neither is true here.
+                     */
+                    delete video.dataset.autoplayInView;
+
+                    video.addEventListener('error', showFailure);
+                    frame.replaceChildren(video);
+
+                    const p = video.play();
+                                        /*
+                     * A refusal is not a failure to report: this film has sound, and
+                     * a browser may want a second press for it.
+                     */
+                    if (p && p.catch) p.catch(() => { });
+                    video.focus();
+                };
+
                 play.addEventListener('click', () => {
+                    if (local) { startLocal(); return; }
+
                     const iframe = document.createElement('iframe');
                     iframe.src = section.src;
                     iframe.title = section.iframeTitle || label;

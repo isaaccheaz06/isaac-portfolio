@@ -22,3 +22,9 @@ assets/suzume-cnc-stool/project-page-img.jpg
 # and vase-repaired.glb is what the page actually loads -- same reason the
 # full-resolution photographs above are kept on disk rather than in git.
 assets/digital-kintsugi/mesh.3dm
+
+# Camera/edit masters for the two project films, for the same reason: 80MB and
+# 438MB. projectfilm-web.mp4 and projectfilm-poster.webp beside each one are
+# what the pages load, and those ARE tracked -- only the masters are listed.
+assets/butterfly-pavilion/projectfilm.mov
+assets/suzume-cnc-stool/projectfilm.mp4

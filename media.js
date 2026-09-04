@@ -302,9 +302,9 @@ window.SITE_MEDIA = {
                     ]
                 },
 
-                /*
-                 * The full film stays on Google Drive: the smallest watchable
-                 * encode is ~19MB, twice the rest of the repository.
+                                /*
+                 * This film stays on Google Drive rather than in the repository:
+                 * the smallest watchable encode is ~19MB.
                  */
                 {
                     layout: 'film',
@@ -340,8 +340,117 @@ window.SITE_MEDIA = {
             ]
         },
         'museum-npc': { hero: null, gallery: [] },
-        'suzume-cnc-stool': { hero: null, gallery: [] },
-        'butterfly-pavilion': { hero: null, gallery: [] }
+        'suzume-cnc-stool': {
+            sections: [
+                {
+                    layout: 'film',
+                    title: 'Project Film',
+                    text: 'Watch the Suzume-Inspired Stool project film.',
+
+                    /*
+                     * The film itself, served from this repository. `video`
+                     * rather than `src` is what makes the frame build a native
+                     * player instead of an embed; the file is not touched until
+                     * the play control is pressed.
+                     */
+                    video: {
+                        type: 'video',
+                        mode: 'player',
+                        src: 'assets/suzume-cnc-stool/projectfilm-web.mp4',
+                        poster: 'assets/suzume-cnc-stool/projectfilm-poster.webp',
+                        alt: 'Suzume-Inspired Stool project film',
+                        width: 720, height: 1280
+                    },
+
+                    /* 9:16, which is the film's own shape and not a crop. */
+                    ratio: '9 / 16',
+                    playLabel: 'Watch project film',
+
+                    /*
+                     * The film on Drive, the same way the first project page links
+                     * its own. resolveURL leaves an absolute URL alone, so this is
+                     * unaffected by the base path; the optimised file beside the
+                     * page is what the player itself loads.
+                     */
+                    href: 'https://drive.google.com/file/d/19HhaxupN07xnntyNVycBSqMkZK9mo2I2/view',
+                    linkLabel: 'Open film in Google Drive',
+
+                    reflection: 'Edited in DaVinci Resolve and exported at 1080x1920, the '
+                        + 'two-minute-twenty film follows the stool from sketches and a '
+                        + 'cardboard mock-up through the Rhino model, CNC routing, and '
+                        + 'the finished plywood piece.\n\n'
+                        + 'Opening footage: \u201cSuzume\u201d by Makoto Shinkai.',
+                    reflectionLabel: 'Film note',
+
+                    /*
+                     * A frame of the film, so the still and the first thing that
+                     * plays are the same piece of work.
+                     */
+                    poster: {
+                        type: 'image',
+                        src: 'assets/suzume-cnc-stool/projectfilm-poster.webp',
+                        alt: '',
+                        width: 720, height: 1280
+                    }
+                }
+            ]
+        },
+
+        'butterfly-pavilion': {
+            sections: [
+                {
+                    layout: 'film',
+                    title: 'Project Film',
+                    text: 'Watch the Butterfly Pavilion project film.',
+
+                    /*
+                     * The film itself, served from this repository. `video`
+                     * rather than `src` is what makes the frame build a native
+                     * player instead of an embed; the file is not touched until
+                     * the play control is pressed.
+                     */
+                    video: {
+                        type: 'video',
+                        mode: 'player',
+                        src: 'assets/butterfly-pavilion/projectfilm-web.mp4',
+                        poster: 'assets/butterfly-pavilion/projectfilm-poster.webp',
+                        alt: 'Butterfly Pavilion project film',
+                        width: 720, height: 1280
+                    },
+
+                    /* 9:16, which is the film's own shape and not a crop. */
+                    ratio: '9 / 16',
+                    playLabel: 'Watch project film',
+
+                    /*
+                     * The film on Drive, the same way the first project page links
+                     * its own. resolveURL leaves an absolute URL alone, so this is
+                     * unaffected by the base path; the optimised file beside the
+                     * page is what the player itself loads.
+                     */
+                    href: 'https://drive.google.com/file/d/1H779N_C0RCBk908Tx_9m-4ScODKrbF0z/view',
+                    linkLabel: 'Open film in Google Drive',
+
+                    reflection: 'Edited in DaVinci Resolve and exported at 1080x1920, the '
+                        + 'one-minute-fifty-one film follows the pavilion from paper '
+                        + 'form-finding through the parametric surface in Rhino and '
+                        + 'Grasshopper, laser cutting, and the assembly of the final '
+                        + 'paper model.',
+                    reflectionLabel: 'Film note',
+
+                    /*
+                     * A frame of the film, so the still and the first thing that
+                     * plays are the same piece of work.
+                     */
+                    poster: {
+                        type: 'image',
+                        src: 'assets/butterfly-pavilion/projectfilm-poster.webp',
+                        alt: '',
+                        width: 720, height: 1280
+                    }
+                }
+            ]
+        }
     }
 };
 

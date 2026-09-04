@@ -5,7 +5,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-    <title>Suzume-Inspired Stool | Isaac Cheaz</title>
+    <title>Suzume-Inspired Stool</title>
     <meta name="description"
         content="A three-legged wooden stool inspired by the chair character from Suzume, developed through cardboard prototyping, CAD and CNC fabrication.">
 
@@ -26,7 +26,8 @@
         <nav class="nav-links" aria-label="Primary">
             <a href="../index.html#work">Work</a>
             <a href="../index.html#about">About</a>
-            <a href="https://docs.google.com/document/d/11qATXeMCFB1Io2WauJywyM81skCrmu7SGtFiiL8NM3w/view" class="nav-resume" target="_blank" rel="noopener noreferrer"
+            <a href="https://docs.google.com/document/d/11qATXeMCFB1Io2WauJywyM81skCrmu7SGtFiiL8NM3w/view"
+                class="nav-resume" target="_blank" rel="noopener noreferrer"
                 aria-label="Resume preview, opens in a new tab">Resume</a>
         </nav>
     </header>
@@ -44,7 +45,13 @@
             developed through cardboard prototyping, CAD, CNC fabrication, and physical assembly.
         </p>
 
-            <!-- A row is left out rather than filled with a guess. -->
+        <p class="project-context" data-reveal>
+            <span>Fall 2025</span>
+            <span>1½ weeks</span>
+            <span>Solo project</span>
+        </p>
+
+        <!-- Tools; the date, duration and contribution sit in the line above. -->
         <dl class="project-meta" data-reveal>
             <div class="project-meta-row">
                 <dt>Tools</dt>
@@ -52,13 +59,26 @@
             </div>
         </dl>
 
-            <!-- Media comes from media.js; nothing renders until it has an entry. -->
+        <!-- Media comes from media.js; nothing renders until it has an entry. -->
         <div data-media-slot></div>
 
+        <!--
+          Previous and next in the homepage's own order, wrapping at both ends.
+          Two sibling links, not one wrapping both: a single link would send a
+          press anywhere in the row to the same project.
+        -->
         <nav class="project-nav" aria-label="More work">
-            <a class="project-nav-link" href="butterfly-pavilion.html">
-                <span class="project-nav-label">Next project</span>
+            <a class="project-nav-link is-next" href="butterfly-pavilion.html" data-cursor-label="Next">
+                <span class="project-nav-label">
+                    Next project <span class="project-nav-arrow" aria-hidden="true">→</span>
+                </span>
                 <span class="project-nav-title">Butterfly Pavilion</span>
+            </a>
+            <a class="project-nav-link is-prev" href="museum-npc.html" data-cursor-label="Previous">
+                <span class="project-nav-label">
+                    <span class="project-nav-arrow" aria-hidden="true">←</span> Previous project
+                </span>
+                <span class="project-nav-title">"This Way of Seeing It"</span>
             </a>
         </nav>
 
@@ -90,9 +110,12 @@
                 <div class="footer-col">
                     <h3 class="footer-col-label">Elsewhere</h3>
                     <ul>
-                        <li><a href="https://www.linkedin.com/in/isaac-cheaz-235302365/" target="_blank" rel="noopener noreferrer">LinkedIn</a></li>
-                        <li><a href="https://github.com/isaaccheaz06" target="_blank" rel="noopener noreferrer">GitHub</a></li>
-                        <li><a href="https://docs.google.com/document/d/11qATXeMCFB1Io2WauJywyM81skCrmu7SGtFiiL8NM3w/view" target="_blank" rel="noopener noreferrer"
+                        <li><a href="https://www.linkedin.com/in/isaac-cheaz-235302365/" target="_blank"
+                                rel="noopener noreferrer">LinkedIn</a></li>
+                        <li><a href="https://github.com/isaaccheaz06" target="_blank"
+                                rel="noopener noreferrer">GitHub</a></li>
+                        <li><a href="https://docs.google.com/document/d/11qATXeMCFB1Io2WauJywyM81skCrmu7SGtFiiL8NM3w/view"
+                                target="_blank" rel="noopener noreferrer"
                                 aria-label="Resume preview, opens in a new tab">Resume</a></li>
                     </ul>
                 </div>

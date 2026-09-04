@@ -263,6 +263,97 @@
     margin-bottom: 28px;
 }
 
+/*
+     * Two titles that do not fit the shared size, each scoped by its page's own
+     * name. Family, weight, colour, tracking and the left edge all still come
+     * from the rule above.
+     *
+     * The column is 820px minus two 7vw gutters, so it gets NARROWER as the
+     * window grows -- 667px at 1024 but 551px at 1920. The widest desktop is the
+     * tightest case, and both sizes below are set from it.
+     */
+
+/*
+     * A wider introduction rather than a smaller heading: at the shared 72px the
+     * title needs 796px, and the shared measure is only 618px at 1440.
+     *
+     * Only the introduction moves. The media slot and the navigation keep the
+     * 820px measure, so the film frame below still matches the other pages.
+     */
+.project-page[data-project="suzume-cnc-stool"] {
+    /*
+     * How far each side reaches. 140px is set by the WIDEST window, not the
+     * narrowest: the column shrinks as the viewport grows (618px at 1440, 551px
+     * at 1920), and 551 + 280 is what finally clears the 796px the title needs.
+     * The second term keeps at least 40px of screen-edge gutter.
+     */
+    --intro-reach: clamp(0px, calc((100vw - 820px) / 2 - 40px), 140px);
+}
+
+/*
+     * One starting edge, two measures: the whole introduction moves out to the
+     * wider container and every line begins at its left edge; only the title
+     * uses the whole width. Reaching the heading out alone read as a second
+     * column rather than the top of this one.
+     */
+.project-page[data-project="suzume-cnc-stool"]>.back-link,
+.project-page[data-project="suzume-cnc-stool"]>.project-label,
+.project-page[data-project="suzume-cnc-stool"]>h1,
+.project-page[data-project="suzume-cnc-stool"]>.project-summary,
+.project-page[data-project="suzume-cnc-stool"]>.project-context,
+.project-page[data-project="suzume-cnc-stool"]>.project-meta {
+    margin-inline: calc(var(--intro-reach) * -1);
+}
+
+/*
+     * Everything except the title comes back to the ordinary measure. The
+     * percentage resolves against the PARENT's content box -- the column as it
+     * was before the negative margin widened these -- so it means "as wide as the
+     * column would have been", with no second variable to keep in sync.
+     *
+     * The summary is not listed: its own 60ch cap is narrower still.
+     */
+.project-page[data-project="suzume-cnc-stool"]>.project-context {
+    max-width: 100%;
+}
+
+/*
+     * Adjacent vertical margins collapse to the larger of the two, so the context
+     * line's 10px was being overruled by the summary's 25px. Zeroing it here lets
+     * the 10px stand and leaves the other three pages as they were.
+     */
+.project-page[data-project="suzume-cnc-stool"]>.project-summary {
+    margin-bottom: 0;
+}
+
+/*
+ * The bilingual title, as one heading on two lines. The break does the work the
+ * dash used to do, so the dash is gone and the quotation marks stay.
+ *
+ * A column with a compact gap rather than two blocks: flex-start puts both
+ * lines on the same left edge with no indent, and a gap in em stays
+ * proportional to the type as it scales, so the pair keeps reading as one
+ * title rather than two headings.
+ */
+.project-page[data-project="museum-npc"]>h1 {
+    align-items: flex-start;
+    display: flex;
+    flex-direction: column;
+    font-size: clamp(36px, 5.2vw, 58px);
+    gap: 0.1em;
+}
+
+/*
+ * Smaller, but not so much smaller that it reads as a subtitle. At 0.84em the
+ * English is 48.7px where the Chinese is 58, and the phrase measures 10.58x its
+ * own size — so it holds one line down to about 480px and wraps below that,
+ * between words, which is what it should do rather than shrink further.
+ */
+.project-page[data-project="museum-npc"] .project-title-en {
+    font-size: 0.84em;
+    letter-spacing: -0.03em;
+}
+
 .project-summary {
     color: var(--muted);
     font-size: clamp(14px, 1.65vw, 15px);
@@ -301,18 +392,46 @@
 /* Project metadata */
 
 /*
- * Role / Tools / Year, sitting directly under the summary. Rows are added one at
- * a time as facts become known — an unknown year is simply an absent row rather
- * than a visible blank or a guess, so the block is always truthful at whatever
- * level of completeness it happens to be at.
- */
+     * When, how long, and with whom -- one line, no labels.
+     *
+     * Each phrase is unbreakable and the dot belongs to the phrase that FOLLOWS
+     * it, so a wrap can never strand a separator on a line of its own.
+     */
+.project-context {
+    color: var(--muted);
+    font-size: clamp(13px, 1.5vw, 13.5px);
+    line-height: 1.55;
+    /*
+     * Close enough to read as a caption on the description rather than as the
+     * next thing after it. NOTE this is only half the distance: it collapses
+     * against .project-summary's own 25px bottom margin, and the larger of the
+     * two wins, so on its own this value changes nothing. The page that wants
+     * them closer drops that margin as well.
+     */
+    margin-top: 10px;
+}
+
+.project-context>span {
+    white-space: nowrap;
+}
+
+.project-context>span+span::before {
+    content: "\00b7\00a0";
+}
+
+/*
+     * Tools, and the line closing the introduction. The rule is BELOW the block:
+     * above, it separated the summary from its own metadata, which are one
+     * thought. The top padding is the gap from the context line.
+     */
 .project-meta {
-    border-top: 1px solid var(--border);
+    border-bottom: 1px solid var(--border);
     display: flex;
     flex-wrap: wrap;
     gap: 0 clamp(32px, 5vw, 72px);
     margin-bottom: 64px;
-    padding-top: 20px;
+    padding-bottom: 24px;
+    padding-top: 26px;
 }
 
 .project-meta-row {
@@ -506,25 +625,60 @@
 
 /* Project navigation */
 
+/*
+     * Two groups under one rule. flex rather than fixed columns, so each takes the
+     * width its own name needs and the pair wraps to separate rows rather than
+     * either name breaking mid-title.
+     */
 .project-nav {
     border-top: 1px solid var(--border);
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0 clamp(24px, 4vw, 72px);
     margin-top: clamp(64px, 8vw, 112px);
 }
 
+/*
+     * A group is a link, not a label beside one; the padding is most of the touch
+     * target. A column, so the label stays tied to its title -- laid out as a row
+     * it aligned on the baseline, and a wrapped baseline opened ~27px between the
+     * two lines.
+     */
 .project-nav-link {
-    align-items: baseline;
     color: var(--text);
     display: flex;
-    flex-wrap: wrap;
-    gap: 4px 24px;
-    justify-content: space-between;
+    flex-direction: column;
+    gap: 8px;
     padding: 26px 0;
     text-decoration: none;
-    transition: padding 0.35s var(--ease), color 0.25s ease;
+    transition: color 0.25s ease;
 }
 
-.project-nav-link:hover {
-    padding-left: 14px;
+.project-nav-link.is-prev {
+    align-items: flex-start;
+    text-align: left;
+}
+
+/*
+ * margin-left does the aligning rather than justify-content, so this group sits
+ * against the right edge whether it is sharing a row with the other one or
+ * sitting on a row of its own.
+ */
+.project-nav-link.is-next {
+    align-items: flex-end;
+    margin-left: auto;
+    text-align: right;
+}
+
+/*
+     * Next is first in the markup so that, stacked on a phone, it sits on top and
+     * the tab order matches the screen. Side by side, `order` puts previous back
+     * on the left.
+     */
+@media (min-width: 621px) {
+    .project-nav-link.is-prev {
+        order: -1;
+    }
 }
 
 .project-nav-label {
@@ -532,18 +686,82 @@
     font-size: 11px;
     letter-spacing: 0.14em;
     text-transform: uppercase;
+    /* the arrow and its words are one thing; a break between them would leave a
+       stray glyph on a line of its own */
+    white-space: nowrap;
 }
 
+/* a plain horizontal arrow at the label's own weight, not a glyph in a circle
+   and not the diagonal that means "this leaves the site" */
+.project-nav-arrow {
+    letter-spacing: 0;
+}
+
+/*
+     * One line always: a name broken across two lines reads as two entries. The
+     * row above wraps a whole group instead, which is what keeps this keepable.
+     */
 .project-nav-title {
     font-family: var(--font-display);
-    font-size: clamp(19px, 2vw, 26px);
+    /*
+     * Scales with the viewport because the constraint is the longest NAME, not the
+     * screen: at 320px the longest title is 281px against a 282px column at 19px.
+     */
+    font-size: clamp(17px, 4.6vw, 26px);
     font-weight: 500;
     letter-spacing: -0.015em;
+    white-space: nowrap;
+}
+
+/*
+     * Hover and focus say the same thing. No underline -- the destination is
+     * visible without hovering, which is what a touchscreen needs.
+     */
+.project-nav-link:hover .project-nav-label,
+.project-nav-link:focus-visible .project-nav-label {
+    color: var(--muted);
 }
 
 .project-nav-link:focus-visible {
     outline: 2px solid var(--text);
     outline-offset: 3px;
+}
+
+/*
+ * Narrow enough that the two groups have wrapped onto rows of their own: close
+ * the gap the padding would otherwise double, and keep each one against its own
+ * side so the direction still reads. Still no second rule between them — the
+ * space does that work.
+ */
+/*
+     * Stacked: next above previous, each against its own side. A column rather
+     * than a wrapped row, so the order does not depend on whether the two names
+     * happen to fit one line.
+     */
+@media (max-width: 620px) {
+    .project-nav {
+        flex-direction: column;
+        gap: 0;
+    }
+
+    .project-nav-link {
+        gap: 6px;
+        padding: 16px 0;
+    }
+
+    /*
+     * Both groups on the content edge, labels and titles alike. The auto margin
+     * and right alignment the row layout uses are undone by name: an auto
+     * cross-axis margin outranks align-self in a column, so leaving it would
+     * push this group right whatever align-self said.
+     */
+    .project-nav-link.is-next,
+    .project-nav-link.is-prev {
+        align-items: flex-start;
+        align-self: flex-start;
+        margin-left: 0;
+        text-align: left;
+    }
 }
 
 .project-section {
@@ -632,15 +850,12 @@
     margin-block: clamp(72px, 9vw, 132px);
 
     /*
-     * ONE SIZE FOR EVERY UPRIGHT FRAME on this page, so the lead preview and
-     * the process viewer are the same object at the same scale rather than two
-     * boxes that happen to look alike.
+     * One size for every upright frame on this page, so the lead preview and the
+     * process viewer are the same object at the same scale.
      *
-     * The cap is a height cap expressed as a width: a max-height on a box with
-     * an aspect-ratio does not scale the box, it squashes it and lets
-     * object-fit crop the difference, so the limit has to be applied on the
-     * axis the ratio is derived from. The 100% wins on a narrow column and the
-     * cap wins on a short one, at every width, with no breakpoint needed.
+     * The cap is a height cap expressed as a width: max-height on a box with an
+     * aspect-ratio squashes it rather than scaling it, so the limit has to go on
+     * the axis the ratio is derived from.
      */
     --pm-upright-cap: 78vh;
     --pm-upright-width: min(100%, calc(var(--pm-upright-cap) * 3 / 4));
@@ -723,7 +938,7 @@
  * is the whole reason swapping the still for the clip costs no layout.
  */
 .pm-hero {
-    /* the shared upright sizing; see --pm-upright-width on .pm-section */
+    /* shared upright sizing; see --pm-upright-width on .pm-section */
     margin-inline: auto;
     max-width: var(--pm-upright-width);
 }
@@ -1232,6 +1447,41 @@
     margin-top: 18px;
 }
 
+/*
+     * A film served from this repository, in the same frame the embedded one uses.
+     *
+     * contain, not cover: the shared max-height leaves the frame slightly wider
+     * than the 9:16 it declares, and cover would take that difference out of the
+     * top and bottom of the film.
+     */
+.pm-film-frame video {
+    background-color: #000;
+    display: block;
+    height: 100%;
+    object-fit: contain;
+    width: 100%;
+}
+
+/* Playback failed; the frame keeps its shape and offers the file directly. */
+.pm-film-failed {
+    align-items: center;
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+    inset: 0;
+    justify-content: center;
+    padding: 24px;
+    position: absolute;
+    text-align: center;
+}
+
+.pm-film-failed p {
+    color: var(--muted);
+    font-size: 14px;
+    line-height: 1.6;
+    max-width: 28ch;
+}
+
 /* Responsive: process media */
 
 
@@ -1286,17 +1536,10 @@
 }
 
 /*
- * STACKED PAIR: two frames in one column, one tall frame beside them.
- *
- * The pair sets the height here, not the viewport: each of its frames keeps the
- * 3:4 the camera gave it, so neither is cropped at all, and the tall frame
- * spans the same single row, which is what makes all four outer corners meet.
- *
- * The tall column is twice the width of the pair on purpose. The pair's column
- * is w wide and 2 x (4w/3) + gap tall, so a frame beside it that is 2w wide
- * lands at about 3:4 as well — `cover` is left with roughly 5% to take off the
- * sides, and none off the top or bottom, at every width this layout is used at.
- */
+     * Stacked pair: two frames in one column beside one tall frame. The pair sets
+     * the height and the feature matches it, so the block has one bottom edge
+     * whatever the images' own ratios are.
+     */
 .pm-block.is-stacked-pair {
     grid-template-columns: minmax(0, 1fr) minmax(0, 2fr);
     grid-template-rows: auto;
@@ -1461,7 +1704,11 @@
     row-gap: clamp(6px, 0.7vw, 9px);
 }
 
-/* the metadata treatment the rest of the page uses for a number */
+/*
+ * The printed "01 / 04" is kept in the DOM but not shown -- the lit segment in
+ * the numbered rail already says which stage this is. The spoken count beside it
+ * is what a screen reader hears.
+ */
 .pm-count {
     color: rgba(255, 255, 255, 0.66);
     font-family: var(--font-display);
@@ -1491,25 +1738,70 @@
 }
 
 /*
- * The upper corner, clear of every line of the copy. A disc rather than the
- * bare glyph: the four clips run from near-black to bright plywood, and an icon
- * that survives one of them disappears into another.
- */
-.pm-viewer.is-overlay-copy .pm-controls {
-    left: auto;
-    right: clamp(6px, 0.9vw, 12px);
-    top: clamp(6px, 0.9vw, 12px);
+     * The frame is the control: one transparent button across the whole picture,
+     * above the overlay (which takes no pointer events), so a press on the copy
+     * and a press on the picture reach the same place. Still the native <button>
+     * from the corner, so Enter, Space, the accessible name and the focus ring
+     * are the browser's job.
+     */
+.pm-viewer.is-overlay-copy .pm-stage-toggle {
+    align-items: center;
+    background: none;
+    border: 0;
+    color: inherit;
+    cursor: pointer;
+    display: flex;
+    height: auto;
+    inset: 0;
+    justify-content: center;
+    padding: 0;
+    position: absolute;
+    /* the stage's gesture rules, not a new set: sideways is the carousel's,
+       up and down stays the page's */
+    touch-action: pan-y;
+    width: auto;
     z-index: 2;
 }
 
-.pm-viewer.is-overlay-copy .pm-controls .pm-btn {
+/*
+     * The glyph comes and goes; the button never does -- fading a CHILD is what
+     * keeps the target, the label and the focus ring alive through the fade. A
+     * disc because the clips run from near-black to bright plywood.
+     */
+.pm-viewer.is-overlay-copy .pm-stage-icon {
+    align-items: center;
     background-color: rgba(8, 8, 8, 0.5);
     border-radius: 50%;
     color: #fff;
+    display: flex;
+    height: 52px;
+    justify-content: center;
+    opacity: 0;
+    transition: opacity 0.28s ease;
+    width: 52px;
 }
 
-.pm-viewer.is-overlay-copy .pm-controls .pm-btn:hover {
-    background-color: rgba(8, 8, 8, 0.72);
+.pm-viewer.is-overlay-copy .pm-stage-icon svg {
+    height: 20px;
+    width: 20px;
+}
+
+/* Also while focused, or the ring would surround nothing once the hint faded. */
+.pm-viewer.is-overlay-copy .pm-stage-toggle.is-hinting .pm-stage-icon,
+.pm-viewer.is-overlay-copy .pm-stage-toggle:focus-visible .pm-stage-icon {
+    opacity: 1;
+}
+
+.pm-viewer.is-overlay-copy .pm-stage-toggle:focus-visible {
+    outline: 2px solid #fff;
+    outline-offset: -4px;
+}
+
+/* Reduced motion keeps the hint, without the fade. */
+@media (prefers-reduced-motion: reduce) {
+    .pm-viewer.is-overlay-copy .pm-stage-icon {
+        transition: none;
+    }
 }
 
 
@@ -1827,22 +2119,13 @@ p.pm-film-reflection-label {
 }
 
 /*
- * THE FIRST SCREEN.
- *
- * A minimum height rather than one large margin: at 1440x900 the opening needs
- * about 550px of it and at 1920x1080 about 740, and a single fixed figure that
- * clears the taller screen leaves a hole in the shorter one.
- *
- * 340px is everything this box is not: the navbar and page padding above it,
- * the Back link, and the media section's own ~130px of clearance below. The
- * intro's bottom margin collapses out of this box, so the section's margin is
- * what actually follows it -- measured, not assumed.
- *
- * Below about 830px of viewport the natural height already exceeds this, so the
- * rule stops applying and the spacing is what it always was: no hole on a short
- * laptop. Nothing is hidden, clipped, masked or taken out of flow -- the media
- * is only further down the page.
- */
+     * THE FIRST SCREEN. A minimum height rather than a large margin, so the media
+     * below starts under the fold: a margin here would collapse against the
+     * section's own larger margin-top and do nothing.
+     *
+     * Below ~830px of viewport the natural height already exceeds this and the
+     * rule stops applying, so a short laptop keeps its ordinary spacing.
+     */
 .kintsugi-opening {
     min-height: calc(100vh - 340px);
 }
@@ -1865,12 +2148,14 @@ p.pm-film-reflection-label {
 }
 
 /*
- * Two rules inside one opening compete. The full-width line below now does the
- * separating, so the short one over Tools goes -- its 20px of clearance stays,
- * because that was holding Tools off the summary, not decorating the border.
+ * Two rules inside one opening compete. This page already closes its
+ * introduction with a full-width line across the text AND the model, so the
+ * short one under Tools goes -- the clearance stays, because that was holding
+ * Tools off the context line above it, not decorating a border.
  */
 .kintsugi-intro .project-meta {
-    border-top: 0;
+    border-bottom: 0;
+    padding-bottom: 0;
 }
 
 /* .project-meta carried the gap down to the media; the wrapper carries it now */
@@ -1879,17 +2164,9 @@ p.pm-film-reflection-label {
 }
 
 /*
- * A reserved, portrait box. The height exists before the model does, so the
- * column never collapses and nothing below it moves when the points arrive.
- *
- * touch-action stays at auto ON PURPOSE. It was `none`, so that a touch-drag
- * would spin the vase rather than scroll -- but this box is a third of a
- * phone screen, and every touch that began on it was a touch that could not
- * scroll the page. The rotation is a pointer affordance; a finger scrolls.
- * Do not put `none` back without solving that.
- *
- * user-select still keeps a mouse drag from selecting the text beside it.
- */
+     * A reserved portrait box: the height exists before the model does, so the
+     * column never collapses and the page does not jump when the canvas arrives.
+     */
 .kintsugi-stage {
     aspect-ratio: 3 / 4;
     position: relative;

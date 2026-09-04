@@ -168,6 +168,20 @@
         let frame = null;
         let shown = false;
 
+                /*
+         * The label is read when the pointer arrives, so a target that rewrites it
+         * -- the process viewer says Pause while its clip runs -- would otherwise
+         * keep showing whatever it said on arrival. One observer on the element
+         * under the pointer, disconnected the moment it is not, with no polling.
+         */
+        let hovered = null;
+
+        const watcher = ('MutationObserver' in window) ? new MutationObserver(() => {
+            if (!shown || !hovered) return;
+            const label = hovered.dataset.cursorLabel;
+            if (box.textContent !== label) box.textContent = label;
+        }) : null;
+
         const draw = () => {
             frame = null;
 
@@ -214,6 +228,16 @@
             const label = target.dataset.cursorLabel;
             if (box.textContent !== label) box.textContent = label;
 
+            if (target !== hovered) {
+                if (watcher) {
+                    watcher.disconnect();
+                    watcher.observe(target, {
+                        attributes: true, attributeFilter: ['data-cursor-label']
+                    });
+                }
+                hovered = target;
+            }
+
             if (!shown) {
                 shown = true;
                 // place it before it fades in, or it would scale up from
@@ -226,6 +250,8 @@
         };
 
         const hide = () => {
+            if (watcher) watcher.disconnect();
+            hovered = null;
             if (!shown) return;
             shown = false;
             cursor.classList.remove('is-visible');
