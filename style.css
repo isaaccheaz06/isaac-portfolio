@@ -9,6 +9,28 @@
      * rather than typed slightly differently into two rules.
      */
     --chrome-bg: #121212;
+
+    /*
+     * The chrome does not end on a line. The navbar starts at that charcoal and
+     * fades into the page underneath it, and the footer rises back out of the
+     * page into the same charcoal — the two colours above, declared once here
+     * rather than written into both rules.
+     */
+    --chrome-fade-down: linear-gradient(to bottom, var(--chrome-bg), var(--bg));
+
+    /*
+     * The foot of the page, one step above the chrome grey. The footer is the
+     * other end of the header's idea but it is a destination rather than a lid,
+     * so it does not merely return to the chrome: it starts at the page's own
+     * black, passes through that grey about a third of the way down and finishes
+     * here, which is what makes the block read as somewhere you have arrived.
+     */
+    --chrome-deep: #1e1e1e;
+    --footer-fade: linear-gradient(180deg,
+            var(--bg) 0%,
+            var(--chrome-bg) 38%,
+            var(--chrome-deep) 100%);
+
     --text: #f2f2f2;
     --muted: #a1a1a1;
     --faint: #7a7a7a;
@@ -182,6 +204,12 @@ body>main {
      * layer on every scroll frame — cost with no payoff.
      */
     background-color: var(--chrome-bg);
+    /*
+     * ...and it does not stop dead either: the charcoal above fades to the page
+     * colour by the header's own bottom edge, so there is no rectangle sitting
+     * on top of the hero. The colour underneath stays as the fallback.
+     */
+    background-image: var(--chrome-fade-down);
     display: flex;
     justify-content: space-between;
     padding: 22px var(--gutter);
@@ -196,13 +224,20 @@ body>main {
     transform: translateY(-100%);
 }
 
+/*
+ * ONE TREATMENT FOR EVERY LABEL IN THE HEADER: uppercase, the page's own white,
+ * and tracking wide enough to keep capitals legible without spacing them out
+ * like the section labels. The name keeps its own size and weight, so the header
+ * is exactly as tall as it was.
+ */
 .logo {
     color: var(--text);
     font-family: var(--font-display);
     font-size: 17px;
     font-weight: 600;
-    letter-spacing: -0.01em;
+    letter-spacing: 0.14em;
     text-decoration: none;
+    text-transform: uppercase;
 }
 
 .nav-links {
@@ -212,19 +247,31 @@ body>main {
 
 .nav-links a,
 .nav-resume {
-    color: var(--muted);
-    font-size: 15px;
+    color: var(--text);
+    font-size: 13px;
+    font-weight: 500;
+    letter-spacing: 0.14em;
     text-decoration: none;
-    transition: color 0.5s ease;
+    text-transform: uppercase;
+    transition: opacity 0.35s ease;
 }
 
+/*
+ * The links are already the brightest white on the page, so hover steps down
+ * instead of up. Opacity rather than a second grey: one value, and it cannot
+ * land on a colour that fails against the chrome.
+ */
 .nav-links a:hover,
 .nav-resume:hover {
-    color: var(--text);
+    opacity: 0.62;
 }
 
+/*
+ * A LABEL, NOT A GREY ONE. It reads as secondary because it is 13px and widely
+ * tracked against a 74px headline, not because it has been dimmed.
+ */
 .eyebrow {
-    color: var(--faint);
+    color: var(--text);
     font-size: 13px;
     letter-spacing: 0.14em;
     margin-bottom: 28px;
@@ -432,8 +479,10 @@ main [id] {
 
 /* One footer on every page, and the only contact block on the site. */
 .footer {
-    background-color: var(--chrome-bg);
-    border-top: 1px solid var(--border);
+    /* the colour underneath is the gradient's own last stop, so nothing can show
+       as a strip below it */
+    background-color: var(--chrome-deep);
+    background-image: var(--footer-fade);
     color: var(--faint-on-surface);
     padding: clamp(36px, 3.4vw, 52px) var(--gutter) clamp(22px, 1.8vw, 28px);
     scroll-margin-top: var(--navbar-height);
@@ -521,7 +570,7 @@ main [id] {
 
 /* Held at 13px. */
 .footer-col-label {
-    color: var(--faint-on-surface);
+    color: var(--text);
     font-family: var(--font-display);
     font-size: 13px;
     font-weight: 500;
@@ -555,27 +604,22 @@ main [id] {
  */
 .footer-col a,
 .footer-top-link {
-    color: var(--muted);
+    color: var(--text);
     display: inline-block;
     margin-block: -9px;
     padding-block: 9px;
     text-decoration: none;
-    transition: transform 0.3s var(--ease), color 0.25s ease;
-}
-
-.footer-col a:hover,
-.footer-top-link:hover {
-    color: var(--text);
-    transform: translateX(5px);
+    transition: transform 0.3s var(--ease);
 }
 
 /*
- * Quieter than the three above it, because it is the only link here that goes
- * nowhere new. --faint-on-surface rather than --faint: 5.43:1 on the chrome grey
- * against --faint's 4.36, which does not clear AA there.
+ * The links no longer have a grey to come up out of, so the step is the one that
+ * was always there underneath it: five pixels to the right, towards where the
+ * link goes.
  */
-.footer-top-link {
-    color: var(--faint-on-surface);
+.footer-col a:hover,
+.footer-top-link:hover {
+    transform: translateX(5px);
 }
 
 /* No rule above it: the footer's border-top is the block's one boundary. */
@@ -627,16 +671,16 @@ main [id] {
     }
 
     .logo {
-        font-size: 15px;
+        font-size: 14px;
     }
 
     .nav-links {
-        gap: 16px;
+        gap: 14px;
     }
 
     .nav-links a,
     .nav-resume {
-        font-size: 13px;
+        font-size: 11px;
     }
 
     .section {
@@ -645,10 +689,27 @@ main [id] {
 }
 
 /*
- * Below 354px "Isaac Cheaz" wraps onto two lines. The navbar is space-between
- * with five text items across it, and the logo is the only one that CAN wrap —
- * the others are single words.
+ * Six text items across a phone, all of them now uppercase and tracked, and the
+ * logo is the only one that CAN wrap — the others are single words. Below these
+ * widths the tracking comes in a little rather than the words breaking.
  */
+@media (max-width: 480px) {
+    .logo {
+        font-size: 13px;
+        letter-spacing: 0.1em;
+    }
+
+    .nav-links {
+        gap: 12px;
+    }
+
+    .nav-links a,
+    .nav-resume {
+        font-size: 10.5px;
+        letter-spacing: 0.1em;
+    }
+}
+
 @media (max-width: 359px) {
     .navbar {
         gap: 8px;
@@ -656,11 +717,18 @@ main [id] {
     }
 
     .logo {
-        font-size: 14px;
+        font-size: 12px;
+        letter-spacing: 0.08em;
     }
 
     .nav-links {
-        gap: 10px;
+        gap: 9px;
+    }
+
+    .nav-links a,
+    .nav-resume {
+        font-size: 10px;
+        letter-spacing: 0.08em;
     }
 }
 

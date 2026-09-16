@@ -2,60 +2,16 @@
  * HOMEPAGE BEHAVIOUR. Loaded only by index.html, before js/site.js so the
  * cards and the portrait exist by the time the reveal observer runs.
  *
- * Card parallax, the magnetic title and its wave, the typewriter, the hero
- * director that sequences them, the View Work float, the comet canvas, and
- * the card and portrait media rendered from window.SITE_MEDIA.
+ * The magnetic title and its wave, the typewriter, the hero director that
+ * sequences them, the View Work float, and the card and portrait media rendered
+ * from window.SITE_MEDIA.
  */
 (function () {
     'use strict';
 
-    /* Featured-card interaction */
-
-    /*
-     * Each card drifts against the cursor by an amount set by its data-depth, on top
-     * of the static rotation it already carries in CSS.
-     */
-    const featured = document.getElementById('featured');
+    /* Shared queries: several blocks below decline to run under either. */
     const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
     const coarsePointer = window.matchMedia('(pointer: coarse)');
-
-    if (featured && !reduceMotion.matches && !coarsePointer.matches) {
-        const cards = [...featured.querySelectorAll('.feature')].map((card) => ({
-            el: card,
-            depth: Number(card.dataset.depth) || 1
-        }));
-
-        let frame = null;
-
-        featured.addEventListener('mousemove', (event) => {
-            if (frame) return;
-
-            frame = requestAnimationFrame(() => {
-                frame = null;
-                const bounds = featured.getBoundingClientRect();
-                const offsetX = (event.clientX - bounds.left) / bounds.width - 0.5;
-                const offsetY = (event.clientY - bounds.top) / bounds.height - 0.5;
-
-                for (const { el, depth } of cards) {
-                    /*
-                     * Two variables, not a transform. .feature composes these with
-                     * the card's tilt and with the scroll reveal, so the drift no
-                     * longer has to carry the tilt along with it — and cannot
-                     * flatten a reveal that is still in flight.
-                     */
-                    el.style.setProperty('--drift-x', `${-offsetX * depth * 16}px`);
-                    el.style.setProperty('--drift-y', `${-offsetY * depth * 16}px`);
-                }
-            });
-        });
-
-        featured.addEventListener('mouseleave', () => {
-            for (const { el } of cards) {
-                el.style.removeProperty('--drift-x');
-                el.style.removeProperty('--drift-y');
-            }
-        });
-    }
 
     /* The hero stage */
     const heroStage = {
@@ -549,10 +505,10 @@
     /* Hero interactions: View Work float */
 
     /*
-     * The primary action hovers, continuously, by five pixels. Get in touch does
-     * not, which is the whole point: two buttons that both moved would rank neither.
+     * The hero's one action hovers, continuously, by five pixels — a standing
+     * invitation on the only button between the headline and the work.
      */
-    const heroFloat = document.querySelector('.hero-actions .button:not(.button-ghost)');
+    const heroFloat = document.querySelector('.hero-actions .button');
 
     if (heroFloat) {
         heroStage.bob = {
@@ -830,213 +786,6 @@
 
             document.addEventListener('visibilitychange', syncClips);
         }
-    }
-
-
-    /* Decorative canvas */
-
-    const COMETS = {
-        count: 14,           // desktop
-        countNarrow: 7,      // below tabletWidth
-        disableBelow: 768,   // viewport px; at or under this there are no comets
-        tabletWidth: 1100,
-
-        /*
-         * One shared heading for every comet — they fall as a single field rather
-         * than scattering, the way a meteor shower reads from the ground. 0.22π is
-         * about 40° below horizontal, travelling down and to the right.
-         */
-        angle: Math.PI * 0.22,
-
-        /*
-         * Depth. Each comet is assigned a value from 0 (far) to 1 (near), and every
-         * property below is interpolated between its far and near end from that
-         * single number.
-         */
-        sizeFar: 0.45,
-        sizeNear: 1.9,
-        speedFar: 0.07,
-        speedNear: 0.38,
-        tailFar: 28,
-        tailNear: 130,
-        alphaFar: 0.05,
-        // ceiling on a comet's opacity, reached only by the nearest ones. At 0.22
-        // the brightest pixel a comet can put behind the headline still leaves the
-        // text above 10:1 contrast, so the effect cannot push type out of WCAG
-        // range however the comets land.
-        alphaNear: 0.22,
-
-        /*
-         * Independent speed variation on top of depth. Without this every comet at a
-         * given size moves at exactly one speed and the field looks mechanical; this
-         * lets two comets the same size still travel at noticeably different rates,
-         * so some clearly outrun others.
-         */
-        speedJitterMin: 0.65,
-        speedJitterMax: 1.45,
-
-        colour: '242, 242, 242'
-    };
-
-    const heroWithComets = document.querySelector('.hero.has-comets');
-
-    if (heroWithComets && !reduceMotion.matches && window.innerWidth > COMETS.disableBelow) {
-        const canvas = document.createElement('canvas');
-        canvas.className = 'hero-comet-canvas';
-        // decorative only: out of the a11y tree, and pointer-events:none in CSS
-        // so it can never swallow a click meant for the hero buttons
-        canvas.setAttribute('aria-hidden', 'true');
-        heroWithComets.insertBefore(canvas, heroWithComets.firstChild);
-
-        const ctx = canvas.getContext('2d');
-        let comets = [];
-        let cometWidth = 0;
-        let cometHeight = 0;
-        let cometFrame = null;
-        let heroOnScreen = true;
-
-        const rand = (min, max) => min + Math.random() * (max - min);
-
-        const lerp = (a, b, t) => a + (b - a) * t;
-
-        // shared heading, so the whole field falls on one inclination
-        const dirX = Math.cos(COMETS.angle);
-        const dirY = Math.sin(COMETS.angle);
-
-        const seed = (comet, fresh) => {
-            /*
-             * One depth value drives everything. Squaring the random keeps most
-             * comets toward the far end, so the near, bright, fast ones stay
-             * occasional — a field of uniformly close comets would be loud.
-             */
-            const depth = Math.pow(Math.random(), 2);
-
-            const speed = lerp(COMETS.speedFar, COMETS.speedNear, depth)
-                * rand(COMETS.speedJitterMin, COMETS.speedJitterMax);
-
-            comet.vx = dirX * speed;
-            comet.vy = dirY * speed;
-            comet.tail = lerp(COMETS.tailFar, COMETS.tailNear, depth);
-            comet.alpha = lerp(COMETS.alphaFar, COMETS.alphaNear, depth);
-            comet.size = lerp(COMETS.sizeFar, COMETS.sizeNear, depth);
-
-            if (fresh) {
-                comet.x = rand(0, cometWidth);
-                comet.y = rand(0, cometHeight);
-            } else {
-                /* Re-enter from the top or left edge, matching travel direction. */
-                const margin = COMETS.tailNear;
-                if (Math.random() < 0.5) {
-                    comet.x = rand(-margin, cometWidth);
-                    comet.y = -margin;
-                } else {
-                    comet.x = -margin;
-                    comet.y = rand(-margin, cometHeight);
-                }
-            }
-            return comet;
-        };
-
-        /*
-         * The disableBelow check also lives here, not just at start-up: a desktop
-         * window dragged narrow would otherwise keep painting comets at a width
-         * where a phone would never have been given any.
-         */
-        const populate = () => {
-            let count = COMETS.count;
-            if (window.innerWidth <= COMETS.disableBelow) count = 0;
-            else if (window.innerWidth < COMETS.tabletWidth) count = COMETS.countNarrow;
-            comets = Array.from({ length: count }, () => seed({}, true));
-        };
-
-        const resizeComets = () => {
-            const rect = heroWithComets.getBoundingClientRect();
-            // cap the backing store at 2x; past that costs fill rate for no
-            // visible gain on an effect this faint
-            const dpr = Math.min(window.devicePixelRatio || 1, 2);
-            cometWidth = rect.width;
-            cometHeight = rect.height;
-            canvas.width = Math.round(cometWidth * dpr);
-            canvas.height = Math.round(cometHeight * dpr);
-            canvas.style.width = cometWidth + 'px';
-            canvas.style.height = cometHeight + 'px';
-            ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
-            populate();
-        };
-
-        const drawComets = () => {
-            ctx.clearRect(0, 0, cometWidth, cometHeight);
-
-            for (const c of comets) {
-                c.x += c.vx;
-                c.y += c.vy;
-
-                if (c.x - c.tail > cometWidth || c.y - c.tail > cometHeight) seed(c, false);
-
-                /*
-                 * Every comet shares one heading, so the tail is just the unit
-                 * direction scaled by this comet's length.
-                 */
-                const tailX = c.x - dirX * c.tail;
-                const tailY = c.y - dirY * c.tail;
-
-                const gradient = ctx.createLinearGradient(c.x, c.y, tailX, tailY);
-                gradient.addColorStop(0, 'rgba(' + COMETS.colour + ', ' + c.alpha + ')');
-                gradient.addColorStop(1, 'rgba(' + COMETS.colour + ', 0)');
-
-                ctx.strokeStyle = gradient;
-                ctx.lineWidth = c.size;
-                ctx.lineCap = 'round';
-                ctx.beginPath();
-                ctx.moveTo(c.x, c.y);
-                ctx.lineTo(tailX, tailY);
-                ctx.stroke();
-            }
-
-            cometFrame = requestAnimationFrame(drawComets);
-        };
-
-        const startComets = () => {
-            if (cometFrame === null) cometFrame = requestAnimationFrame(drawComets);
-        };
-
-        const stopComets = () => {
-            if (cometFrame !== null) {
-                cancelAnimationFrame(cometFrame);
-                cometFrame = null;
-            }
-        };
-
-        // no work at all while the hero is scrolled away or the tab is in the
-        // background: the loop is cancelled, not merely skipped
-        const syncComets = () => {
-            if (heroOnScreen && !document.hidden) startComets();
-            else stopComets();
-        };
-
-        resizeComets();
-        window.addEventListener('resize', resizeComets);
-        document.addEventListener('visibilitychange', syncComets);
-
-        if ('IntersectionObserver' in window) {
-            new IntersectionObserver((entries) => {
-                heroOnScreen = entries[0].isIntersecting;
-                syncComets();
-            }, { threshold: 0 }).observe(heroWithComets);
-        }
-
-        // reduced motion can be switched on while the page is already open
-        if (reduceMotion.addEventListener) {
-            reduceMotion.addEventListener('change', (e) => {
-                if (!e.matches) return;
-                stopComets();
-                window.removeEventListener('resize', resizeComets);
-                document.removeEventListener('visibilitychange', syncComets);
-                canvas.remove();
-            });
-        }
-
-        syncComets();
     }
 
 }());

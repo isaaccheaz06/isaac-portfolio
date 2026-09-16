@@ -26,6 +26,7 @@
         <nav class="nav-links" aria-label="Primary">
             <a href="#work">Work</a>
             <a href="#about">About</a>
+            <a href="#contact">Contact</a>
             <a href="https://docs.google.com/document/d/11qATXeMCFB1Io2WauJywyM81skCrmu7SGtFiiL8NM3w/view"
                 class="nav-resume" target="_blank" rel="noopener noreferrer"
                 aria-label="Resume preview, opens in a new tab">Resume</a>
@@ -34,7 +35,7 @@
 
     <main id="top">
 
-        <section class="hero has-comets">
+        <section class="hero">
             <!--
               .typewriter-sizer holds the longest phrase, laid out but hidden, so
               the box never resizes while typing. The visible half is aria-hidden
@@ -51,9 +52,9 @@
                 <span class="visually-hidden">Hi, I&rsquo;m Isaac Welcome to my portfolio...</span>
             </p>
             <h1 class="hero-title magnetic-text">
-                <span class="line-mask"><span class="line-inner">I design and prototype</span></span>
-                <span class="line-mask"><span class="line-inner">useful products and</span></span>
-                <span class="line-mask"><span class="line-inner">interactive experiences</span></span>
+                <!-- One line, wrapped by the browser: js/home.js splits this text on
+                     spaces, so a break inside it would become part of a word. -->
+                <span class="line-mask"><span class="line-inner">i&rsquo;m a student exploring how products are designed, built, and used.</span></span>
             </h1>
 
             <div class="hero-actions" data-reveal>
@@ -61,7 +62,6 @@
                 <span class="button-float">
                     <a href="#work" class="button">View Work</a>
                 </span>
-                <a href="#contact" class="button button-ghost">Get in touch</a>
             </div>
         </section>
 
@@ -73,50 +73,34 @@
             <!-- Featured projects -->
             <div class="featured" id="featured" data-reveal-stagger="80">
 
-                <a class="feature feature-1" data-reveal data-cursor-label="VIEW" href="projects/digital-kintsugi.html"
-                    data-project="digital-kintsugi" data-depth="1.2">
+                <a class="feature" data-reveal data-cursor-label="VIEW" href="projects/digital-kintsugi.html"
+                    data-project="digital-kintsugi">
                     <span class="feature-body">
-                        <span class="feature-top">
-                            <span class="feature-index" aria-hidden="true">01</span>
-                            <span class="feature-descriptor">Digital Fabrication</span>
-                        </span>
                         <span class="feature-title">Digital Kintsugi</span>
                         <span class="feature-tools">Rhino · 3D Scanning · Ceramic 3D Printing · FDM 3D
                             Printing</span>
                     </span>
                 </a>
 
-                <a class="feature feature-2" data-reveal data-cursor-label="VIEW" href="projects/museum-npc.html"
-                    data-project="museum-npc" data-depth="0.8">
+                <a class="feature" data-reveal data-cursor-label="VIEW" href="projects/museum-npc.html"
+                    data-project="museum-npc">
                     <span class="feature-body">
-                        <span class="feature-top">
-                            <span class="feature-index" aria-hidden="true">02</span>
-                            <span class="feature-descriptor">Interactive Systems</span>
-                        </span>
                         <span class="feature-title">如是觀 – "This Way of Seeing It"</span>
                         <span class="feature-tools">Unity · Ollama · Local LLMs</span>
                     </span>
                 </a>
 
-                <a class="feature feature-3" data-reveal data-cursor-label="VIEW" href="projects/suzume-cnc-stool.html"
-                    data-project="suzume-cnc-stool" data-depth="1.1">
+                <a class="feature" data-reveal data-cursor-label="VIEW" href="projects/suzume-cnc-stool.html"
+                    data-project="suzume-cnc-stool">
                     <span class="feature-body">
-                        <span class="feature-top">
-                            <span class="feature-index" aria-hidden="true">03</span>
-                            <span class="feature-descriptor">Product &amp; Fabrication</span>
-                        </span>
                         <span class="feature-title">Suzume-Inspired Stool</span>
                         <span class="feature-tools">Rhino · Carbide Create · CNC Machining</span>
                     </span>
                 </a>
 
-                <a class="feature feature-4" data-reveal data-cursor-label="VIEW"
-                    href="projects/butterfly-pavilion.html" data-project="butterfly-pavilion" data-depth="0.9">
+                <a class="feature" data-reveal data-cursor-label="VIEW"
+                    href="projects/butterfly-pavilion.html" data-project="butterfly-pavilion">
                     <span class="feature-body">
-                        <span class="feature-top">
-                            <span class="feature-index" aria-hidden="true">04</span>
-                            <span class="feature-descriptor">Parametric Design</span>
-                        </span>
                         <span class="feature-title">Butterfly Pavilion</span>
                         <span class="feature-tools">Rhino · Grasshopper · Laser Cutting</span>
                     </span>
@@ -126,23 +110,23 @@
 
             <!-- Explore by discipline -->
             <nav class="disciplines" aria-labelledby="disciplines-title" data-reveal>
-                <h3 class="disciplines-title" id="disciplines-title">Explore by discipline</h3>
+                <h3 class="disciplines-title" id="disciplines-title">Areas I&rsquo;m Exploring</h3>
                 <ul class="disciplines-list">
                     <li>
                         <div class="discipline-row" data-cursor-label="IN PROGRESS">
-                            <span class="discipline-name">Product &amp; Fabrication</span>
+                            <span class="discipline-name">UX/UI Design</span>
+                            <span class="visually-hidden">In progress</span>
+                        </div>
+                    </li>
+                    <li>
+                        <div class="discipline-row" data-cursor-label="IN PROGRESS">
+                            <span class="discipline-name">Product &amp; Industrial Design</span>
                             <span class="visually-hidden">In progress</span>
                         </div>
                     </li>
                     <li>
                         <div class="discipline-row" data-cursor-label="IN PROGRESS">
                             <span class="discipline-name">Creative Technology</span>
-                            <span class="visually-hidden">In progress</span>
-                        </div>
-                    </li>
-                    <li>
-                        <div class="discipline-row" data-cursor-label="IN PROGRESS">
-                            <span class="discipline-name">UX &amp; Product Experience</span>
                             <span class="visually-hidden">In progress</span>
                         </div>
                     </li>
@@ -251,7 +235,7 @@
 
     <!--
       The same block on every page. It carries id="contact", which is what
-      the hero's "Get in touch" resolves to.
+      the navigation's Contact link resolves to.
 
       Markup in each file rather than injected by JavaScript: an address
       nobody can read with JavaScript off is not a contact detail.

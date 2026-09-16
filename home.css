@@ -5,10 +5,8 @@
  */
 
 /*
- * The cards are the one exception, because they already own their transform (see
- * .feature). The generic rule would replace it and take the tilt with it —
- * .is-revealed sets `transform: none`, which on a card means "and stop being
- * rotated".
+ * The cards are the one exception, because they compose their own transform (see
+ * .feature) out of the same two variables the generic rule animates.
  */
 .js-reveal .feature[data-reveal] {
     --reveal-scale: 0.985;
@@ -16,8 +14,7 @@
     opacity: 0;
     transition:
         opacity 700ms var(--ease),
-        transform 700ms var(--ease),
-        border-color 0.3s ease;
+        transform 700ms var(--ease);
 }
 
 .js-reveal .feature[data-reveal].is-revealed {
@@ -27,7 +24,7 @@
 }
 
 .js-reveal .feature[data-reveal].is-settled {
-    transition: transform 0.5s var(--ease), opacity 0.4s ease, border-color 0.3s ease;
+    transition: transform 0.5s var(--ease), opacity 0.4s ease;
 }
 
 .js-reveal .feature[data-reveal].is-resetting {
@@ -36,11 +33,6 @@
 
 @media (prefers-reduced-motion: reduce) {
 
-    /*
-     * No `transform: none` for a card: that is not "stop being offset", it is
-     * "stop being rotated", and the tilt is the composition rather than an
-     * animation.
-     */
     .js-reveal .feature[data-reveal],
     .js-reveal .feature[data-reveal].is-revealed {
         --reveal-scale: 1;
@@ -52,7 +44,31 @@
 
 /* Homepage hero */
 
+/*
+ * A CENTRED COMPOSITION, not one set against the left gutter. One measure,
+ * shared by the greeting, the headline and the buttons, puts all three in the
+ * same column: the headline and the buttons centre their own content inside it,
+ * and the greeting starts at that column's left edge rather than at the page
+ * gutter, which is what keeps it deliberately off-centre. The headline is one
+ * sentence the browser breaks itself, so the measure is what decides where: at the
+ * 74px ceiling its longest three-line break is 897px, so 920px is what keeps it to
+ * three lines. Under about 1070px the measure is simply the content width, so the
+ * hero keeps the gutters it had and the sentence takes the lines it needs.
+ */
 .hero {
+    --hero-measure: min(100%, 920px);
+
+    /*
+     * WHERE THE GREETING STARTS: not at the edge of the measure, but where the
+     * headline's last line does. That line is the longest of the three and runs
+     * 897px at the 74px ceiling, so it begins half of whatever slack is left
+     * inside the measure. max() pins the indent to nothing as soon as the
+     * measure is too narrow to hold that line — which is the same width at which
+     * the headline stops being three lines and the indent would mean nothing.
+     */
+    --greeting-indent: max(0px, calc((var(--hero-measure) - 897px) / 2));
+
+    align-items: center;
     display: flex;
     flex-direction: column;
     justify-content: center;
@@ -60,6 +76,16 @@
     overflow: hidden;
     padding: 90px var(--gutter) 120px;
     position: relative;
+}
+
+.hero>.eyebrow,
+.hero>.hero-title,
+.hero>.hero-actions {
+    width: var(--hero-measure);
+}
+
+.hero>.eyebrow {
+    padding-left: var(--greeting-indent);
 }
 
 /*
@@ -130,11 +156,13 @@
     font-weight: 600;
     letter-spacing: -0.035em;
     line-height: 1.02;
+    text-align: center;
+    text-wrap: balance;
 }
 
 /*
- * Mask-reveal on load: each line's outer span clips, the inner span slides up
- * from below it.
+ * Mask-reveal on load: the outer span clips, the inner span slides up from below
+ * it.
  */
 .hero-title .line-mask {
     display: block;
@@ -144,14 +172,6 @@
 .hero-title .line-inner {
     animation: reveal-line 0.7s var(--ease) both;
     display: block;
-}
-
-.hero-title .line-mask:nth-child(2) .line-inner {
-    animation-delay: 70ms;
-}
-
-.hero-title .line-mask:nth-child(3) .line-inner {
-    animation-delay: 140ms;
 }
 
 .hero-description {
@@ -207,6 +227,7 @@
     display: flex;
     flex-wrap: wrap;
     gap: 12px;
+    justify-content: center;
     margin-top: 44px;
 }
 
@@ -270,99 +291,60 @@
     }
 }
 
-.button-ghost {
-    background-color: transparent;
-    border-color: var(--border-strong);
-    color: var(--text);
-}
-
-.button-ghost:hover {
-    background-color: rgba(255, 255, 255, 0.06);
-    opacity: 1;
-}
-
-/* Hero comets */
-
-/*
- * Canvas for the comet background, created by js/home.js only when the hero
- * carries `has-comets`. Remove that class from index.html and no canvas is ever
- * inserted, so these rules simply stop applying. pointer-events:none is the
- * important one: the canvas covers the whole hero, including both buttons, and
- * without it every click in the hero would land on the canvas instead of the
- * link underneath.
- */
-.hero-comet-canvas {
-    inset: 0;
-    pointer-events: none;
-    position: absolute;
-    z-index: 0;
-}
-
-/*
- * Everything the hero actually says sits above the comets. Written as "every
- * hero child except the canvas" so adding another element to the hero later
- * cannot accidentally end up behind the effect.
- */
-.hero>*:not(.hero-comet-canvas) {
-    position: relative;
-    z-index: 1;
-}
-
 /* Featured work */
 
 /*
- * Content-driven grid, not a fixed-height canvas. This section was once `height:
- * 640px` with every tile absolutely positioned at a top%.
+ * Two equal columns with one gap between every pair, so the pictures in a row
+ * start and end on the same lines. The track set was twelve columns with a
+ * six-column span per card, which only existed so cards could be offset against
+ * each other; nothing is offset now. The columns sit close, the way plates do on
+ * a page; the rows stand well apart, because the gap there has a caption inside
+ * it and still has to read as space between two rows rather than as one list.
  */
 .featured {
     display: grid;
-    gap: clamp(20px, 3vw, 44px);
-    /* 12 columns so a 2-up (span 6) and a future 3-up (span 4) both divide */
-    grid-template-columns: repeat(12, minmax(0, 1fr));
+    gap: clamp(72px, 8vw, 140px) clamp(16px, 1.5vw, 28px);
+    grid-template-columns: repeat(2, minmax(0, 1fr));
     margin-top: 48px;
 }
 
 /*
  * The whole card is the link. Its children are spans, so the anchor stays valid
- * however the card is laid out.
+ * however the card is laid out. It carries no box of its own: the picture and
+ * the caption beneath it sit on the page's own background.
  */
 .feature {
-    background-color: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: 4px;
     color: var(--text);
     display: flex;
     flex-direction: column;
-    grid-column: span 6;
-    overflow: hidden;
-    position: relative;
     text-decoration: none;
-    /*
-     * THREE THINGS MOVE THIS CARD and they are all in this one function: the
-     * pointer drift (js/home.js, per frame), the scroll reveal, and the static
-     * tilt each card carries.
-     */
-    transform:
-        translate(var(--drift-x, 0px), calc(var(--drift-y, 0px) + var(--reveal-y, 0px))) rotate(var(--card-tilt, 0deg)) scale(var(--reveal-scale, 1));
-    transition: transform 0.5s var(--ease), opacity 0.4s ease, border-color 0.3s ease;
+    /* THE SCROLL REVEAL, AND NOTHING ELSE. A resting card is not transformed. */
+    transform: translateY(var(--reveal-y, 0px)) scale(var(--reveal-scale, 1));
+    transition: transform 0.5s var(--ease), opacity 0.4s ease;
     will-change: transform;
 }
 
 /*
  * Optional media. Absent by default — the card is typographic and reads as
  * finished with no image, so nothing here reserves empty space until a real file
- * is dropped in.
+ * is dropped in. When there is one it is the whole top of the card, at a fixed
+ * 4:3, so every picture on the grid is the same shape whatever its file measures.
  */
 .feature-media {
+    aspect-ratio: 4 / 3;
+    /* nearly square: enough to take the pinpoint off the corner, not enough to
+       read as a rounded card. The picture and the veil inherit it, so the three
+       are clipped to one shape. */
+    border-radius: 2px;
     display: block;
-    inset: 0;
     line-height: 0;
     overflow: hidden;
-    position: absolute;
+    position: relative;
 }
 
 .feature-media img,
 .feature-media video {
+    border-radius: inherit;
     display: block;
     height: 100%;
     object-fit: cover;
@@ -377,163 +359,110 @@
 }
 
 /*
- * One flat wash, never a gradient. A gradient would be doing the same job at the
- * bottom while quietly restyling the top of every photograph; a uniform veil
- * treats the picture as one surface and leaves its composition alone.
- */
-.feature-media::after {
-    background-color: var(--card-veil);
-    content: "";
-    inset: 0;
-    position: absolute;
-    transition: background-color 0.35s ease;
-}
-
-/*
- * A fixed 4:3, so cards keep a common shape however long their titles run.
- * max-width, not min-height.
- */
-.feature.has-media {
-    aspect-ratio: 4 / 3;
-    max-width: 100%;
-}
-
-/*
- * The type drops to the foot of the picture. z-index puts it over the veil,
- * which lives inside .feature-media — hence the stacking context here.
- */
-.feature.has-media .feature-body {
-    justify-content: flex-end;
-    position: relative;
-    z-index: 1;
-}
-
-.feature.has-media .feature-top {
-    color: var(--on-card-media);
-}
-
-.feature.has-media .feature-index::after {
-    color: rgba(242, 242, 242, 0.5);
-}
-
-.feature.has-media .feature-title {
-    color: var(--text);
-}
-
-/*
- * The tools line comes off a picture card. At 13px in --muted it measures 2.5:1
- * over the veiled image and there is no weight it can take that would both pass
- * and stay secondary to the title — and a wall of tool names is the "competing
- * interface element" this treatment is meant to remove.
- */
-.feature.has-media .feature-tools {
-    display: none;
-}
-
-/*
  * Per-image framing. The default above is centre and a project only needs a line
  * here when its subject is not — but state it either way, so a later re-crop
  * cannot silently move the object out of frame. digital-kintsugi: the card file
- * is 1200x900, exactly the card's own 4:3, so cover has nothing to crop and
- * centre is exact.
+ * is 1200x900, exactly the picture box's own 4:3, so cover has nothing to crop
+ * and centre is exact. museum-npc is the one file wider than 4:3 (2000x1210) and
+ * its scroll hangs in the middle, so the crop it takes off each side is safe.
  */
 .feature[data-project="digital-kintsugi"] .feature-media img {
     object-position: 50% 50%;
 }
 
 /*
- * Generous padding is what makes an image-less card look deliberate rather than
- * unfinished: the type gets room instead of sitting in a thin strip.
+ * The caption, directly under the picture and aligned to its edges. The title is
+ * all of it that is permanent: the number and the discipline that used to run
+ * above it are gone from the markup, and on a pointer device the tools move onto
+ * the picture itself (below).
  */
 .feature-body {
-    display: flex;
-    flex: 1;
-    flex-direction: column;
-    padding: clamp(22px, 2.6vw, 34px);
-}
-
-/* With a picture above it, the type can sit closer to the image. */
-.feature.has-media .feature-body {
-    padding-top: clamp(18px, 2vw, 24px);
-}
-
-.feature-top {
-    align-items: baseline;
-    color: var(--faint-on-surface);
-    display: flex;
-    flex-wrap: wrap;
-    gap: 6px 14px;
-    font-size: 11px;
-    letter-spacing: 0.13em;
-    text-transform: uppercase;
+    padding-top: 14px;
 }
 
 /*
- * A running number gives each card a fixed visual anchor in the corner, which is
- * what an image would otherwise provide.
+ * Uppercased in CSS, so the names stay written properly in the markup for a
+ * screen reader and for anywhere else they are reused, and so the Chinese in
+ * museum-npc's title is left exactly as it is written. The tracking is the small
+ * positive one uppercase needs to breathe, not the 0.13em the labels beside it
+ * carry, and the size sits below the section headings rather than competing.
  */
-.feature-index {
-    font-variant-numeric: tabular-nums;
-}
-
-.feature-index::after {
-    color: var(--border-strong);
-    content: "/";
-    margin-left: 14px;
-}
-
-.feature-descriptor,
-.feature-year {
-    display: inline-block;
-}
-
 .feature-title {
     display: block;
     font-family: var(--font-display);
-    font-size: clamp(21px, 2.1vw, 28px);
+    font-size: clamp(16px, 1.5vw, 20px);
     font-weight: 500;
-    letter-spacing: -0.02em;
-    line-height: 1.2;
-    margin-top: 14px;
+    letter-spacing: 0.03em;
+    line-height: 1.3;
+    text-transform: uppercase;
     text-wrap: balance;
 }
 
+/*
+ * The tools, and where they sit depends on whether this visitor can hover. This
+ * is the answer for the one who cannot: a quiet second line under the title,
+ * permanently, because a tap has to open the project rather than spend itself
+ * revealing something.
+ */
 .feature-tools {
     color: var(--muted);
     display: block;
     font-size: 13px;
     line-height: 1.55;
-    /* margin-top:auto pins tools to the bottom so cards of differing title
-       length still line their tool lists up with one another */
-    margin-top: auto;
-    padding-top: 28px;
+    padding-top: 6px;
 }
 
 /*
- * Subtle rotation, carried over from the previous collage. Offsets are margins
- * rather than absolute tops, so they push the grid's own height instead of
- * floating free of it.
+ * And this is the answer for a mouse. The tools lift off the caption onto the
+ * foot of the picture, over a wash that deepens to carry them: 8% at rest, which
+ * is only there to take the glare off a bright photograph on a black page, and
+ * 50% while the card is hovered or focused, which puts --text at about 5.3:1
+ * over the brightest place the text lands in these four images. The overlay
+ * takes no pointer events, so the card is still one link and one tab stop.
  */
-.feature-1 {
-    --card-tilt: -1.4deg;
-    z-index: 3;
-}
+@media (hover: hover) and (pointer: fine) {
+    .feature.has-media {
+        position: relative;
+    }
 
-.feature-2 {
-    margin-top: clamp(18px, 3vw, 48px);
-    --card-tilt: 1.1deg;
-    z-index: 4;
-}
+    .feature-media::after {
+        background-color: rgba(10, 10, 10, 0.08);
+        border-radius: inherit;
+        content: "";
+        inset: 0;
+        position: absolute;
+        transition: background-color 0.25s ease;
+    }
 
-.feature-3 {
-    --card-tilt: 1.6deg;
-    z-index: 2;
-}
+    .feature.has-media:hover .feature-media::after,
+    .feature.has-media:focus-visible .feature-media::after {
+        background-color: rgba(10, 10, 10, 0.5);
+    }
 
-.feature-4 {
-    margin-top: clamp(10px, 2vw, 30px);
-    --card-tilt: -1deg;
-    z-index: 3;
+    /*
+     * Boxed by the same 4:3 the picture carries and pinned to the top of the
+     * card, so the overlay lands on the image exactly without anything needing
+     * to know how tall the caption beneath it runs.
+     */
+    .feature.has-media .feature-tools {
+        align-items: flex-end;
+        aspect-ratio: 4 / 3;
+        color: var(--text);
+        display: flex;
+        left: 0;
+        opacity: 0;
+        padding: clamp(14px, 1.6vw, 22px);
+        pointer-events: none;
+        position: absolute;
+        top: 0;
+        transition: opacity 0.25s ease;
+        width: 100%;
+    }
+
+    .feature.has-media:hover .feature-tools,
+    .feature.has-media:focus-visible .feature-tools {
+        opacity: 1;
+    }
 }
 
 .featured:hover .feature {
@@ -541,9 +470,7 @@
 }
 
 .featured .feature:hover {
-    border-color: var(--border-strong);
     opacity: 1;
-    z-index: 10;
 }
 
 /*
@@ -551,17 +478,15 @@
  * while the pointer is dimming the rest of the grid.
  */
 .featured .feature:focus-visible {
-    border-color: var(--border-strong);
     opacity: 1;
     outline: 2px solid var(--text);
     outline-offset: 3px;
-    z-index: 10;
 }
 
 /*
- * Restrained on purpose: a 1.04 push on the picture and one step of veil. Two
- * things already move on this grid — the pointer parallax and the sibling
- * dimming — so a third, larger motion would be noise.
+ * Restrained on purpose: a 1.04 push inside the picture's own box, so nothing
+ * around it moves and no neighbour reflows. The sibling dimming above is the
+ * other half of the hover, and between them that is enough.
  */
 .featured .feature.has-media:hover .feature-media img,
 .featured .feature.has-media:hover .feature-media video,
@@ -570,12 +495,7 @@
     transform: scale(1.04);
 }
 
-.featured .feature.has-media:hover .feature-media::after,
-.featured .feature.has-media:focus-visible .feature-media::after {
-    background-color: var(--card-veil-hover);
-}
-
-/* Explore by discipline */
+/* Areas I'm Exploring */
 
 /*
  * Secondary to the featured cards by construction: text links on a hairline
@@ -589,7 +509,7 @@
 }
 
 .disciplines-title {
-    color: var(--faint);
+    color: var(--text);
     font-family: var(--font-display);
     font-size: 14px;
     font-weight: 500;
@@ -608,11 +528,10 @@
  * nowhere to go yet, so they are divs rather than anchors.
  */
 .discipline-row {
-    color: var(--muted);
+    color: var(--text);
     display: block;
     padding-block: clamp(18px, 2vw, 26px);
     text-decoration: none;
-    transition: color 0.3s ease;
 }
 
 /*
@@ -634,14 +553,11 @@
     transition: transform 0.35s var(--ease);
 }
 
-.discipline-row:hover {
-    color: var(--text);
-}
-
 /*
- * The name moves, not the row. Shifting the anchor would carry the right edge
- * with it and push VIEW past the column; shifting the name alone reads as the
- * row leaning towards where it goes, which is the whole gesture.
+ * The name moves, not the row — and with the names set at full strength, this
+ * and the cursor label are the whole of the hover. Shifting the anchor would
+ * carry the right edge with it and push VIEW past the column; shifting the name
+ * alone reads as the row leaning towards where it goes.
  */
 .discipline-row:hover .discipline-name {
     transform: translateX(7px);
@@ -1047,19 +963,17 @@
         max-width: 320px;
     }
 
-    /* cards collapse to a stacked, un-rotated list */
+    /*
+     * Two columns for as long as a picture in one still reads as large, one
+     * below that. 300px is about where a 4:3 card stops being a picture and
+     * starts being a thumbnail, so that is where the row breaks rather than
+     * squeezing a second card in beside it.
+     */
     .featured {
-        gap: 16px;
-        grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
-    }
-
-    /* release the 12-column span — this grid has its own column count */
-    .feature {
-        grid-column: auto;
-        margin-top: 0;
-        /* !important because .feature-N sets transform at the same
-           specificity and would otherwise win on source order */
-        transform: none !important;
+        /* the desktop row gap is a desktop measurement: on one column it would
+           read as four separate sections rather than one list of four */
+        gap: clamp(44px, 7vw, 72px) clamp(16px, 1.5vw, 28px);
+        grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
     }
 
     /*
@@ -1144,5 +1058,11 @@
     .featured .feature.has-media:focus-visible .feature-media img,
     .featured .feature.has-media:focus-visible .feature-media video {
         transform: none;
+    }
+
+    /* the veil and the tools still arrive, they just do not fade in */
+    .feature-media::after,
+    .feature.has-media .feature-tools {
+        transition: none;
     }
 }
