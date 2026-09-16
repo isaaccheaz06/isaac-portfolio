@@ -1005,14 +1005,31 @@
     }
 
     /*
-     * The hero is the whole first screen on a phone, and at the desktop clamp
-     * floor (52px) three lines plus the eyebrow and buttons pushed everything
-     * else well below the fold.
+     * THE WHOLE FIRST SCREEN, AND NO MORE. Everything under the navbar, measured
+     * against the small viewport — the screen with the browser's own bars
+     * showing — so the work starts exactly at the fold on arrival. Not the
+     * dynamic unit: that one resizes as the address bar slides away, which would
+     * move everything below the hero in the middle of a scroll. 100vh first, for
+     * a browser with no svh; a minimum, so larger text can still take more room.
      */
     .hero {
-        min-height: 0;
+        min-height: calc(100vh - var(--navbar-height));
+        min-height: calc(100svh - var(--navbar-height));
         padding-bottom: 80px;
         padding-top: 60px;
+    }
+
+    /*
+     * The greeting centres over the headline here, rather than starting where the
+     * headline's last line does, and the indent that alignment needs goes with it.
+     * text-align reaches both halves of the typing line: the cell sized by the
+     * longer phrase centres in the paragraph, and whatever has been typed so far
+     * centres inside the cell — so the short phrase sits in the middle on its own
+     * account, not at the left of a box built for the long one.
+     */
+    .hero>.eyebrow {
+        padding-left: 0;
+        text-align: center;
     }
 
     .hero-title {

@@ -232,12 +232,16 @@ body>main {
  */
 .logo {
     color: var(--text);
+    /* the name is one unit: it never breaks over two lines, and it is never the
+       thing that gives way when the header runs short of room */
+    flex-shrink: 0;
     font-family: var(--font-display);
     font-size: 17px;
     font-weight: 600;
     letter-spacing: 0.14em;
     text-decoration: none;
     text-transform: uppercase;
+    white-space: nowrap;
 }
 
 .nav-links {
@@ -254,6 +258,7 @@ body>main {
     text-decoration: none;
     text-transform: uppercase;
     transition: opacity 0.35s ease;
+    white-space: nowrap;
 }
 
 /*
@@ -665,8 +670,15 @@ main [id] {
 
 @media (max-width: 620px) {
 
+    /*
+     * One row for as long as it fits. The 16px between the name and the links is
+     * a gap of its own rather than whatever space-between has left over, so it
+     * cannot close up when the row runs short — and if the row does run out,
+     * wrap sends the links down under the name instead of clipping anything.
+     */
     .navbar {
-        gap: 14px;
+        flex-wrap: wrap;
+        gap: 10px 16px;
         padding-inline: 5vw;
     }
 
@@ -675,6 +687,7 @@ main [id] {
     }
 
     .nav-links {
+        flex-wrap: wrap;
         gap: 14px;
     }
 
@@ -689,9 +702,10 @@ main [id] {
 }
 
 /*
- * Six text items across a phone, all of them now uppercase and tracked, and the
- * logo is the only one that CAN wrap — the others are single words. Below these
- * widths the tracking comes in a little rather than the words breaking.
+ * Five uppercase, tracked labels across a phone, none of which may break. Each
+ * step takes the room out of the tracking and the gaps before it touches the
+ * type, and each is sized to hold one row at the narrowest width it covers with
+ * a few pixels to spare, because a phone's own font rendering is not ours.
  */
 @media (max-width: 480px) {
     .logo {
@@ -710,15 +724,23 @@ main [id] {
     }
 }
 
-@media (max-width: 359px) {
-    .navbar {
-        gap: 8px;
-        padding-inline: 4vw;
+/* 375: the same type, set closer */
+@media (max-width: 389px) {
+    .logo,
+    .nav-links a,
+    .nav-resume {
+        letter-spacing: 0.08em;
     }
 
+    .nav-links {
+        gap: 10px;
+    }
+}
+
+/* 360: half a pixel off the type as well */
+@media (max-width: 374px) {
     .logo {
-        font-size: 12px;
-        letter-spacing: 0.08em;
+        font-size: 12.5px;
     }
 
     .nav-links {
@@ -728,7 +750,30 @@ main [id] {
     .nav-links a,
     .nav-resume {
         font-size: 10px;
-        letter-spacing: 0.08em;
+    }
+}
+
+/*
+ * THE COMPACT HEADER. Under 360 the name and all four homepage links cannot share
+ * a row at a size worth reading, so this step stops shrinking them. The type goes
+ * back to its 480 sizes, which is more than that row can hold, and the wrap set
+ * at 620 puts the links on a line of their own under the name. A page with fewer
+ * links, which still fits, keeps its one row.
+ */
+@media (max-width: 359px) {
+    .logo {
+        font-size: 13px;
+        letter-spacing: 0.1em;
+    }
+
+    .nav-links {
+        gap: 14px;
+    }
+
+    .nav-links a,
+    .nav-resume {
+        font-size: 10.5px;
+        letter-spacing: 0.1em;
     }
 }
 
